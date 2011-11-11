@@ -1,0 +1,12 @@
+[
+    {
+        "command": "insert",
+        "args":
+        {
+            "characters": ","
+        }
+    },
+    {
+        "command": "haxe_hint"
+    }
+]
