@@ -181,14 +181,20 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				
 				print( msg )
 				status = msg
-				
+			
+			#print( err )
+
 			for i in tree.getiterator("i"):
 				name = i.get("n")
 				sig = i.find("t").text
 				if sig is not None :
 					types = sig.split(" -> ")
 					ret = types.pop()
-					comps.append( (name + "( " + " , ".join( types ) + " ) : "+ ret, name) )
+						
+					if( len(types) > 0 ) :
+						comps.append( (name + "( " + " , ".join( types ) + " ) : "+ ret, name) )
+					else : 
+						comps.append( (name + " : "+ ret, name ))
 				else :
 					comps.append( (name , name) )
 			
