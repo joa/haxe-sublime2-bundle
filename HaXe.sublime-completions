@@ -1,0 +1,11 @@
+{
+  "scope": "source.haxe.2",
+  "completions" : [
+    /*{ "trigger" : "... [iterator]" , "contents" : "."},*/
+    /*{ "trigger" : "<No completion available>" , "contents" : " "},*/
+    { "trigger" : "." , "contents" : "."}
+    
+  ]
+
+
+}

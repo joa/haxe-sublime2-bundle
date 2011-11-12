@@ -10,6 +10,10 @@
   <string>^@H</string>
   <key>name</key>
   <string>Hxml</string>
+  <key>foldingStartMarker</key>
+  <string>--next</string>
+  <key>foldingStopMarker</key>
+  <string>\n\n</string>
   <key>patterns</key>
   <array>
     <dict>
