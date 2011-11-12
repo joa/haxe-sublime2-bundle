@@ -114,41 +114,38 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			currentBuild.hxml = build
 			buildPath = os.path.dirname(build);
 
-			if not os.path.exists( build ) :
-				sublime.status_message("No build.hxml file found")
-			else :
-				# print("build file exists")
-				f = open( build , "r+" )
-				while 1:
-					l = f.readline() 
-					if not l : 
-						break;
-					if l.startswith("--next") :
-						self.builds.append( currentBuild )
-						currentBuild = HaxeBuild()
-						currentBuild.hxml = build
-					l = l.strip()
-					if l.startswith("-main") :
-						currentBuild.main = l.split(" ")[1]
-					for flag in ["lib" , "D"] :
-						if l.startswith( "-"+flag ) :
-							currentBuild.args.append( tuple(l.split(" ") ) )
-							#for a in l.split(" ") :
-							#	currentArgs.append( a )
-							break
-					for flag in ["js" , "php" , "cpp" , "neko"] :
-						if l.startswith( "-"+flag ) :
-							spl = l.split(" ")
-							currentBuild.args.append( tuple( spl ) )
-							
-							currentBuild.target = flag
-							currentBuild.output = os.path.join( folder , " ".join(spl[1:]) )
-							break
-					if l.startswith("-cp "):
-						cp = l.split(" ")
-						cp.pop(0)
-						classpath = " ".join( cp )
-						currentBuild.args.append( ("-cp" , os.path.join( buildPath , classpath ) ) )
+			# print("build file exists")
+			f = open( build , "r+" )
+			while 1:
+				l = f.readline() 
+				if not l : 
+					break;
+				if l.startswith("--next") :
+					self.builds.append( currentBuild )
+					currentBuild = HaxeBuild()
+					currentBuild.hxml = build
+				l = l.strip()
+				if l.startswith("-main") :
+					currentBuild.main = l.split(" ")[1]
+				for flag in ["lib" , "D"] :
+					if l.startswith( "-"+flag ) :
+						currentBuild.args.append( tuple(l.split(" ") ) )
+						#for a in l.split(" ") :
+						#	currentArgs.append( a )
+						break
+				for flag in ["js" , "php" , "cpp" , "neko"] :
+					if l.startswith( "-"+flag ) :
+						spl = l.split(" ")
+						currentBuild.args.append( tuple( spl ) )
+						
+						currentBuild.target = flag
+						currentBuild.output = os.path.join( folder , " ".join(spl[1:]) )
+						break
+				if l.startswith("-cp "):
+					cp = l.split(" ")
+					cp.pop(0)
+					classpath = " ".join( cp )
+					currentBuild.args.append( ("-cp" , os.path.join( buildPath , classpath ) ) )
 
 				if len(currentBuild.args) > 0 :
 					self.builds.append( currentBuild )
@@ -259,9 +256,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		comps = []
 		
 		if autocomplete :
-			status = "No autocompletion"
+			status = "No autocompletion available"
 		else :
-			status = build.to_string() + " (" + os.path.basename(build.hxml) + ") : Build success"
+			status = "Build success!"
+			status += "   "+build.to_string() + " (" + os.path.basename(build.hxml) + ")"
+			
 			print(status)
 		
 		try:
@@ -278,7 +277,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						#view.window().run_command("insert" , {'characters':")"})
 						#comps.append((")",""))
 					else:
-						msg =  "Too many arguments "
+						msg =  "Too many arguments."
 				else :
 					msg = ", ".join(types[commas:]) 
 
@@ -312,7 +311,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						comps.append( ( name , name ) )
 
 			if len(comps) > 0 :
-				status = "Autocompleting"
+				status = "Autocompleting..."
 			
 		except xml.parsers.expat.ExpatError as e:
 
@@ -349,7 +348,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				
 				status = m
 
-			view.add_regions( "haxe-error" , regions , "invalid" )	
+			view.add_regions( "haxe-error" , regions , "invalid" , "dot" )	
 
 		return ( err, comps, status )
 
