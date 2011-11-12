@@ -3,6 +3,8 @@ import subprocess
 import tempfile
 import os
 import xml.parsers.expat
+import re
+import codecs
 from xml.etree import ElementTree
 from subprocess import Popen, PIPE
 
@@ -13,17 +15,8 @@ try:
 except (AttributeError):
 	STARTUP_INFO = None
 
-class CloseParenthesis( sublime_plugin.TextCommand ):
-	def run( self , edit ) :
-		self.view.run_command('auto_complete', {
-			'disable_auto_insert': True,
-			'completions' : [
-				{"trigger" : "aaaa", "content" : "aaaa"},
-				{"trigger" : "bbbb", "content" : "bbbb"}
-			]
-		})
 
-
+compilerOutput = re.compile("([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? : (.*)")
 	
 class HaxeHint( sublime_plugin.TextCommand ):
 	def run( self , edit ) :
@@ -75,12 +68,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			f = open( build , "r+" )
 			while 1:
 				l = f.readline() 
-				if not l: 
+				if not l or l.startswith("--next") : 
 					break;
 				l = l.strip()
-				if l.startswith("-lib ") or l.startswith("-D ") :
-					for a in l.split(" ") :
-						buildArgs.append( a )
+				for flag in ["-lib" , "-D" , "-js" , "-php" , "-cpp" , "-neko"] :
+					if l.startswith( flag ) :
+						for a in l.split(" ") :
+							buildArgs.append( a )
+						break
 				if l.startswith("-cp "):
 					cp = l.split(" ")
 					buildArgs.append( cp.pop(0) )
@@ -111,10 +106,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		userOffset = offset
 		prev = src[offset-1]
 		fragment = view.substr(sublime.Region(0,offset))
-		if prev != "(" and prev != "." :
-			prevDot = fragment.rfind(".")
-			prevPar = fragment.rfind("(")
-			offset = max(prevDot+1, prevPar+1)
+		#if prev != "(" and prev != "." :
+		#	prevDot = fragment.rfind(".")
+		#	prevPar = fragment.rfind("(")
+		#	offset = max(prevDot+1, prevPar+1)
 		
 		commas = len(view.substr(sublime.Region(offset,userOffset)).split(","))-1
 		
@@ -124,7 +119,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		temp = os.path.join(tdir, "AutoComplete_.hx")
 		if not os.path.exists( tdir ):
 			os.mkdir( tdir )
-		f = open( temp, "wb" )
+		f = codecs.open( temp, "wb", "utf-8" )
 		f.write( src )
 		f.close()
 		#f = self.savetotemp( tmp_path, src )
@@ -134,11 +129,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print( "Saved %s" % temp )
 		#haxe -js dummy.js -cp c:\devx86\www\notime\js\haxe --display c:\devx86\www\notime\js\haxe\autocomplete\Test.hx@135
 
-		args = ["haxe" , "-js" , "dummy.js"]
+		args = ["haxe"]
 		
 		#buildArgs = view.window().settings
 		if settings.has("haxe-complete-build-args"):
 			args.extend( settings.get('haxe-complete-build-args') )	
+		else:
+			args.extend( ["-js" , "dummy.js"] )
 
 		#print(args)
 		#args = [ "haxe", "-js", "dummy.js", "-cp", src_dir, "--display", temp + "@" + str(offset) ]
@@ -192,19 +189,57 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					ret = types.pop()
 						
 					if( len(types) > 0 ) :
-						comps.append( (name + "( " + " , ".join( types ) + " ) : "+ ret, name) )
+						cm = name + "("
+						if len(types) == 1 and types[0] == "Void" :
+							cm += ")"
+
+						comps.append( (name + "( " + " , ".join( types ) + " ) : "+ ret, cm ) )
 					else : 
 						comps.append( (name + " : "+ ret, name ))
 				else :
-					comps.append( (name , name) )
+					if re.match("^[A-Z]",name ) :
+						comps.append( ( name + " [class]" , name ) )
+					else :
+						comps.append( ( name , name ) )
 			
 		except xml.parsers.expat.ExpatError as e:
-			status = err.split("\n")[0]
-			status = status.replace( temp , fn )
+			err = err.replace( temp , fn )
+			err = re.sub("\(display(.*)\)","",err)
+
+			lines = err.split("\n")
+			status = lines[0]
 			#status = status.replace( self.folder , "" )
 			status = status.strip()
 
-			print(err)
+			regions = []
+			for infos in compilerOutput.findall(err) :
+				infos = list(infos)
+				f = infos.pop(0)
+				l = int( infos.pop(0) )-1
+				left = int( infos.pop(0) )
+				right = infos.pop(0)
+				if right != "" :
+					right = int( right )
+				else :
+					right = left+1
+				m = infos.pop(0)
+
+				a = view.text_point(l,left)
+				b = view.text_point(l,right)
+
+				if( f == fn ):
+					regions.append( sublime.Region( a , b ) )
+					status = m
+
+					#comps.append( ( "" , "") )
+					#comps.append( ( m , "") )
+					
+
+
+			view.add_regions( "haxe-error" , regions , "invalid.ssraw" )
+
+
+			#print(err)
 			
 
 		return ( err, comps, status )
