@@ -18,20 +18,39 @@ except (AttributeError):
 
 
 compilerOutput = re.compile("([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? : (.*)")
-
+packageLine = re.compile("package ([a-z_.]*);")
 
 inst = None
 class HaxeBuild :
+
+	#auto = None
+
 	def __init__(self) :
+
 		self.args = []
 		self.main = "Main"
 		self.target = "js"
 		self.output = "dummy.js"
-		self.hxml = ""
+		self.hxml = None
 
 	def to_string(self) :
 		out = os.path.basename(self.output)
 		return "{self.main} {self.target}:{out}".format(self=self, out=out);
+	
+	def make_hxml( self ) :
+		
+		outp = "# "+self.to_string() + "\n"
+		outp += "-main "+ self.main + "\n"
+		for a in self.args :
+			outp += " ".join( list(a) ) + "\n"
+		
+		d = os.path.dirname( self.hxml ) + "/"
+		outp = outp.replace( d , "")
+		outp = outp.replace("--no-output " , "")
+		#print( outp )
+		return outp
+
+
 
 class HaxeRunBuild( sublime_plugin.TextCommand ):
 	def run( self , edit ) :
@@ -74,11 +93,25 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	def __init__(self):
 		HaxeComplete.inst = self
 
+	def on_load( self, view ) :
+		scopes = view.scope_name(view.sel()[0].end()).split()
+		#sublime.status_message( scopes[0] )
+		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
+			return []
+
+		if not self.currentBuild is None and view.file_name() == self.currentBuild.hxml and view.size() == 0 :
+			e = view.begin_edit()
+			hxmlSrc = self.currentBuild.make_hxml()
+			print(hxmlSrc)
+			view.insert(e,0,hxmlSrc)
+			view.end_edit(e)
+
 	def on_activated( self , view ) :
 		scopes = view.scope_name(view.sel()[0].end()).split()
 		#sublime.status_message( scopes[0] )
 		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
 			return []
+		
 		self.extract_build_args( view )
 
 	def select_build( self , view ) :
@@ -136,10 +169,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				for flag in ["js" , "php" , "cpp" , "neko"] :
 					if l.startswith( "-"+flag ) :
 						spl = l.split(" ")
-						currentBuild.args.append( tuple( spl ) )
+						outp = os.path.join( folder , " ".join(spl[1:]) )
+						currentBuild.args.append( ("-"+flag, outp) )
 						
 						currentBuild.target = flag
-						currentBuild.output = os.path.join( folder , " ".join(spl[1:]) )
+						currentBuild.output = outp
 						break
 				if l.startswith("-cp "):
 					cp = l.split(" ")
@@ -147,10 +181,21 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					classpath = " ".join( cp )
 					currentBuild.args.append( ("-cp" , os.path.join( buildPath , classpath ) ) )
 
-				if len(currentBuild.args) > 0 :
-					self.builds.append( currentBuild )
-				
-		if len(self.builds) > 1 and forcePanel :
+			if len(currentBuild.args) > 0 :
+				self.builds.append( currentBuild )
+		
+		if len(self.builds) == 0 and forcePanel :
+			sublime.status_message("No hxml file found...")
+			
+			self.run_haxe(view,False)
+
+			f = os.path.join(folder,"build.hxml")
+			v = view.window().open_file(f)
+			
+			if not self.currentBuild is None :
+				self.currentBuild.hxml = f
+
+		elif len(self.builds) > 1 and forcePanel :
 			buildsView = []
 			for b in self.builds :
 				#for a in b.args :
@@ -170,13 +215,17 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def set_current_build( self , view , id ) :
-		#print("setting current build")
+		#print("setting current build #"+str(id))
+		#print(len(self.builds))
 		#print(build)
-		if len(self.builds) > id :
+		if id >= 0 and len(self.builds) > id :
 			view.settings().set( "haxe-build-id" , id )
 			self.currentBuild = self.builds[id]
 			sublime.status_message( "Current build : " + self.currentBuild.to_string() )
-			self.selectingBuild = False
+		#else:
+			#self.currentBuild = None
+
+		self.selectingBuild = False
 
 	def run_build( self , view ) :
 		view.run_command("save")
@@ -195,6 +244,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		src_dir = os.path.dirname(fn)
 		tdir = os.path.dirname(fn)
 		temp = os.path.join(tdir, "AutoComplete_.hx")	
+
+		pack = []
+		for ps in packageLine.findall( src ) :
+			pack = ps.split(".")
+			for p in pack : 
+				spl = os.path.split( src_dir )
+				if( spl[1] == p ) :
+					src_dir = spl[0]
+
 
 		#find actual autocompletable char.
 		if autocomplete : 
@@ -218,7 +276,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			f.close()
 		#f = self.savetotemp( tmp_path, src )
 
-		
 		#print( "Saved %s" % temp )
 		#haxe -js dummy.js -cp c:\devx86\www\notime\js\haxe --display c:\devx86\www\notime\js\haxe\autocomplete\Test.hx@135
 
@@ -226,10 +283,36 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		#buildArgs = view.window().settings
 		if build is None:
-			args.append( ("-js" , "dummy.js") )
-			args.append( ("-cp" , src_dir) )
-		else:
-			args.extend( build.args )	
+			build = HaxeBuild()
+			build.target = "js"
+
+			folder = os.path.dirname(fn)
+			folders = view.window().folders()
+			for f in folders:
+				if f in fn :
+					folder = f
+
+			build.output = os.path.join(folder,"dummy.js")
+
+			cl = os.path.basename(fn)
+			cl = cl.encode('ascii','ignore')
+			cl = cl[0:cl.rfind(".")]
+			main = pack[0:]
+			main.extend( [ cl ] )
+			build.main = ".".join( main )
+
+			build.args.append( ("-cp" , src_dir) )
+			#build.args.append( ("-main" , build.main ) )
+
+			build.args.append( ("-js" , build.output ) )
+			build.args.append( ("--no-output" , "-v" ) )
+			
+			self.currentBuild = build	
+		
+		args.extend( build.args )	
+		
+		if not autocomplete :
+			args.append( ("-main" , build.main ) )
 
 		#args = [ "haxe", "-js", "dummy.js", "-cp", src_dir, "--display", temp + "@" + str(offset) ]
 		#args = [ "haxe",src_dir+"/../build.hxml" , "--display", temp + "@" + str(offset) ]
@@ -237,17 +320,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		if autocomplete :
 			args.append( ("--display",temp + "@" + str(offset) ) )
-		elif build is None : 
-			args.append( ("--no-output" , "" ) )
-		else:
-			args.append( ("-main" , build.main ) )
+			args.append( ("--no-output" , "-v" ) )
+			
+		#elif build is None : 
+			
+		#else:
 			#args.append( ( "-v" ) )
 
 		cmd = ["haxe"]
 		for a in args :
 			cmd.extend( list(a) )
 		
-		#print(cmd)
+		print( " ".join(cmd))
 		res, err = self.runcmd( cmd, "" )
 
 		#print( "err: %s" % err )
@@ -256,10 +340,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		comps = []
 		
 		if autocomplete :
+			os.remove(temp)
 			status = "No autocompletion available"
+		elif build.hxml is None :
+			status = "Please create an hxml file"
+			
 		else :
 			status = "Build success!"
-			status += "   "+build.to_string() + " (" + os.path.basename(build.hxml) + ")"
+			status += "   "+build.to_string()
+			if not build.hxml is None :
+				status += " (" + os.path.basename(build.hxml) + ")"
 			
 			print(status)
 		
@@ -345,11 +435,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 				if( f == fn ):
 					regions.append( sublime.Region( a , b ) )
-				
-				status = m
+					status = m
 
 			view.add_regions( "haxe-error" , regions , "invalid" , "dot" )	
 
+		
 		return ( err, comps, status )
 
 		#print( str(args) )
@@ -357,7 +447,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print( "err: %s" % err )
 		#sublime.error_message("Hello!!!")
 		#return comps
-
+	
 
 	def on_query_completions(self, view, prefix, locations):
 		

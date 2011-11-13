@@ -3,7 +3,9 @@
   "completions" : [
     /*{ "trigger" : "... [iterator]" , "contents" : "."},*/
     /*{ "trigger" : "<No completion available>" , "contents" : " "},*/
+    { "trigger" : " " , "contents" : " "},
     { "trigger" : "." , "contents" : "."}
+
     
   ]
 
