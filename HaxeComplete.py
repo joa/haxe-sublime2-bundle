@@ -207,6 +207,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						break
 				if l.startswith("-cp "):
 					cp = l.split(" ")
+					view.set_status( "haxe-status" , "Building..." )
 					cp.pop(0)
 					classpath = " ".join( cp )
 					currentBuild.args.append( ("-cp" , os.path.join( buildPath , classpath ) ) )
@@ -251,19 +252,21 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if id >= 0 and len(self.builds) > id :
 			view.settings().set( "haxe-build-id" , id )
 			self.currentBuild = self.builds[id]
-			#sublime.status_message( "Current build : " + self.currentBuild.to_string() )
+			view.set_status( "haxe-build" , self.currentBuild.to_string() )
 		else:
 			self.currentBuild = None
+			view.set_status( "haxe-build" , "No build" )
 
 		self.selectingBuild = False
 
 	def run_build( self , view ) :
 		view.run_command("save")
+		view.set_status( "haxe-status" , "Building..." )
 		err, comps, status = self.run_haxe( view )
 		print( err )
 		view.set_status( "haxe-status" , status )
-		if not "success" in status :
-			sublime.error_message( err )
+		#if not "success" in status :
+			#sublime.error_message( err )
 
 	def run_haxe( self, view , offset = None ) :
 
@@ -381,9 +384,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			
 		else :
 			status = "Build success!"
-			status += "   "+build.to_string()
-			if not build.hxml is None :
-				status += " (" + os.path.basename(build.hxml) + ")"
+			#status += "   "+build.to_string()
+			#if not build.hxml is None :
+			#	status += " (" + os.path.basename(build.hxml) + ")"
 			
 			print(status)
 		
@@ -480,7 +483,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					status = m
 					
 				if not autocomplete :
-					view.window().open_file(f+":"+str(l)+":"+str(right) , sublime.ENCODED_POSITION )
+					view.window().open_file(f+":"+str(l)+":"+str(right) , sublime.ENCODED_POSITION  )
 				#if not autocomplete
 
 			self.highlight_errors( view )
@@ -503,12 +506,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if 'source.haxe.2' not in scopes:
 			return []
 		
+		#view.set_status( "haxe-status", "Autocompleting..." )
 		#print("haxe completion")
-		
 		offset = pos - len(prefix)
 
 		ret , comps , status = self.run_haxe( view , offset )
-		#view.set_status( "haxe-status", status )
+		view.set_status( "haxe-status", status )
 
 		return comps
 		
