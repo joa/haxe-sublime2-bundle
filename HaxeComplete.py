@@ -80,7 +80,7 @@ class HaxeHint( sublime_plugin.TextCommand ):
 		sel = view.sel()
 		for r in sel :
 			ret , comps , status = complete.run_haxe( self.view , r.end() )
-			sublime.status_message( status )
+			#view.set_status("haxe-status", status )
 			if( len(comps) > 0 ) :
 				view.run_command('auto_complete', {'disable_auto_insert': True})
 
@@ -110,6 +110,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				b = view.text_point(l,right)
 
 				regions.append( sublime.Region(a,b))
+
+				view.set_status("haxe-status" , "Error: " + e["message"] )
 				
 		view.add_regions("haxe-error" , regions , "invalid" , "dot" )
 
@@ -147,7 +149,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def extract_build_args( self , view , forcePanel = False ) :
 		scopes = view.scope_name(view.sel()[0].end()).split()
-		sublime.status_message( scopes[0] )
+		#sublime.status_message( scopes[0] )
 		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
 			return []
 		
@@ -249,7 +251,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if id >= 0 and len(self.builds) > id :
 			view.settings().set( "haxe-build-id" , id )
 			self.currentBuild = self.builds[id]
-			sublime.status_message( "Current build : " + self.currentBuild.to_string() )
+			#sublime.status_message( "Current build : " + self.currentBuild.to_string() )
 		else:
 			self.currentBuild = None
 
@@ -259,7 +261,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		view.run_command("save")
 		err, comps, status = self.run_haxe( view )
 		print( err )
-		sublime.status_message( status )
+		view.set_status( "haxe-status" , status )
 		if not "success" in status :
 			sublime.error_message( err )
 
@@ -506,7 +508,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		offset = pos - len(prefix)
 
 		ret , comps , status = self.run_haxe( view , offset )
-		sublime.status_message( status )
+		#view.set_status( "haxe-status", status )
 
 		return comps
 		
