@@ -59,6 +59,8 @@ class HaxeRunBuild( sublime_plugin.TextCommand ):
 		
 		complete.run_build( view )
 
+
+
 class HaxeSelectBuild( sublime_plugin.TextCommand ):
 	def run( self , edit ) :
 		complete = HaxeComplete.inst
@@ -232,6 +234,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		err, comps, status = self.run_haxe( view )
 		print( err )
 		sublime.status_message( status )
+		if not "success" in status :
+			sublime.error_message( err )
 
 	def run_haxe( self, view , offset = None ) :
 

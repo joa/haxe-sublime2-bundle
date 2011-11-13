@@ -4,7 +4,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/macros/Dot.sublime-macro"
+            "file": "Packages/HaXe/input/Dot.sublime-macro"
         },
         "context":
         [
@@ -49,7 +49,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/macros/Hyphen.sublime-macro"
+            "file": "Packages/HaXe/input/Hyphen.sublime-macro"
         },
         "context":
         [
@@ -70,7 +70,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/macros/OpenPar.sublime-macro"
+            "file": "Packages/HaXe/input/OpenPar.sublime-macro"
         },
         "context":
         [
@@ -91,7 +91,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/macros/Comma.sublime-macro"
+            "file": "Packages/HaXe/input/Comma.sublime-macro"
         },
         "context":
         [
