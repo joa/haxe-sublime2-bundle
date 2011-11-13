@@ -4,14 +4,14 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/Haxe/macros/DotCompletion.sublime-macro"
+            "file": "Packages/HaXe/macros/Dot.sublime-macro"
         },
         "context":
         [
             {
                 "key": "auto_complete_visible",
                 "operator": "equal",
-                "operand": true
+                "operand": false
             },
             {
                 "key": "selector",
@@ -21,11 +21,77 @@
         ]
     },
     {
-        "keys": ["."],
+        "keys": ["ctrl+shift+b"],
+        "command": "haxe_select_build",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
+        "keys": ["ctrl+enter"],
+        "command": "haxe_run_build",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
+        "keys": ["-"],
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/Haxe/macros/Dot.sublime-macro"
+            "file": "Packages/HaXe/macros/Hyphen.sublime-macro"
+        },
+        "context":
+        [
+            {
+                "key": "auto_complete_visible",
+                "operator": "equal",
+                "operand": false
+            },
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.hxml"
+            }
+        ]
+    },  
+      {
+        "keys": ["("],
+        "command": "run_macro_file",
+        "args":
+        {
+            "file": "Packages/HaXe/macros/OpenPar.sublime-macro"
+        },
+        "context":
+        [
+            {
+                "key": "auto_complete_visible",
+                "operator": "equal",
+                "operand": false
+            },
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
+        "keys": [","],
+        "command": "run_macro_file",
+        "args":
+        {
+            "file": "Packages/HaXe/macros/Comma.sublime-macro"
         },
         "context":
         [
