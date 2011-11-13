@@ -411,6 +411,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			for i in tree.getiterator("i"):
 				name = i.get("n")
 				sig = i.find("t").text
+				doc = i.find("d").text #nothing to do
 				if sig is not None :
 					types = sig.split(" -> ")
 					ret = types.pop()
@@ -431,6 +432,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						comps.append( ( name + " [class]" , name ) )
 					else :
 						comps.append( ( name , name ) )
+				#if doc is not None :
+				#	comps.append(("[" + doc.strip() + "]" , doc ))
 
 			if len(comps) > 0 :
 				status = "Autocompleting..."
