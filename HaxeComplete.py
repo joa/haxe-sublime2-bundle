@@ -6,6 +6,7 @@ import xml.parsers.expat
 import re
 import codecs
 import glob
+import hashlib
 from xml.etree import ElementTree
 from subprocess import Popen, PIPE
 
@@ -91,23 +92,46 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	currentBuild = None
 	selectingBuild = False
 	builds = []
+	errors = []
 
 	def __init__(self):
 		HaxeComplete.inst = self
+
+	def highlight_errors( self , view ) :
+		fn = view.file_name()
+		regions = []
+
+		for e in self.errors :
+			if e["file"] == fn :
+				l = e["line"]
+				left = e["from"]
+				right = e["to"]
+				a = view.text_point(l,left)
+				b = view.text_point(l,right)
+
+				regions.append( sublime.Region(a,b))
+				
+		view.add_regions("haxe-error" , regions , "invalid" , "dot" )
+
 
 	def on_load( self, view ) :
 		scopes = view.scope_name(view.sel()[0].end()).split()
 		#sublime.status_message( scopes[0] )
 		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
 			return []
+		
+		fn = view.file_name()
 
-		if not self.currentBuild is None and view.file_name() == self.currentBuild.hxml and view.size() == 0 :
+		if not self.currentBuild is None and fn == self.currentBuild.hxml and view.size() == 0 :
 			e = view.begin_edit()
 			hxmlSrc = self.currentBuild.make_hxml()
 			print(hxmlSrc)
 			view.insert(e,0,hxmlSrc)
 			view.end_edit(e)
 
+		self.highlight_errors( view )
+		
+	
 	def on_activated( self , view ) :
 		scopes = view.scope_name(view.sel()[0].end()).split()
 		#sublime.status_message( scopes[0] )
@@ -115,6 +139,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			return []
 		
 		self.extract_build_args( view )
+		self.highlight_errors( view )
+
 
 	def select_build( self , view ) :
 		self.extract_build_args( view , True )
@@ -224,8 +250,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			view.settings().set( "haxe-build-id" , id )
 			self.currentBuild = self.builds[id]
 			sublime.status_message( "Current build : " + self.currentBuild.to_string() )
-		#else:
-			#self.currentBuild = None
+		else:
+			self.currentBuild = None
 
 		self.selectingBuild = False
 
@@ -248,6 +274,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		src_dir = os.path.dirname(fn)
 		tdir = os.path.dirname(fn)
 		temp = os.path.join(tdir, "AutoComplete_.hx")	
+
+		self.errors = []
 
 		pack = []
 		for ps in packageLine.findall( src ) :
@@ -422,6 +450,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#comps.append(("[" + status + "]"," " ))
 
 			regions = []
+			
 			for infos in compilerOutput.findall(err) :
 				infos = list(infos)
 				f = infos.pop(0)
@@ -434,14 +463,22 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					right = left+1
 				m = infos.pop(0)
 
-				a = view.text_point(l,left)
-				b = view.text_point(l,right)
-
+				self.errors.append({
+					"file" : f,
+					"line" : l,
+					"from" : left,
+					"to" : right,
+					"message" : m
+				})
+				
 				if( f == fn ):
-					regions.append( sublime.Region( a , b ) )
 					status = m
+					
+				if not autocomplete :
+					view.window().open_file(f+":"+str(l)+":"+str(right) , sublime.ENCODED_POSITION )
+				#if not autocomplete
 
-			view.add_regions( "haxe-error" , regions , "invalid" , "dot" )	
+			self.highlight_errors( view )
 
 		
 		return ( err, comps, status )
@@ -467,6 +504,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		ret , comps , status = self.run_haxe( view , offset )
 		sublime.status_message( status )
+
 		return comps
 		
 	
