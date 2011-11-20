@@ -7,6 +7,7 @@ import re
 import codecs
 import glob
 import hashlib
+import shutil
 from xml.etree import ElementTree
 from subprocess import Popen, PIPE
 
@@ -278,7 +279,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		settings = view.settings()
 		src_dir = os.path.dirname(fn)
 		tdir = os.path.dirname(fn)
-		temp = os.path.join(tdir, "AutoComplete_.hx")	
+		temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
 
 		self.errors = []
 
@@ -308,7 +309,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#temp = os.path.join(tdir, os.path.basename(fn))
 			if not os.path.exists( tdir ):
 				os.mkdir( tdir )
-			f = codecs.open( temp, "wb", "utf-8" )
+			
+			if os.path.exists( fn ):
+				# copy saved file to temp for future restoring
+				shutil.copy2( fn , temp )
+			
+			# write current source to file
+			f = codecs.open( fn , "wb" , "utf-8" )
 			f.write( src )
 			f.close()
 		#f = self.savetotemp( tmp_path, src )
@@ -350,13 +357,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		if not autocomplete :
 			args.append( ("-main" , build.main ) )
-
-		#args = [ "haxe", "-js", "dummy.js", "-cp", src_dir, "--display", temp + "@" + str(offset) ]
-		#args = [ "haxe",src_dir+"/../build.hxml" , "--display", temp + "@" + str(offset) ]
-		#args.append( ("-cp" , src_dir) )
-		
-		if autocomplete :
-			args.append( ("--display",temp + "@" + str(offset) ) )
+		else:
+			args.append( ("--display", fn + "@" + str(offset) ) )
 			args.append( ("--no-output" , "-v" ) )
 			
 		#elif build is None : 
@@ -377,7 +379,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		comps = []
 		
 		if autocomplete :
-			os.remove(temp)
+			#os.remove(temp)
+			if os.path.exists( temp ) :
+				shutil.copy2( temp , fn )
+				os.remove( temp )
+			else:
+				# fn didn't exist in the first place, so we remove it
+				os.remove( fn )
+			
 			status = "No autocompletion available"
 		elif build.hxml is None :
 			status = "Please create an hxml file"
