@@ -1,0 +1,9 @@
+<snippet>
+    <content><![CDATA[interface ${1:interface_name} 
+{
+	
+}]]></content>
+    <tabTrigger>interface</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Interface</description>
+</snippet>

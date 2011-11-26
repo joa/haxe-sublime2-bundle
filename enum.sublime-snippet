@@ -1,0 +1,9 @@
+<snippet>
+    <content><![CDATA[enum ${1:enum_name} 
+{
+	
+}]]></content>
+    <tabTrigger>enum</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Enum</description>
+</snippet>
