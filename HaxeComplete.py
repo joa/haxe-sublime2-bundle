@@ -496,7 +496,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					status = m
 				
 				if not autocomplete :
-					view.window().open_file(f+":"+str(l)+":"+str(right) , sublime.ENCODED_POSITION  )
+					w = view.window()
+					if not w is None :
+						w.open_file(f+":"+str(l)+":"+str(right) , sublime.ENCODED_POSITION  )
 				#if not autocomplete
 
 			self.highlight_errors( view )
