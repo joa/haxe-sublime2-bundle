@@ -1,0 +1,12 @@
+<snippet>
+    <content><![CDATA[class ${1:class_name} 
+{
+	function new()
+	{
+		
+	}
+}]]></content>
+    <tabTrigger>class</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Class</description>
+</snippet>

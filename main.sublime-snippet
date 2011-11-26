@@ -1,0 +1,17 @@
+<snippet>
+    <content><![CDATA[class ${1:class_name} 
+{
+	function new()
+	{
+		${0}
+	}
+
+	static public function main()
+	{
+		var app = new ${1:class_name}();
+	}
+}]]></content>
+    <tabTrigger>main</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Main class</description>
+</snippet>

@@ -19,7 +19,7 @@ except (AttributeError):
 	STARTUP_INFO = None
 
 
-compilerOutput = re.compile("([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? : (.*)")
+compilerOutput = re.compile("^([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? : (.*)", re.M)
 packageLine = re.compile("package ([a-z_.]*);")
 
 inst = None
@@ -37,7 +37,8 @@ class HaxeBuild :
 
 	def to_string(self) :
 		out = os.path.basename(self.output)
-		return "{self.main} {self.target}:{out}".format(self=self, out=out);
+		return "{out}".format(self=self, out=out);
+		#return "{self.main} {self.target}:{out}".format(self=self, out=out);
 	
 	def make_hxml( self ) :
 		
@@ -81,7 +82,8 @@ class HaxeHint( sublime_plugin.TextCommand ):
 		sel = view.sel()
 		for r in sel :
 			ret , comps , status = complete.run_haxe( self.view , r.end() )
-			#view.set_status("haxe-status", status )
+			view.set_status("haxe-status", "")
+			sublime.status_message(status)
 			if( len(comps) > 0 ) :
 				view.run_command('auto_complete', {'disable_auto_insert': True})
 
@@ -154,8 +156,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
 			return []
 		
-		#print("extracting build args")
-		
 		self.builds = []
 
 		fn = view.file_name()
@@ -208,7 +208,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						break
 				if l.startswith("-cp "):
 					cp = l.split(" ")
-					view.set_status( "haxe-status" , "Building..." )
+					#view.set_status( "haxe-status" , "Building..." )
 					cp.pop(0)
 					classpath = " ".join( cp )
 					currentBuild.args.append( ("-cp" , os.path.join( buildPath , classpath ) ) )
@@ -236,20 +236,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			self.selectingBuild = True
 			sublime.status_message("Please select your build")
-			view.window().show_quick_panel( buildsView , lambda i : self.set_current_build(view,i) , sublime.MONOSPACE_FONT )
+			view.window().show_quick_panel( buildsView , lambda i : self.set_current_build(view, int(i)) , sublime.MONOSPACE_FONT )
 		
 		elif settings.has("haxe-build-id"):
-			self.set_current_build( view , settings.get("haxe-build-id") )
+			self.set_current_build( view , int(settings.get("haxe-build-id")) )
 		
 		else:
-			self.set_current_build( view , 0 )
+			self.set_current_build( view , int(0))
 
 
 
 	def set_current_build( self , view , id ) :
 		#print("setting current build #"+str(id))
-		#print(len(self.builds))
-		#print(build)
 		if id >= 0 and len(self.builds) > id :
 			view.settings().set( "haxe-build-id" , id )
 			self.currentBuild = self.builds[id]
@@ -270,8 +268,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#sublime.error_message( err )
 
 	def run_haxe( self, view , offset = None ) :
-
-		#print("running haxe")
 		autocomplete = not offset is None
 		build = self.currentBuild
 		src = view.substr(sublime.Region(0, view.size()))
@@ -319,9 +315,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			f.write( src )
 			f.close()
 		#f = self.savetotemp( tmp_path, src )
-
 		#print( "Saved %s" % temp )
-		#haxe -js dummy.js -cp c:\devx86\www\notime\js\haxe --display c:\devx86\www\notime\js\haxe\autocomplete\Test.hx@135
 
 		args = []
 		
@@ -392,12 +386,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			status = "Please create an hxml file"
 			
 		else :
-			status = "Build success!"
+			status = ""
 			#status += "   "+build.to_string()
 			#if not build.hxml is None :
 			#	status += " (" + os.path.basename(build.hxml) + ")"
-			
-			print(status)
+			#print(status)
 		
 		try:
 			tree = ElementTree.XML( err )
@@ -450,7 +443,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				#	comps.append(("[" + doc.strip() + "]" , doc ))
 
 			if len(comps) > 0 :
-				status = "Autocompleting..."
+				status = ""
+				#status = "Autocompleting..."
 			
 		except xml.parsers.expat.ExpatError as e:
 
@@ -490,7 +484,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				
 				if( f == fn ):
 					status = m
-					
+				
 				if not autocomplete :
 					view.window().open_file(f+":"+str(l)+":"+str(right) , sublime.ENCODED_POSITION  )
 				#if not autocomplete
@@ -499,12 +493,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		
 		return ( err, comps, status )
-
-		#print( str(args) )
-		#print( "res: %s" % res )
-		#print( "err: %s" % err )
-		#sublime.error_message("Hello!!!")
-		#return comps
 	
 
 	def on_query_completions(self, view, prefix, locations):
@@ -516,7 +504,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			return []
 		
 		#view.set_status( "haxe-status", "Autocompleting..." )
-		#print("haxe completion")
 		offset = pos - len(prefix)
 
 		ret , comps , status = self.run_haxe( view , offset )

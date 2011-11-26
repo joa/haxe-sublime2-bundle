@@ -1,0 +1,6 @@
+<snippet>
+    <content><![CDATA[private var ${1:var_name};]]></content>
+    <tabTrigger>pv</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Private variable (pv)</description>
+</snippet>
