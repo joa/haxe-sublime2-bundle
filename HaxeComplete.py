@@ -368,7 +368,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		print( " ".join(cmd))
 		res, err = self.runcmd( cmd, "" )
-
+		
 		#print( "err: %s" % err )
 		#print( "res: %s" % res )
 		
@@ -421,11 +421,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				name = i.get("n")
 				sig = i.find("t").text
 				doc = i.find("d").text #nothing to do
+				insert = name
+				hint = name
+
 				if sig is not None :
 					types = sig.split(" -> ")
 					ret = types.pop()
-					hint = name
-					insert = name
 
 					if( len(types) > 0 ) :
 						cm = name + "("
