@@ -21,6 +21,8 @@ except (AttributeError):
 
 compilerOutput = re.compile("^([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? : (.*)", re.M)
 packageLine = re.compile("package ([a-z_.]*);")
+compactFunc = re.compile("\(.*\)")
+compactProp = re.compile(":.*\.([a-z_0-9]+)", re.I)
 
 inst = None
 class HaxeBuild :
@@ -197,8 +199,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						#for a in l.split(" ") :
 						#	currentArgs.append( a )
 						break
-				for flag in ["js" , "php" , "cpp" , "neko"] :
-					if l.startswith( "-"+flag ) :
+				for flag in ["js" , "php" , "cpp" , "neko", "swf"] :
+					if l.startswith( "-" + flag + " " ) :
 						spl = l.split(" ")
 						outp = os.path.join( folder , " ".join(spl[1:]) )
 						currentBuild.args.append( ("-"+flag, outp) )
@@ -422,25 +424,33 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				if sig is not None :
 					types = sig.split(" -> ")
 					ret = types.pop()
-						
+					hint = name
+					insert = name
+
 					if( len(types) > 0 ) :
 						cm = name + "("
 						if len(types) == 1 and types[0] == "Void" :
 							types = []
 							cm += ")"
-							comps.append( (name + "() : "+ ret, cm ) )
+							hint = name + "() : "+ ret
+							insert = cm
 						else:
-							comps.append( (name + "( " + " , ".join( types ) + " ) : "+ ret, cm ) )
-					
-					else : 
-						comps.append( (name + " : "+ ret, name ))
+							hint = name + "( " + " , ".join( types ) + " ) : " + ret
+							if len(hint) > 40: # compact arguments
+								hint = compactFunc.sub("(...)", hint);
+							insert = cm
+					else :
+						hint = name + " : " + ret
 				else :
 					if re.match("^[A-Z]",name ) :
-						comps.append( ( name + " [class]" , name ) )
-					else :
-						comps.append( ( name , name ) )
-				#if doc is not None :
-				#	comps.append(("[" + doc.strip() + "]" , doc ))
+						hint = name + " [class]"
+					
+				if len(hint) > 40: # compact return type
+					m = compactProp.search(hint)
+					if not m is None:
+						hint = compactProp.sub(": " + m.group(1), hint)
+				
+				comps.append( ( hint, insert ) )
 
 			if len(comps) > 0 :
 				status = ""
