@@ -397,7 +397,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			status = "Please create an hxml file"
 			
 		else :
-			status = ""
+			# default message = build success
+			status = "Build success"
 			#status += "   "+build.to_string()
 			#if not build.hxml is None :
 			#	status += " (" + os.path.basename(build.hxml) + ")"
