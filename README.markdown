@@ -1,5 +1,5 @@
 # Introduction
-Basic haXe Bundle for Sublime Text 2 (http://www.sublimetext.com/2)
+Basic haXe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
 
 # Installation
 ## Mac OSX
