@@ -27,3 +27,13 @@ Restart Sublime Text 2
  - edit your classes (check the cool snippets, like 'prop'-Tab)
  - press Ctrl+Enter to build
  - open the console (View > Show Console) for more details about errors & stuff
+
+# Targeting NME
+
+NME is based on a specific .nmml file (the .hxml is generated). 
+For code completion to work you still need a dummy .hxml with:
+
+    -swf dummy.swf 
+    -lib nme 
+    -cp src
+
