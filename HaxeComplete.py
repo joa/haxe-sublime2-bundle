@@ -55,9 +55,14 @@ class HaxeBuild :
 		# relative paths
 		outp = outp.replace( d , "")
 		outp = outp.replace( "-cp "+os.path.dirname( self.hxml )+"\n", "")
+
 		outp = outp.replace("--no-output " , "")
+		outp = outp.replace("-v" , "")
+
+		outp = outp.replace("dummy" , self.main.lower() )
+
 		#print( outp )
-		return outp
+		return outp.strip()
 
 
 
@@ -305,10 +310,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			prev = src[offset-1]
 			fragment = view.substr(sublime.Region(0,offset))
 			
-			if prev != "(" and prev != "." :
+			if prev not in "(." :
 				prevDot = fragment.rfind(".")
 				prevPar = fragment.rfind("(")
-				offset = max(prevDot+1, prevPar+1)
+				completeOffset = max(prevDot+1, prevPar+1)
+				skipped = src[completeOffset:offset]
+				if ";" not in skipped:
+					offset = completeOffset
+			
 
 			commas = len(view.substr(sublime.Region(offset,userOffset)).split(","))-1
 			
