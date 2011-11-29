@@ -180,7 +180,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if f in fn :
 				folder = f
 
-		settings.set("haxe-complete-folder", folder)
+		# settings.set("haxe-complete-folder", folder)
 
 		hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
 
