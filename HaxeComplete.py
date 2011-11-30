@@ -69,6 +69,8 @@ class HaxeBuild :
 		return outp.strip()
 
 
+<<<<<<< HEAD
+=======
 class HaxeGenerateImport( sublime_plugin.TextCommand ):
 
 	start = None
@@ -228,6 +230,7 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 		
 		self.insert_import(edit, view, src)		
 
+>>>>>>> a7f7081a8401d3237415083f53f051b82614c742
 
 class HaxeRunBuild( sublime_plugin.TextCommand ):
 	def run( self , edit ) :
@@ -602,8 +605,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				name = i.get("n")
 				sig = i.find("t").text
 				doc = i.find("d").text #nothing to do
-				hint = name
 				insert = name
+				hint = name
+
 				if sig is not None :
 					types = sig.split(" -> ")
 					ret = types.pop()
