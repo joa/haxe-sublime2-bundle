@@ -37,3 +37,6 @@ For code completion to work you still need a dummy .hxml with:
     -lib nme 
     -cp src
 
+# Generator(s)
+
+ - select or just place your cursor on a qualified class name and press Ctrl+I to generate the import statement

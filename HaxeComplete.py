@@ -23,6 +23,10 @@ compilerOutput = re.compile("^([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? 
 packageLine = re.compile("package ([a-z_.]*);")
 compactFunc = re.compile("\(.*\)")
 compactProp = re.compile(":.*\.([a-z_0-9]+)", re.I)
+spaceChars = re.compile("\s")
+wordChars = re.compile("[a-z0-9._]", re.I)
+importLine = re.compile("^([ \t]*)import\s+([a-z0-9._]+)", re.I | re.M)
+packageLine = re.compile("package\s*[a-z0-9.]*;", re.I)
 
 inst = None
 class HaxeBuild :
@@ -72,7 +76,6 @@ class HaxeRunBuild( sublime_plugin.TextCommand ):
 		view = self.view
 		
 		complete.run_build( view )
-
 
 
 class HaxeSelectBuild( sublime_plugin.TextCommand ):
@@ -464,7 +467,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				else :
 					if re.match("^[A-Z]",name ) :
 						hint = name + " [class]"
-					
+				
 				if len(hint) > 40: # compact return type
 					m = compactProp.search(hint)
 					if not m is None:
