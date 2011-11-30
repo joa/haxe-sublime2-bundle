@@ -45,6 +45,18 @@
         ]
     },
     {
+        "keys": ["ctrl+i"],
+        "command": "haxe_generate_import",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
         "keys": ["-"],
         "command": "run_macro_file",
         "args":
