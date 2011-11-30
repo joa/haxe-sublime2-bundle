@@ -92,6 +92,7 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 				if spaceChars.match(c): continue
 				foundWord = 1
 			if not wordChars.match(c): break
+
 		return offset + 2
 	
 	def get_classname( self, view, src ) :
@@ -113,7 +114,7 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 		view.sel().add(sublime.Region(loc, loc))
 
 	def get_indent( self, src, index ) :
-		print("first=" + src[index])
+	
 		if src[index] == "\n": return index + 1
 		return index
 
