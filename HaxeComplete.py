@@ -80,7 +80,7 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 		while offset < end:
 			c = src[offset]
 			offset += 1
-			if not wordChars.match(c): break
+			if spaceChars.match(c): break
 		return offset - 1
 
 	def get_start( self, src, offset ) :
@@ -89,9 +89,10 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 			c = src[offset]
 			offset -= 1
 			if foundWord == 0:
-				if not wordChars.match(c): continue
+				if spaceChars.match(c): continue
 				foundWord = 1
 			if not wordChars.match(c): break
+
 		return offset + 2
 	
 	def is_membername( self, token ) :
@@ -120,6 +121,7 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 		view.sel().add(sublime.Region(loc, loc))
 
 	def get_indent( self, src, index ) :
+	
 		if src[index] == "\n": return index + 1
 		return index
 
@@ -143,6 +145,9 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 			if not pkg is None:
 				ins = "\n\nimport {0};".format(cname)
 				view.insert(edit, pkg.end(0), ins)
+			else:
+				ins = "import {0};\n\n".format(cname)
+				view.insert(edit, 0, ins)
 
 	def run( self , edit ) :
 		complete = HaxeComplete.inst
@@ -536,8 +541,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				name = i.get("n")
 				sig = i.find("t").text
 				doc = i.find("d").text #nothing to do
-				hint = name
 				insert = name
+				hint = name
+
 				if sig is not None :
 					types = sig.split(" -> ")
 					ret = types.pop()
