@@ -94,6 +94,9 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 			if not wordChars.match(c): break
 		return offset + 2
 	
+	def is_membername( self, token ) :
+		return token[0] >= "Z" or token == token.upper()
+
 	def get_classname( self, view, src ) :
 		loc = view.sel()[0]
 		end = max(loc.a, loc.b)
@@ -104,7 +107,11 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 			self.size = end - self.start
 		else:
 			self.start = end - self.size
+
 		self.cname = view.substr(sublime.Region(self.start, end)).rpartition(".")
+		while not self.cname[0] == "" and self.is_membername(self.cname[2]):
+			self.size -= 1 + len(self.cname[2])
+			self.cname = self.cname[0].rpartition(".")
 
 	def compact_classname( self, edit, view ) :
 		view.replace(edit, sublime.Region(self.start, self.start+self.size), self.cname[2])
@@ -123,7 +130,6 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 
 		for imp in importLine.finditer(src):
 			if clow < imp.group(2).lower():
-				print(imp.group(0))
 				ins = "{0}import {1};\n".format(imp.group(1), cname)
 				view.insert(edit, self.get_indent(src, imp.start(0)), ins)
 				return
