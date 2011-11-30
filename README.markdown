@@ -27,3 +27,8 @@ Restart Sublime Text 2
  - edit your classes (check the cool snippets, like 'prop'-Tab)
  - press Ctrl+Enter to build
  - open the console (View > Show Console) for more details about errors & stuff
+
+# Generator(s)
+
+ - select or just place your cursor on a qualified class name and press Ctrl+I to generate the import statement
+
