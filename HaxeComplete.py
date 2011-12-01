@@ -291,9 +291,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			currentBuild.hxml = build
 			buildPath = os.path.dirname(build);
 
-			currentBuild.classpaths.append( buildPath )
-			currentBuild.args.append( ("-cp" , buildPath ) )
-
 			# print("build file exists")
 			f = open( build , "r+" )
 			while 1:
@@ -330,6 +327,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					currentBuild.classpaths.append( os.path.join( buildPath , classpath ) )
 					currentBuild.args.append( ("-cp" , os.path.join( buildPath , classpath ) ) )
 
+			if len(currentBuild.classpaths) == 0:
+				currentBuild.classpaths.append( buildPath )
+				currentBuild.args.append( ("-cp" , buildPath ) )
+			
 			if len(currentBuild.args) > 0 :
 				self.builds.append( currentBuild )
 		
@@ -411,14 +412,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			prev = src[offset-1]
 			fragment = view.substr(sublime.Region(0,offset))
 			
+			# TODO fix that dumb context detection
 			if prev not in "(." :
 				prevDot = fragment.rfind(".")
 				prevPar = fragment.rfind("(")
-				completeOffset = max(prevDot+1, prevPar+1)
+				prevComa = fragment.rfind(",")
+				print(prev,prevDot,prevPar,prevComa)
+				if prevComa > prevDot and prevComa > prevPar:
+					completeOffset = prevPar+1
+				else:
+					completeOffset = max(prevDot+1, prevPar+1)
 				skipped = src[completeOffset:offset]
 				if ";" not in skipped:
 					offset = completeOffset
-			
 
 			commas = len(view.substr(sublime.Region(offset,userOffset)).split(","))-1
 			
