@@ -408,28 +408,42 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		#find actual autocompletable char.
 		if autocomplete : 
-			userOffset = offset
+			userOffset = completeOffset = offset
 			prev = src[offset-1]
-			fragment = view.substr(sublime.Region(0,offset))
+			commas = 0
 			
-			# TODO fix that dumb context detection
 			if prev not in "(." :
+				fragment = view.substr(sublime.Region(0,offset))
 				prevDot = fragment.rfind(".")
 				prevPar = fragment.rfind("(")
 				prevComa = fragment.rfind(",")
-				print(prev,prevDot,prevPar,prevComa)
-				if prevComa > prevDot and prevComa > prevPar:
-					completeOffset = prevPar+1
-				else:
-					completeOffset = max(prevDot+1, prevPar+1)
-				skipped = src[completeOffset:offset]
-				if ";" not in skipped:
-					offset = completeOffset
+				prevSymbol = max(prevDot,prevPar,prevComa)
+				
+				if prevSymbol == prevComa:
+					closedPars = 0
+					
+					for i in range( prevComa , 0 , -1 ) :
+						c = src[i]
+						if c == ")" :
+							closedPars += 1
+						elif c == "(" :
+							if closedPars < 1 :
+								completeOffset = i+1
+								break
+							else :
+								closedPars -= 1
+						elif c == "," :
+							if closedPars == 0 :
+								commas += 1
+				else :
+					completeOffset = max( prevDot + 1, prevPar + 1 )
+					
+					skipped = src[completeOffset:offset]
+					if len(skipped.strip()) > 0 :
+						return []
 
-			commas = len(view.substr(sublime.Region(offset,userOffset)).split(","))-1
+				offset = completeOffset
 			
-			#tdir = os.path.join(os.path.dirname(fn), "_autocomplete")
-			#temp = os.path.join(tdir, os.path.basename(fn))
 			if not os.path.exists( tdir ):
 				os.mkdir( tdir )
 			
@@ -491,7 +505,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		for a in args :
 			cmd.extend( list(a) )
 		
-		print( " ".join(cmd))
+		#print( " ".join(cmd))
 		res, err = self.runcmd( cmd, "" )
 		
 		#print( "err: %s" % err )
@@ -530,7 +544,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				msg = "";
 				if commas >= len(types) :
 					if commas == 0 :
-						msg = ""
+						msg = hint + ": No autocompletion available"
 						#view.window().run_command("insert" , {'characters':")"})
 						#comps.append((")",""))
 					else:
@@ -538,7 +552,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				else :
 					msg = ", ".join(types[commas:]) 
 
-				if( msg ) :
+				if msg :
 					#msg =  " ( " + " , ".join( types ) + " ) : " + ret + "      " + msg
 					status = msg
 				
