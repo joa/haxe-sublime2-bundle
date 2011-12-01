@@ -21,6 +21,27 @@
         ]
     },
     {
+        "keys": ["."],
+        "command": "run_macro_file",
+        "args":
+        {
+            "file": "Packages/HaXe/input/DotCompletion.sublime-macro"
+        },
+        "context":
+        [
+            {
+                "key": "auto_complete_visible",
+                "operator": "equal",
+                "operand": true
+            },
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
         "keys": ["ctrl+shift+b"],
         "command": "haxe_select_build",
         "context":
@@ -35,6 +56,18 @@
     {
         "keys": ["ctrl+enter"],
         "command": "haxe_run_build",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
+        "keys": ["ctrl+i"],
+        "command": "haxe_generate_import",
         "context":
         [
             {
@@ -78,6 +111,27 @@
                 "key": "auto_complete_visible",
                 "operator": "equal",
                 "operand": false
+            },
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },  
+      {
+        "keys": ["("],
+        "command": "run_macro_file",
+        "args":
+        {
+            "file": "Packages/HaXe/input/OpenParCompletion.sublime-macro"
+        },
+        "context":
+        [
+            {
+                "key": "auto_complete_visible",
+                "operator": "equal",
+                "operand": true
             },
             {
                 "key": "selector",
