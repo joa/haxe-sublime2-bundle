@@ -334,7 +334,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if len(currentBuild.args) > 0 :
 				self.builds.append( currentBuild )
 		
-		if len(self.builds) == 0 and forcePanel :
+		if len(self.builds) <= 1 and forcePanel :
 			sublime.status_message("No hxml file found...")
 			self.run_haxe(view,False)
 
@@ -355,7 +355,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			self.selectingBuild = True
 			sublime.status_message("Please select your build")
 			view.window().show_quick_panel( buildsView , lambda i : self.set_current_build(view, int(i)) , sublime.MONOSPACE_FONT )
-		
+
 		elif settings.has("haxe-build-id"):
 			self.set_current_build( view , int(settings.get("haxe-build-id")) )
 		
@@ -366,14 +366,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def set_current_build( self , view , id ) :
 		#print("setting current build #"+str(id))
-		if id >= 0 and len(self.builds) > id :
-			view.settings().set( "haxe-build-id" , id )
+		#print( self.builds )
+		if id < 0 or id >= len(self.builds) :
+			id = 0
+		
+		view.settings().set( "haxe-build-id" , id )	
+
+		if len(self.builds) > 0 :
 			self.currentBuild = self.builds[id]
 			view.set_status( "haxe-build" , self.currentBuild.to_string() )
 		else:
 			self.currentBuild = None
 			view.set_status( "haxe-build" , "No build" )
-
+			
 		self.selectingBuild = False
 
 	def run_build( self , view ) :
@@ -440,7 +445,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					
 					skipped = src[completeOffset:offset]
 					if len(skipped.strip()) > 0 :
-						return []
+						#return []
+						completeOffset = 0
 
 				offset = completeOffset
 			
