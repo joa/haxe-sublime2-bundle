@@ -407,9 +407,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			currentBuild.hxml = build
 			buildPath = os.path.dirname(build);
 
-			currentBuild.classpaths.append( buildPath )
-			currentBuild.args.append( ("-cp" , buildPath ) )
-
 			# print("build file exists")
 			f = open( build , "r+" )
 			while 1:
@@ -450,6 +447,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					classpath = " ".join( cp )
 					currentBuild.classpaths.append( os.path.join( buildPath , classpath ) )
 					currentBuild.args.append( ("-cp" , os.path.join( buildPath , classpath ) ) )
+			
+			if len(currentBuild.classpaths) == 0:
+				currentBuild.classpaths.append( buildPath )
+				currentBuild.args.append( ("-cp" , buildPath ) )
 
 			
 			if currentBuild.main is not None :
@@ -637,9 +638,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			f = codecs.open( fn , "wb" , "utf-8" )
 			f.write( src )
 			f.close()
-		#f = self.savetotemp( tmp_path, src )
-		#print( "Saved %s" % temp )
-
 
 		if not autocomplete :
 			args.append( ("-main" , build.main ) )
@@ -647,16 +645,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			args.append( ("--display", fn + "@" + str(offset) ) )
 			args.append( ("--no-output" , "-v" ) )
 			
-		#elif build is None : 
-			
-		#else:
-			#args.append( ( "-v" ) )
-
 		cmd = ["haxe"]
 		for a in args :
 			cmd.extend( list(a) )
 		
-		#print( " ".join(cmd))
+		print( " ".join(cmd))
 		res, err = runcmd( cmd, "" )
 		
 		#print( "err: %s" % err )
