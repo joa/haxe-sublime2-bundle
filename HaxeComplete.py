@@ -18,6 +18,16 @@ try:
 except (AttributeError):
 	STARTUP_INFO = None
 
+def runcmd( args, input=None ):
+	try:
+		p = Popen(args, stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
+		if isinstance(input, unicode):
+			input = input.encode('utf-8')
+		out, err = p.communicate(input=input)
+		return (out.decode('utf-8') if out else '', err.decode('utf-8') if err else '')
+	except (OSError, ValueError) as e:
+		err = u'Error while running %s: %s' % (args[0], e)
+		return ("", err)
 
 compilerOutput = re.compile("^([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? : (.*)", re.M)
 packageLine = re.compile("package ([a-z_.]*);")
@@ -27,6 +37,50 @@ spaceChars = re.compile("\s")
 wordChars = re.compile("[a-z0-9._]", re.I)
 importLine = re.compile("^([ \t]*)import\s+([a-z0-9._]+)", re.I | re.M)
 packageLine = re.compile("package\s*[a-z0-9.]*;", re.I)
+libLine = re.compile("([^:]*):[^\[]*\[(dev\:)?(.*)\]")
+classpathLine = re.compile("Classpath : (.*)")
+typeDecl = re.compile("class\s+([^\s{]*)")
+
+class HaxeLib :
+
+	available = {}
+	basePath = None
+
+	def __init__( self , name , dev , version ):
+		self.name = name
+		self.dev = dev
+		self.version = version
+
+		if self.dev :
+			self.path = self.version
+		else : 
+			self.path = os.path.join( HaxeLib.basePath , self.name , ",".join(self.version.split(".")) )
+
+		#print(self.name + " => " + self.path)
+	@staticmethod
+	def get( name ) :
+		return HaxeLib.available[name]
+
+	@staticmethod
+	def scan() :
+		hlout, hlerr = runcmd( ["haxelib" , "config" ] )
+		HaxeLib.basePath = hlout.strip()
+
+		HaxeLib.available = {}
+
+		hlout, hlerr = runcmd( ["haxelib" , "list" ] )
+
+		for l in hlout.split("\n") :
+			found = libLine.match( l )
+			if found is not None :
+				name, dev, version = found.groups()
+				lib = HaxeLib( name , dev is not None , version )
+
+				HaxeLib.available[ name ] = lib
+
+
+
+HaxeLib.scan()
 
 inst = None
 class HaxeBuild :
@@ -36,11 +90,12 @@ class HaxeBuild :
 	def __init__(self) :
 
 		self.args = []
-		self.main = "Main"
+		self.main = None
 		self.target = "js"
 		self.output = "dummy.js"
 		self.hxml = None
 		self.classpaths = []
+		self.libs = []
 
 	def to_string(self) :
 		out = os.path.basename(self.output)
@@ -67,6 +122,27 @@ class HaxeBuild :
 
 		#print( outp )
 		return outp.strip()
+
+	def get_types( self ) :
+		classes = []
+		packs = []
+
+		cp = []
+		cp.extend( self.classpaths )
+
+		for lib in self.libs :
+			cp.append( lib.path )
+
+		for path in cp :
+			c, p = HaxeComplete.inst.extract_types( path )
+			classes.extend( c )
+			packs.extend( p )
+
+		classes.sort()
+		packs.sort()
+		return classes, packs
+
+
 
 
 class HaxeGenerateImport( sublime_plugin.TextCommand ):
@@ -209,8 +285,48 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	builds = []
 	errors = []
 
+	stdPaths = []
+	stdPackages = []
+	stdClasses = ["Void","Float","Int","UInt","Null","Bool","Dynamic","Iterator","Iterable","ArrayAccess"]
+	stdCompletes = []
+
 	def __init__(self):
 		HaxeComplete.inst = self
+
+		out, err = runcmd( ["haxe", "-main", "Nothing", "-js", "nothing.js", "-v", "--no-output"] )
+		m = classpathLine.match(out)
+		if m is not None :
+			HaxeComplete.stdPaths = m.group(1).split(";")
+
+		for p in HaxeComplete.stdPaths :
+			if len(p) > 1 and os.path.exists(p) and os.path.isdir(p):
+				for f in os.listdir( p ) :
+					classes, packs = self.extract_types( p )
+					HaxeComplete.stdClasses.extend( classes )
+					HaxeComplete.stdPackages.extend( packs )
+
+		#for cl in HaxeComplete.stdClasses :
+		#	HaxeComplete.stdCompletes.append( ( cl + " [class]" , cl ))
+		#for pack in HaxeComplete.stdPackages :
+		#	HaxeComplete.stdCompletes.append( ( pack , pack ))
+
+
+	def extract_types( self , path ) :
+		classes = []
+		packs = []
+
+		for f in os.listdir( path ) :
+			cl, ext = os.path.splitext( f )
+			if os.path.isdir( os.path.join( path , f ) ) and f not in HaxeComplete.stdPackages :
+				packs.append( f )
+				
+			if ext == ".hx"  and cl not in HaxeComplete.stdClasses:
+				classes.append( cl )
+				# TODO parse the file to get actual types
+		classes.sort()
+		packs.sort()
+		return classes, packs
+
 
 	def highlight_errors( self , view ) :
 		fn = view.file_name()
@@ -291,6 +407,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			currentBuild.hxml = build
 			buildPath = os.path.dirname(build);
 
+			currentBuild.classpaths.append( buildPath )
+			currentBuild.args.append( ("-cp" , buildPath ) )
+
 			# print("build file exists")
 			f = open( build , "r+" )
 			while 1:
@@ -301,9 +420,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					self.builds.append( currentBuild )
 					currentBuild = HaxeBuild()
 					currentBuild.hxml = build
+					
 				l = l.strip()
 				if l.startswith("-main") :
 					currentBuild.main = l.split(" ")[1]
+				if l.startswith("-lib") :
+					libName = l.split(" ")[1]
+
+					currentBuild.libs.append( HaxeLib.get( libName ) )
 				for flag in ["lib" , "D"] :
 					if l.startswith( "-"+flag ) :
 						currentBuild.args.append( tuple(l.split(" ") ) )
@@ -327,15 +451,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					currentBuild.classpaths.append( os.path.join( buildPath , classpath ) )
 					currentBuild.args.append( ("-cp" , os.path.join( buildPath , classpath ) ) )
 
-			if len(currentBuild.classpaths) == 0:
-				currentBuild.classpaths.append( buildPath )
-				currentBuild.args.append( ("-cp" , buildPath ) )
 			
-			if len(currentBuild.args) > 0 :
+			if currentBuild.main is not None :
 				self.builds.append( currentBuild )
 		
 		if len(self.builds) <= 1 and forcePanel :
-			sublime.status_message("No hxml file found...")
+			if len(self.builds) == 0 :
+				sublime.status_message("No hxml file found")
+			else :
+				sublime.status_message("There is only one build")
+
 			self.run_haxe(view,False)
 
 			f = os.path.join(folder,"build.hxml")
@@ -400,6 +525,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		tdir = os.path.dirname(fn)
 		temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
 
+		comps = []
+
 		self.errors = []
 
 		pack = []
@@ -410,7 +537,38 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				if( spl[1] == p ) :
 					src_dir = spl[0]
 
+		args = []
+		
+		#buildArgs = view.window().settings
+		if build is None:
+			build = HaxeBuild()
+			build.target = "js"
 
+			folder = os.path.dirname(fn)
+			folders = view.window().folders()
+			for f in folders:
+				if f in fn :
+					folder = f
+
+			build.output = os.path.join(folder,"dummy.js")
+
+			cl = os.path.basename(fn)
+			cl = cl.encode('ascii','ignore')
+			cl = cl[0:cl.rfind(".")]
+			main = pack[0:]
+			main.extend( [ cl ] )
+			build.main = ".".join( main )
+
+			build.args.append( ("-cp" , src_dir) )
+			#build.args.append( ("-main" , build.main ) )
+
+			build.args.append( ("-js" , build.output ) )
+			build.args.append( ("--no-output" , "-v" ) )
+			
+			self.currentBuild = build	
+		
+		args.extend( build.args )	
+		
 		#find actual autocompletable char.
 		if autocomplete : 
 			userOffset = completeOffset = offset
@@ -446,7 +604,25 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					skipped = src[completeOffset:offset]
 					if len(skipped.strip()) > 0 :
 						#return []
-						completeOffset = 0
+						buildClasses , buildPacks = build.get_types()
+						
+						cl = []
+						cl.extend( HaxeComplete.stdClasses )
+						cl.extend( buildClasses )
+						cl.sort();
+
+						packs = []
+						packs.extend( HaxeComplete.stdPackages )
+						packs.extend( buildPacks )
+						packs.sort()
+
+						for c in cl :
+							comps.append(( c + " [class]" , c ))
+
+						for p in packs :
+							comps.append(( p , p ))
+							
+						#completeOffset = 0
 
 				offset = completeOffset
 			
@@ -464,38 +640,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#f = self.savetotemp( tmp_path, src )
 		#print( "Saved %s" % temp )
 
-		args = []
-		
-		#buildArgs = view.window().settings
-		if build is None:
-			build = HaxeBuild()
-			build.target = "js"
 
-			folder = os.path.dirname(fn)
-			folders = view.window().folders()
-			for f in folders:
-				if f in fn :
-					folder = f
-
-			build.output = os.path.join(folder,"dummy.js")
-
-			cl = os.path.basename(fn)
-			cl = cl.encode('ascii','ignore')
-			cl = cl[0:cl.rfind(".")]
-			main = pack[0:]
-			main.extend( [ cl ] )
-			build.main = ".".join( main )
-
-			build.args.append( ("-cp" , src_dir) )
-			#build.args.append( ("-main" , build.main ) )
-
-			build.args.append( ("-js" , build.output ) )
-			build.args.append( ("--no-output" , "-v" ) )
-			
-			self.currentBuild = build	
-		
-		args.extend( build.args )	
-		
 		if not autocomplete :
 			args.append( ("-main" , build.main ) )
 		else:
@@ -512,12 +657,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			cmd.extend( list(a) )
 		
 		#print( " ".join(cmd))
-		res, err = self.runcmd( cmd, "" )
+		res, err = runcmd( cmd, "" )
 		
 		#print( "err: %s" % err )
 		#print( "res: %s" % res )
 		
-		comps = []
+		
 		
 		if autocomplete :
 			#os.remove(temp)
@@ -530,15 +675,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			
 			status = "No autocompletion available"
 		elif build.hxml is None :
-			status = "Please create an hxml file"
+			#status = "Please create an hxml file"
+			self.extract_build_args( view , True )
 			
 		else :
 			# default message = build success
 			status = "Build success"
-			#status += "   "+build.to_string()
-			#if not build.hxml is None :
-			#	status += " (" + os.path.basename(build.hxml) + ")"
-			#print(status)
 		
 		try:
 			tree = ElementTree.XML( err )
@@ -676,13 +818,4 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		f.write( src )
 		return f
 
-	def runcmd( self, args, input=None ):
-		try:
-			p = Popen(args, stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
-			if isinstance(input, unicode):
-				input = input.encode('utf-8')
-			out, err = p.communicate(input=input)
-			return (out.decode('utf-8') if out else '', err.decode('utf-8') if err else '')
-		except (OSError, ValueError) as e:
-			err = u'Error while running %s: %s' % (args[0], e)
-			return ("", err)
+	
