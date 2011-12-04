@@ -441,11 +441,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					
 				l = l.strip()
 				if l.startswith("-main") :
-					currentBuild.main = l.split(" ")[1]
+					spl = l.split(" ")
+					if len( spl ) == 2 :
+						currentBuild.main = spl[1]
+					else :
+						sublime.status_message( "Invalid build.hxml : no Main class" )
 				if l.startswith("-lib") :
-					libName = l.split(" ")[1]
-
-					currentBuild.libs.append( HaxeLib.get( libName ) )
+					spl = l.split(" ")
+					if len( spl ) == 2 :
+						currentBuild.libs.append( HaxeLib.get( spl[1] ) )
+					else :
+						sublime.status_message( "Invalid build.hxml : lib not found" )
+					
 				for flag in ["lib" , "D"] :
 					if l.startswith( "-"+flag ) :
 						currentBuild.args.append( tuple(l.split(" ") ) )
@@ -709,7 +716,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				# fn didn't exist in the first place, so we remove it
 				os.remove( fn )
 			
-			status = "No autocompletion available"
+			status = ""
+			sublime.status_message("No autocompletion available")
 		elif build.hxml is None :
 			#status = "Please create an hxml file"
 			self.extract_build_args( view , True )
