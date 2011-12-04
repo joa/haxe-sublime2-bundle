@@ -692,7 +692,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		for a in args :
 			cmd.extend( list(a) )
 		
-		print( " ".join(cmd))
+		#print( " ".join(cmd))
 		res, err = runcmd( cmd, "" )
 		
 		#print( "err: %s" % err )
