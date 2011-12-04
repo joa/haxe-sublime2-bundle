@@ -340,7 +340,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				#print(src)
 				for decl in typeDecl.findall( src ):
 					t = decl[1]
-					print(t)
+					#print(t)
 					if( t == cl or cl == "StdTypes") :
 						classes.append( t )
 				
