@@ -30,16 +30,19 @@ def runcmd( args, input=None ):
 		return ("", err)
 
 compilerOutput = re.compile("^([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? : (.*)", re.M)
-packageLine = re.compile("package ([a-z_.]*);")
 compactFunc = re.compile("\(.*\)")
 compactProp = re.compile(":.*\.([a-z_0-9]+)", re.I)
 spaceChars = re.compile("\s")
 wordChars = re.compile("[a-z0-9._]", re.I)
-importLine = re.compile("^([ \t]*)import\s+([a-z0-9._]+)", re.I | re.M)
+importLine = re.compile("^([ \t]*)import\s+([a-z0-9._]+);", re.I | re.M)
 packageLine = re.compile("package\s*[a-z0-9.]*;", re.I)
 libLine = re.compile("([^:]*):[^\[]*\[(dev\:)?(.*)\]")
 classpathLine = re.compile("Classpath : (.*)")
-typeDecl = re.compile("class\s+([^\s{]*)")
+typeDecl = re.compile("(class|typedef|enum)\s+([A-Z][a-zA-Z0-9_]*)(<[a-zA-Z0-9_,]+>)?" , re.M )
+libFlag = re.compile("-lib\s+(.*?)")
+skippable = re.compile("^[a-zA-Z0-9_\s]*$")
+inAnonymous = re.compile("[{,]\s*([a-zA-Z0-9_\"\']+)\s*:\s*$" , re.M | re.U )
+comments = re.compile( "/\*(.*)\*/" , re.M )
 
 class HaxeLib :
 
@@ -53,6 +56,7 @@ class HaxeLib :
 
 		if self.dev :
 			self.path = self.version
+			self.version = "dev"
 		else : 
 			self.path = os.path.join( HaxeLib.basePath , self.name , ",".join(self.version.split(".")) )
 
@@ -60,6 +64,15 @@ class HaxeLib :
 	@staticmethod
 	def get( name ) :
 		return HaxeLib.available[name]
+
+	@staticmethod
+	def get_completions() :
+		comps = []
+		for l in HaxeLib.available :
+			lib = HaxeLib.available[l]
+			comps.append( ( lib.name + " [" + lib.version + "]" , lib.name ) )
+
+		return comps
 
 	@staticmethod
 	def scan() :
@@ -287,7 +300,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	stdPaths = []
 	stdPackages = []
-	stdClasses = ["Void","Float","Int","UInt","Null","Bool","Dynamic","Iterator","Iterable","ArrayAccess"]
+	#stdClasses = ["Void","Float","Int","UInt","Null","Bool","Dynamic","Iterator","Iterable","ArrayAccess"]
+	stdClasses = []
 	stdCompletes = []
 
 	def __init__(self):
@@ -321,8 +335,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				packs.append( f )
 				
 			if ext == ".hx"  and cl not in HaxeComplete.stdClasses:
-				classes.append( cl )
-				# TODO parse the file to get actual types
+				s = open( os.path.join( path , f ) , "r" )
+				src = s.read() #comments.sub( s.read() , "" )
+				#print(src)
+				for decl in typeDecl.findall( src ):
+					t = decl[1]
+					print(t)
+					if( t == cl or cl == "StdTypes") :
+						classes.append( t )
+				
 		classes.sort()
 		packs.sort()
 		return classes, packs
@@ -603,11 +624,30 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					completeOffset = max( prevDot + 1, prevPar + 1 )
 					
 					skipped = src[completeOffset:offset]
-					if len(skipped.strip()) > 0 :
-						#return []
+					
+					if skippable.search( skipped ) is None and inAnonymous.search( skipped ) is None :
+						cl = []
+
+						localTypes = typeDecl.findall( src )
+						for t in localTypes :
+							if t[1] not in cl:
+								cl.append( t[1] )
+
+						packageClasses, subPacks = self.extract_types( src_dir )
+						for c in packageClasses :
+							if c not in cl:
+								cl.append( c )
+
+						imports = importLine.findall( src )
+						for i in imports :
+							imp = i[1]
+							dot = imp.rfind(".")+1
+							clname = imp[dot:]
+							cl.append( clname )
+							#print( i )
+
 						buildClasses , buildPacks = build.get_types()
 						
-						cl = []
 						cl.extend( HaxeComplete.stdClasses )
 						cl.extend( buildClasses )
 						cl.sort();
@@ -617,13 +657,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						packs.extend( buildPacks )
 						packs.sort()
 
-						for c in cl :
-							comps.append(( c + " [class]" , c ))
-
 						for p in packs :
-							comps.append(( p , p ))
-							
-						#completeOffset = 0
+							cm = (p,p)
+							if cm not in comps :
+								comps.append(cm)
+
+						for c in cl :
+							cm = ( c + " [class]" , c )
+							if cm not in comps :
+								comps.append( cm )
+
 
 				offset = completeOffset
 			
@@ -793,18 +836,28 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		pos = locations[0]
 		scopes = view.scope_name(pos).split()
-		#sublime.status_message( scopes[0] )
-		if 'source.haxe.2' not in scopes:
-			return []
-		
-		#view.set_status( "haxe-status", "Autocompleting..." )
 		offset = pos - len(prefix)
 
-		ret , comps , status = self.run_haxe( view , offset )
-		view.set_status( "haxe-status", status )
+		if 'source.hxml' in scopes:
+			comps = self.get_hxml_completions( view , offset );
+
+		#sublime.status_message( scopes[0] )
+		if 'source.haxe.2' in scopes:
+			ret , comps , status = self.run_haxe( view , offset )
+			view.set_status( "haxe-status", status )
 
 		return comps
-		
+	
+
+	def get_hxml_completions( self , view , offset ):
+		src = view.substr(sublime.Region(0, offset))
+		currentLine = src[src.rfind("\n")+1:offset]
+		m = libFlag.match( currentLine )
+		if m is not None :
+			return HaxeLib.get_completions()
+		else :
+			return []
+
 	
 	def savetotemp( self, path, src ):
 		f = tempfile.NamedTemporaryFile( delete=False )

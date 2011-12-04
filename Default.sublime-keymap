@@ -42,6 +42,48 @@
         ]
     },
     {
+        "keys": [":"],
+        "command": "run_macro_file",
+        "args":
+        {
+            "file": "Packages/HaXe/input/Colon.sublime-macro"
+        },
+        "context":
+        [
+            {
+                "key": "auto_complete_visible",
+                "operator": "equal",
+                "operand": false
+            },
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
+        "keys": [":"],
+        "command": "run_macro_file",
+        "args":
+        {
+            "file": "Packages/HaXe/input/ColonCompletion.sublime-macro"
+        },
+        "context":
+        [
+            {
+                "key": "auto_complete_visible",
+                "operator": "equal",
+                "operand": true
+            },
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
         "keys": ["ctrl+shift+b"],
         "command": "haxe_select_build",
         "context":
