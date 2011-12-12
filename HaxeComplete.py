@@ -436,8 +436,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						currentBuild.args.append( ("-cp" , os.path.join( buildPath , name ) ) )
 			
 			outp = os.path.join( folder , outp )
-			currentBuild.args.append( ("-swf", outp) )
-			currentBuild.target = "swf"
+			currentBuild.args.append( ("-cpp", outp) )
+			currentBuild.target = "cpp"
 			currentBuild.output = outp
 
 			if currentBuild.main is not None :
