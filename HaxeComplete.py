@@ -43,6 +43,7 @@ libFlag = re.compile("-lib\s+(.*?)")
 skippable = re.compile("^[a-zA-Z0-9_\s]*$")
 inAnonymous = re.compile("[{,]\s*([a-zA-Z0-9_\"\']+)\s*:\s*$" , re.M | re.U )
 comments = re.compile( "/\*(.*)\*/" , re.M )
+extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main)=\"([a-z0-9_./-]+)\"", re.I)
 
 class HaxeLib :
 
@@ -107,6 +108,7 @@ class HaxeBuild :
 		self.target = "js"
 		self.output = "dummy.js"
 		self.hxml = None
+		self.nmml = None
 		self.classpaths = []
 		self.libs = []
 
@@ -400,26 +402,49 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	def select_build( self , view ) :
 		self.extract_build_args( view , True )
 
-	def extract_build_args( self , view , forcePanel = False ) :
-		scopes = view.scope_name(view.sel()[0].end()).split()
-		#sublime.status_message( scopes[0] )
-		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
-			return []
-		
-		self.builds = []
 
-		fn = view.file_name()
-		settings = view.settings()
+	def find_nmml( self, folder ) :
+		nmmls = glob.glob( os.path.join( folder , "*.nmml" ) )
 
-		folder = os.path.dirname(fn)
-		
-		folders = view.window().folders()
-		for f in folders:
-			if f in fn :
-				folder = f
+		for build in nmmls:
+			currentBuild = HaxeBuild()
+			currentBuild.hxml = build
+			currentBuild.nmml = build
+			buildPath = os.path.dirname(build)
 
-		# settings.set("haxe-complete-folder", folder)
+			outp = "NME"
+			f = open( build , "r+" )
+			while 1:
+				l = f.readline() 
+				if not l : 
+					break;
+				m = extractTag.search(l)
+				if not m is None:
+					#print(m.groups())
+					tag = m.group(1)
+					name = m.group(3)
+					if (tag == "app"):
+						currentBuild.main = name
+						mFile = re.search("(file|title)=\"([a-z0-9_-]+)\"", l, re.I)
+						if not mFile is None:
+							outp = mFile.group(2)
+					elif (tag == "haxelib"):
+						currentBuild.libs.append( HaxeLib.get( name ) )
+						currentBuild.args.append( ("-lib" , name) )
+					elif (tag == "classpath"):
+						currentBuild.classpaths.append( os.path.join( buildPath , name ) )
+						currentBuild.args.append( ("-cp" , os.path.join( buildPath , name ) ) )
+			
+			outp = os.path.join( folder , outp )
+			currentBuild.args.append( ("-cpp", outp) )
+			currentBuild.target = "cpp"
+			currentBuild.output = outp
 
+			if currentBuild.main is not None :
+				self.builds.append( currentBuild )
+
+
+	def find_hxml( self, folder ) :
 		hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
 
 		for build in hxmls:
@@ -479,14 +504,37 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if len(currentBuild.classpaths) == 0:
 				currentBuild.classpaths.append( buildPath )
 				currentBuild.args.append( ("-cp" , buildPath ) )
-
 			
 			if currentBuild.main is not None :
 				self.builds.append( currentBuild )
+
+	def extract_build_args( self , view , forcePanel = False ) :
+		scopes = view.scope_name(view.sel()[0].end()).split()
+		#sublime.status_message( scopes[0] )
+		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes and 'source.nmml' not in scopes:
+			return []
+		
+		self.builds = []
+
+		fn = view.file_name()
+		settings = view.settings()
+
+		folder = os.path.dirname(fn)
+		
+		folders = view.window().folders()
+		for f in folders:
+			if f in fn :
+				folder = f
+
+		# settings.set("haxe-complete-folder", folder)
+		self.find_hxml(folder)
+
+		if len(self.builds) <= 1:
+			self.find_nmml(folder)
 		
 		if len(self.builds) <= 1 and forcePanel :
 			if len(self.builds) == 0 :
-				sublime.status_message("No hxml file found")
+				sublime.status_message("No hxml or nmml file found")
 			else :
 				sublime.status_message("There is only one build")
 
@@ -717,7 +765,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				os.remove( fn )
 			
 			status = ""
-			sublime.status_message("No autocompletion available")
+			sublime.status_message("")
+
 		elif build.hxml is None :
 			#status = "Please create an hxml file"
 			self.extract_build_args( view , True )
