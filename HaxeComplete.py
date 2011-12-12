@@ -171,11 +171,12 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 		while offset < end:
 			c = src[offset]
 			offset += 1
-			if spaceChars.match(c): break
+			if not wordChars.match(c): break
 		return offset - 1
 
 	def get_start( self, src, offset ) :
-		foundWord = 0;
+		foundWord = 0
+		offset -= 1
 		while offset > 0:
 			c = src[offset]
 			offset -= 1
@@ -201,6 +202,7 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 			self.start = end - self.size
 
 		self.cname = view.substr(sublime.Region(self.start, end)).rpartition(".")
+		#print(self.cname)
 		while not self.cname[0] == "" and self.is_membername(self.cname[2]):
 			self.size -= 1 + len(self.cname[2])
 			self.cname = self.cname[0].rpartition(".")
