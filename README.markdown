@@ -1,6 +1,16 @@
 # Introduction
 Basic haXe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
 
+# Features
+
+ - **Syntax highlighting** for haxe sources, hxml build files and hss
+ - **HaXe compiler completion**, code hints and error highlighting
+ - **Package and classes discovery/completion** supporting hxml classpath (-cp) and haxelib libraries (-lib)
+ - Automatic generation of hxml files, multiple build/hxml management, and -lib autocompletion based on haxelib
+ - Code snippets, auto-import, NME support, Sublime build system integration
+ 
+and more to come :)
+
 # Installation
 ## Mac OSX
     cd /Users/<username>/Library/Application\ Support/Sublime\ Text\ 2/Packages
@@ -17,7 +27,11 @@ Restart Sublime Text 2
 
 # Troubleshooting
 
- - On my Mac, SublimeCodeIntel conflicts with the plugin, hiding the completion list after pressing '.'. I'm using [Package Control](http://wbond.net/sublime_packages/package_control) to disable this plugin when I don't need it.
+On Ubuntu, you'll probably need to install package python2.6
+
+    sudo apt-get install python2.6
+
+SublimeCodeIntel seems to conflict with the plugin, hiding the completion list after pressing '.'. You can use [Package Control](http://wbond.net/sublime_packages/package_control) to disable this plugin when I don't need it.
 
 # Usage
 
