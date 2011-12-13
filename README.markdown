@@ -9,7 +9,9 @@ Basic haXe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
     cd ~/.config/sublime-text-2/Packages
     git clone git://github.com/<fork author>/haxe-sublime2-bundle.git HaXe
 ## Windows
-    TODO
+    (Using git bash http://code.google.com/p/msysgit/)
+    cd /c/Users/<username>/AppData/Roaming/Sublime\ Text\ 2/Packages
+    git clone git://github.com/<fork author>/haxe-sublime2-bundle.git HaXe
 
 Restart Sublime Text 2
 
