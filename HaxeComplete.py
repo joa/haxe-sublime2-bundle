@@ -1,3 +1,7 @@
+#fix for ubuntu
+import sys
+sys.path.append("/usr/lib/python2.6/")
+
 import sublime, sublime_plugin
 import subprocess
 import tempfile
