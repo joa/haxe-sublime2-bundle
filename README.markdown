@@ -17,10 +17,6 @@ Restart Sublime Text 2
 
 # Troubleshooting
 
- - On my Ubuntu, the plugin seemed to complain about pyexpat. I had to link my local python2.6 to Sublime's lib directory:
-
-        ln -s /usr/lib/python2.6 [Sublime dir]/lib/
-
  - On my Mac, SublimeCodeIntel conflicts with the plugin, hiding the completion list after pressing '.'. I'm using [Package Control](http://wbond.net/sublime_packages/package_control) to disable this plugin when I don't need it.
 
 # Usage
