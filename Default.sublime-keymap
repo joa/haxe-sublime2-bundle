@@ -38,6 +38,16 @@
                 "key": "selector",
                 "operator": "equal",
                 "operand": "source.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.double.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.simple.haxe.2"
             }
         ]
     },
@@ -80,6 +90,16 @@
                 "key": "selector",
                 "operator": "equal",
                 "operand": "source.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.double.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.simple.haxe.2"
             }
         ]
     },
@@ -158,6 +178,16 @@
                 "key": "selector",
                 "operator": "equal",
                 "operand": "source.hxml"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.double.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.simple.haxe.2"
             }
         ]
     },  
@@ -179,6 +209,16 @@
                 "key": "selector",
                 "operator": "equal",
                 "operand": "source.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.double.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.simple.haxe.2"
             }
         ]
     },  
@@ -221,6 +261,16 @@
                 "key": "selector",
                 "operator": "equal",
                 "operand": "source.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.double.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string.quoted.simple.haxe.2"
             }
         ]
     }

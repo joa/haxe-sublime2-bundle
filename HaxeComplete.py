@@ -657,17 +657,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			userOffset = completeOffset = offset
 			prev = src[offset-1]
 			commas = 0
-			
+			#print("prev : "+prev)
 			if prev not in "(." :
 				fragment = view.substr(sublime.Region(0,offset))
 				prevDot = fragment.rfind(".")
 				prevPar = fragment.rfind("(")
 				prevComa = fragment.rfind(",")
-				prevSymbol = max(prevDot,prevPar,prevComa)
+				prevBrace = fragment.rfind("{")
+				prevSymbol = max(prevDot,prevPar,prevComa,prevBrace)
 				
 				if prevSymbol == prevComa:
 					closedPars = 0
-					
+
 					for i in range( prevComa , 0 , -1 ) :
 						c = src[i]
 						if c == ")" :
@@ -681,12 +682,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						elif c == "," :
 							if closedPars == 0 :
 								commas += 1
+					
 				else :
+
 					completeOffset = max( prevDot + 1, prevPar + 1 )
 					
 					skipped = src[completeOffset:offset]
+					toplevelComplete = skippable.search( skipped ) is None and inAnonymous.search( skipped ) is None
 					
-					if skippable.search( skipped ) is None and inAnonymous.search( skipped ) is None :
+					if toplevelComplete :
 						cl = []
 
 						localTypes = typeDecl.findall( src )
@@ -753,7 +757,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		for a in args :
 			cmd.extend( list(a) )
 		
-		#print( " ".join(cmd))
+		print( " ".join(cmd))
 		res, err = runcmd( cmd, "" )
 		
 		#print( "err: %s" % err )
@@ -896,15 +900,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	
 
 	def on_query_completions(self, view, prefix, locations):
-		
+
 		pos = locations[0]
 		scopes = view.scope_name(pos).split()
 		offset = pos - len(prefix)
-
+		print(scopes)
 		if 'source.hxml' in scopes:
 			comps = self.get_hxml_completions( view , offset );
-
-		#sublime.status_message( scopes[0] )
+		
 		if 'source.haxe.2' in scopes:
 			ret , comps , status = self.run_haxe( view , offset )
 			view.set_status( "haxe-status", status )
