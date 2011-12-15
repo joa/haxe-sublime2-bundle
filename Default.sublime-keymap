@@ -1,5 +1,41 @@
 [
     {
+        "keys": ["ctrl+shift+b"],
+        "command": "haxe_select_build",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
+        "keys": ["ctrl+enter"],
+        "command": "haxe_run_build",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
+        "keys": ["ctrl+i"],
+        "command": "haxe_generate_import",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
         "keys": [" "],
         "command": "run_macro_file",
         "args":
@@ -42,12 +78,12 @@
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.double.haxe.2"
+                "operand": "string"
             },
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.simple.haxe.2"
+                "operand": "comment"
             }
         ]
     },
@@ -94,12 +130,12 @@
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.double.haxe.2"
+                "operand": "string"
             },
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.simple.haxe.2"
+                "operand": "comment"
             }
         ]
     },
@@ -121,45 +157,20 @@
                 "key": "selector",
                 "operator": "equal",
                 "operand": "source.haxe.2"
-            }
-        ]
-    },
-    {
-        "keys": ["ctrl+shift+b"],
-        "command": "haxe_select_build",
-        "context":
-        [
+            },
             {
                 "key": "selector",
-                "operator": "equal",
-                "operand": "source.haxe.2"
-            }
-        ]
-    },
-    {
-        "keys": ["ctrl+enter"],
-        "command": "haxe_run_build",
-        "context":
-        [
+                "operator": "not_equal",
+                "operand": "string"
+            },
             {
                 "key": "selector",
-                "operator": "equal",
-                "operand": "source.haxe.2"
+                "operator": "not_equal",
+                "operand": "comment"
             }
         ]
     },
-    {
-        "keys": ["ctrl+i"],
-        "command": "haxe_generate_import",
-        "context":
-        [
-            {
-                "key": "selector",
-                "operator": "equal",
-                "operand": "source.haxe.2"
-            }
-        ]
-    },
+    
     {
         "keys": ["-"],
         "command": "run_macro_file",
@@ -182,12 +193,12 @@
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.double.haxe.2"
+                "operand": "string"
             },
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.simple.haxe.2"
+                "operand": "comment"
             }
         ]
     },  
@@ -213,16 +224,16 @@
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.double.haxe.2"
+                "operand": "string"
             },
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.simple.haxe.2"
+                "operand": "comment"
             }
         ]
     },  
-      {
+     /* {
         "keys": ["("],
         "command": "run_macro_file",
         "args":
@@ -240,9 +251,19 @@
                 "key": "selector",
                 "operator": "equal",
                 "operand": "source.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "comment"
             }
         ]
-    },
+    },*/
     {
         "keys": [","],
         "command": "run_macro_file",
@@ -265,12 +286,12 @@
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.double.haxe.2"
+                "operand": "string"
             },
             {
                 "key": "selector",
                 "operator": "not_equal",
-                "operand": "string.quoted.simple.haxe.2"
+                "operand": "comment"
             }
         ]
     }

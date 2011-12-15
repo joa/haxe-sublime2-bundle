@@ -1,6 +1,7 @@
 #fix for ubuntu
 import sys
 sys.path.append("/usr/lib/python2.6/")
+sys.path.append("/usr/lib/python2.6/lib-dynload")
 
 import sublime, sublime_plugin
 import subprocess
@@ -735,6 +736,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 				offset = completeOffset
 			
+			if src[offset-1]=="." and src[offset-2] in ".1234567890" :
+				#comps.append(("... [iterator]",".."))
+				comps.append((".","."))
+			
 			if not os.path.exists( tdir ):
 				os.mkdir( tdir )
 			
@@ -757,7 +762,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		for a in args :
 			cmd.extend( list(a) )
 		
-		print( " ".join(cmd))
+		#print( " ".join(cmd))
 		res, err = runcmd( cmd, "" )
 		
 		#print( "err: %s" % err )
@@ -793,6 +798,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				types = hint.split(" -> ")
 				ret = types.pop()
 				msg = "";
+				
+				#if ( autocomplete and len(comps) == 0 and len(types) == 0 and ret in ["Int","Float"] ):
+					#comps.append((".. [range]","."))
+				#	comps.append((".","."))
+
 				if commas >= len(types) :
 					if commas == 0 :
 						msg = hint + ": No autocompletion available"
@@ -820,10 +830,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					ret = types.pop()
 
 					if( len(types) > 0 ) :
-						cm = name + "("
+						#cm = name + "("
+						cm = name
 						if len(types) == 1 and types[0] == "Void" :
 							types = []
-							cm += ")"
+							#cm += ")"
 							hint = name + "() : "+ ret
 							insert = cm
 						else:
@@ -904,14 +915,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		pos = locations[0]
 		scopes = view.scope_name(pos).split()
 		offset = pos - len(prefix)
-		print(scopes)
+		#print(scopes)
 		if 'source.hxml' in scopes:
 			comps = self.get_hxml_completions( view , offset );
 		
 		if 'source.haxe.2' in scopes:
 			ret , comps , status = self.run_haxe( view , offset )
 			view.set_status( "haxe-status", status )
+			#if( len(comps) <= 1 ):
+			#	comps.append((".","."));
+			#	comps.append(("...",".."));
+			#comps.append((".","."));
 
+		
 		return comps
 	
 
