@@ -105,12 +105,13 @@ inst = None
 class HaxeBuild :
 
 	#auto = None
+	targets = ["js","cpp","flash9","flash","neko","php"]
 
 	def __init__(self) :
 
 		self.args = []
 		self.main = None
-		self.target = "js"
+		self.target = None
 		self.output = "dummy.js"
 		self.hxml = None
 		self.nmml = None
@@ -292,10 +293,11 @@ class HaxeHint( sublime_plugin.TextCommand ):
 		sel = view.sel()
 		for r in sel :
 			ret , comps , status = complete.run_haxe( self.view , r.end() )
-			view.set_status("haxe-status", "")
-			sublime.status_message(status)
-			if( len(comps) > 0 ) :
-				view.run_command('auto_complete', {'disable_auto_insert': True})
+			#print(status);
+			view.set_status("haxe-status", status)
+			#sublime.status_message(status)
+			#if( len(comps) > 0 ) :
+			#	view.run_command('auto_complete', {'disable_auto_insert': True})
 
 
 class HaxeComplete( sublime_plugin.EventListener ):
@@ -493,7 +495,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						#for a in l.split(" ") :
 						#	currentArgs.append( a )
 						break
-				for flag in ["js" , "php" , "cpp" , "neko", "swf"] :
+				for flag in HaxeBuild.targets :
 					if l.startswith( "-" + flag + " " ) :
 						spl = l.split(" ")
 						outp = os.path.join( folder , " ".join(spl[1:]) )
@@ -633,6 +635,59 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		return self.panel
 
+	def get_toplevel_completion( self , src , src_dir , build ) :
+		cl = []
+		comps = []
+
+		localTypes = typeDecl.findall( src )
+		for t in localTypes :
+			if t[1] not in cl:
+				cl.append( t[1] )
+
+		packageClasses, subPacks = self.extract_types( src_dir )
+		for c in packageClasses :
+			if c not in cl:
+				cl.append( c )
+
+		imports = importLine.findall( src )
+		for i in imports :
+			imp = i[1]
+			dot = imp.rfind(".")+1
+			clname = imp[dot:]
+			cl.append( clname )
+			#print( i )
+
+		buildClasses , buildPacks = build.get_types()
+		
+		cl.extend( HaxeComplete.stdClasses )
+		cl.extend( buildClasses )
+		cl.sort();
+
+		packs = []
+		stdPackages = []
+		#print("target : "+build.target)
+		for p in HaxeComplete.stdPackages :
+			#print(p)
+			if (p not in HaxeBuild.targets) or (p == build.target) :
+				stdPackages.append(p)
+
+		packs.extend( stdPackages )
+		packs.extend( buildPacks )
+		packs.sort()
+
+		for p in packs :
+			cm = (p,p)
+			if cm not in comps :
+				comps.append(cm)
+
+		for c in cl :
+			cm = ( c + " [class]" , c )
+			if cm not in comps :
+				comps.append( cm )
+
+		return comps
+
+
 	def run_haxe( self, view , offset = None ) :
 		autocomplete = not offset is None
 		build = self.currentBuild
@@ -689,6 +744,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		#find actual autocompletable char.
 		if autocomplete : 
+			toplevelComplete = False
 			userOffset = completeOffset = offset
 			prev = src[offset-1]
 			commas = 0
@@ -721,54 +777,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				else :
 
 					completeOffset = max( prevDot + 1, prevPar + 1 )
-					
 					skipped = src[completeOffset:offset]
 					toplevelComplete = skippable.search( skipped ) is None and inAnonymous.search( skipped ) is None
-					
-					if toplevelComplete :
-						cl = []
+				
+				
+			if src[completeOffset-1] in "(," or toplevelComplete :
+				comps = self.get_toplevel_completion( src , src_dir , build )
 
-						localTypes = typeDecl.findall( src )
-						for t in localTypes :
-							if t[1] not in cl:
-								cl.append( t[1] )
-
-						packageClasses, subPacks = self.extract_types( src_dir )
-						for c in packageClasses :
-							if c not in cl:
-								cl.append( c )
-
-						imports = importLine.findall( src )
-						for i in imports :
-							imp = i[1]
-							dot = imp.rfind(".")+1
-							clname = imp[dot:]
-							cl.append( clname )
-							#print( i )
-
-						buildClasses , buildPacks = build.get_types()
-						
-						cl.extend( HaxeComplete.stdClasses )
-						cl.extend( buildClasses )
-						cl.sort();
-
-						packs = []
-						packs.extend( HaxeComplete.stdPackages )
-						packs.extend( buildPacks )
-						packs.sort()
-
-						for p in packs :
-							cm = (p,p)
-							if cm not in comps :
-								comps.append(cm)
-
-						for c in cl :
-							cm = ( c + " [class]" , c )
-							if cm not in comps :
-								comps.append( cm )
-
-
-				offset = completeOffset
+			offset = completeOffset
 			
 			if src[offset-1]=="." and src[offset-2] in ".1234567890" :
 				#comps.append(("... [iterator]",".."))
@@ -818,7 +834,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				os.remove( fn )
 			
 			status = ""
-			sublime.status_message("")
+			#sublime.status_message("")
 
 		elif build.hxml is None :
 			#status = "Please create an hxml file"
@@ -893,8 +909,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				
 				comps.append( ( hint, insert ) )
 
-			if len(comps) > 0 :
-				status = ""
+			#if len(comps) > 0 :
+			#	status = ""
 				#status = "Autocompleting..."
 			
 		except xml.parsers.expat.ExpatError as e:
@@ -949,7 +965,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	
 
 	def on_query_completions(self, view, prefix, locations):
-		print("completing");
+		#print("completing");
 		pos = locations[0]
 		scopes = view.scope_name(pos).split()
 		offset = pos - len(prefix)
