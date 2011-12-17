@@ -594,16 +594,23 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def run_build( self , view ) :
 		view.run_command("save")
+		self.clear_output_panel(view)
 		#view.set_status( "haxe-status" , "Building..." )
 		err, comps, status = self.run_haxe( view )
-
-		self.panel_output( view , err )
+		if status == "Build success":
+			self.panel_output(view,status,"success")
+		else:
+			self.panel_output( view , err , "invalid" )
 		
 		view.set_status( "haxe-status" , status )
 		#if not "success" in status :
 			#sublime.error_message( err )
 
-	def panel_output( self , view , text ) :
+	def clear_output_panel(self, view) :
+		win = view.window()
+		self.panel = win.get_output_panel("haxe")
+
+	def panel_output( self , view , text , scope = None ) :
 		win = view.window()
 		if self.panel is None :
 			self.panel = win.get_output_panel("haxe")
@@ -611,9 +618,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		panel = self.panel
 		
 		edit = panel.begin_edit()
-		panel.insert(edit, panel.size(), text + "\n");
+		region = sublime.Region(panel.size(),panel.size() + len(text))
+		panel.insert(edit, panel.size(), text + "\n")
+		panel.end_edit( edit )
+
+		if scope is not None :
+			icon = "dot"
+			key = "haxe-" + scope
+			regions = panel.get_regions( key );
+			regions.append(region)
+			panel.add_regions( key , regions , scope , icon )
 		#print( err )
-		win.run_command("show_panel",{"panel":"output.haxe"});
+		win.run_command("show_panel",{"panel":"output.haxe"})
 
 		return self.panel
 
@@ -785,6 +801,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		if not autocomplete :
 			self.panel_output( view , " ".join(cmd) )
+
+
 		#print( "err: %s" % err )
 		#print( "res: %s" % res )
 		
@@ -809,7 +827,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		else :
 			# default message = build success
 			status = "Build success"
-		
+
 		try:
 			tree = ElementTree.XML( err )
 
