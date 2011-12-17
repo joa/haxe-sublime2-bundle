@@ -49,6 +49,8 @@ skippable = re.compile("^[a-zA-Z0-9_\s]*$")
 inAnonymous = re.compile("[{,]\s*([a-zA-Z0-9_\"\']+)\s*:\s*$" , re.M | re.U )
 comments = re.compile( "/\*(.*)\*/" , re.M )
 extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main)=\"([a-z0-9_./-]+)\"", re.I)
+variables = re.compile("var\s+([^;\s]*)", re.I)
+functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
 
 class HaxeLib :
 
@@ -668,12 +670,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print("target : "+build.target)
 		for p in HaxeComplete.stdPackages :
 			#print(p)
-			if (p not in HaxeBuild.targets) or (p == build.target) :
+			if build.target is None or (p not in HaxeBuild.targets) or (p == build.target) :
 				stdPackages.append(p)
 
 		packs.extend( stdPackages )
 		packs.extend( buildPacks )
 		packs.sort()
+
+		for v in variables.findall(src) :
+			comps.append(( v + " [var]" , v ))
+		
+		for f in functions.findall(src) :
+			if f not in ["new"] :
+				comps.append(( f + " [function]" , f ))
 
 		for p in packs :
 			cm = (p,p)
@@ -754,8 +763,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				prevDot = fragment.rfind(".")
 				prevPar = fragment.rfind("(")
 				prevComa = fragment.rfind(",")
+				prevColon = fragment.rfind(":")
 				prevBrace = fragment.rfind("{")
-				prevSymbol = max(prevDot,prevPar,prevComa,prevBrace)
+				prevSymbol = max(prevDot,prevPar,prevComa,prevBrace,prevColon)
 				
 				if prevSymbol == prevComa:
 					closedPars = 0
@@ -776,13 +786,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					
 				else :
 
-					completeOffset = max( prevDot + 1, prevPar + 1 )
+					completeOffset = max( prevDot + 1, prevPar + 1 , prevColon + 1 )
 					skipped = src[completeOffset:offset]
 					toplevelComplete = skippable.search( skipped ) is None and inAnonymous.search( skipped ) is None
 				
-				
-			if src[completeOffset-1] in "(," or toplevelComplete :
+			#print(src[completeOffset-1])
+			if src[completeOffset-1] in ":(," or toplevelComplete :
+				#print("toplevel")
 				comps = self.get_toplevel_completion( src , src_dir , build )
+				#print(comps)
 
 			offset = completeOffset
 			

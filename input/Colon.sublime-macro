@@ -7,6 +7,6 @@
         }
     },
     {
-        "command": "haxe_hint"
+        "command": "auto_complete"
     }
 ]
