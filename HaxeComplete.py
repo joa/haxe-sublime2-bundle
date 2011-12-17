@@ -313,6 +313,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	stdClasses = []
 	stdCompletes = []
 
+	panel = None
+
 	def __init__(self):
 		HaxeComplete.inst = self
 
@@ -592,12 +594,28 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def run_build( self , view ) :
 		view.run_command("save")
-		view.set_status( "haxe-status" , "Building..." )
+		#view.set_status( "haxe-status" , "Building..." )
 		err, comps, status = self.run_haxe( view )
-		print( err )
+
+		self.panel_output( view , err )
+		
 		view.set_status( "haxe-status" , status )
 		#if not "success" in status :
 			#sublime.error_message( err )
+
+	def panel_output( self , view , text ) :
+		win = view.window()
+		if self.panel is None :
+			self.panel = win.get_output_panel("haxe")
+
+		panel = self.panel
+		
+		edit = panel.begin_edit()
+		panel.insert(edit, panel.size(), text + "\n");
+		#print( err )
+		win.run_command("show_panel",{"panel":"output.haxe"});
+
+		return self.panel
 
 	def run_haxe( self, view , offset = None ) :
 		autocomplete = not offset is None
@@ -765,6 +783,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print( " ".join(cmd))
 		res, err = runcmd( cmd, "" )
 		
+		if not autocomplete :
+			self.panel_output( view , " ".join(cmd) )
 		#print( "err: %s" % err )
 		#print( "res: %s" % res )
 		
@@ -911,7 +931,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	
 
 	def on_query_completions(self, view, prefix, locations):
-
+		print("completing");
 		pos = locations[0]
 		scopes = view.scope_name(pos).split()
 		offset = pos - len(prefix)

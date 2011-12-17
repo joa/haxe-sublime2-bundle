@@ -69,7 +69,7 @@
                 "key": "auto_complete_visible",
                 "operator": "equal",
                 "operand": false
-            },
+            }, 
             {
                 "key": "selector",
                 "operator": "equal",
@@ -211,11 +211,11 @@
         },
         "context":
         [
-            {
+            /*{
                 "key": "auto_complete_visible",
                 "operator": "equal",
                 "operand": false
-            },
+            },*/
             {
                 "key": "selector",
                 "operator": "equal",
@@ -233,7 +233,7 @@
             }
         ]
     },  
-     /* {
+      {
         "keys": ["("],
         "command": "run_macro_file",
         "args":
@@ -263,7 +263,7 @@
                 "operand": "comment"
             }
         ]
-    },*/
+    },
     {
         "keys": [","],
         "command": "run_macro_file",
