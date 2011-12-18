@@ -925,7 +925,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						hint = name + " : " + ret
 				else :
 					if re.match("^[A-Z]",name ) :
-						hint = name + " [class]"
+						hint = name 
 					else :
 						hint = name + " [package]"
 				
