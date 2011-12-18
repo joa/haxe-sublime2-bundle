@@ -49,7 +49,7 @@ skippable = re.compile("^[a-zA-Z0-9_\s]*$")
 inAnonymous = re.compile("[{,]\s*([a-zA-Z0-9_\"\']+)\s*:\s*$" , re.M | re.U )
 comments = re.compile( "/\*(.*)\*/" , re.M )
 extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main)=\"([a-z0-9_./-]+)\"", re.I)
-variables = re.compile("var\s+([^;\s]*)", re.I)
+variables = re.compile("var\s+([^:;\s]*)", re.I)
 functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
 
 class HaxeLib :
@@ -346,8 +346,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		for f in os.listdir( path ) :
 			cl, ext = os.path.splitext( f )
+
 			if os.path.isdir( os.path.join( path , f ) ) and f not in HaxeComplete.stdPackages :
 				packs.append( f )
+				subclasses,subpacks = self.extract_types( os.path.join( path , f ) )
+				for cl in subclasses :
+					classes.append( f + "." + cl )
+				
 				
 			if ext == ".hx"  and cl not in HaxeComplete.stdClasses:
 				s = open( os.path.join( path , f ) , "r" )
@@ -684,15 +689,23 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if f not in ["new"] :
 				comps.append(( f + " [function]" , f ))
 
+		for c in cl :
+			spl = c.split(".")
+			top = spl[0]
+			clname = spl.pop()
+			pack = ".".join(spl)
+			display = clname
+			if pack != "" :
+				display += " [" + pack + "]"
+			cm = ( display , c )
+			if cm not in comps and ( build.target is None or (top not in HaxeBuild.targets) or (top == build.target) ) :
+				comps.append( cm )
+		
 		for p in packs :
-			cm = (p,p)
+			cm = (p + " [package]",p)
 			if cm not in comps :
 				comps.append(cm)
 
-		for c in cl :
-			cm = ( c + " [class]" , c )
-			if cm not in comps :
-				comps.append( cm )
 
 		return comps
 
@@ -913,6 +926,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				else :
 					if re.match("^[A-Z]",name ) :
 						hint = name + " [class]"
+					else :
+						hint = name + " [package]"
 				
 				if len(hint) > 40: # compact return type
 					m = compactProp.search(hint)
