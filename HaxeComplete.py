@@ -107,7 +107,7 @@ inst = None
 class HaxeBuild :
 
 	#auto = None
-	targets = ["js","cpp","flash9","flash","neko","php"]
+	targets = ["js","cpp","swf","swf9","neko","php"]
 
 	def __init__(self) :
 
