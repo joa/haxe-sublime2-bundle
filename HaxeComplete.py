@@ -323,6 +323,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		HaxeComplete.inst = self
 
 		out, err = runcmd( ["haxe", "-main", "Nothing", "-js", "nothing.js", "-v", "--no-output"] )
+		#print(out)
 		m = classpathLine.match(out)
 		if m is not None :
 			HaxeComplete.stdPaths = m.group(1).split(";")
@@ -340,30 +341,50 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#	HaxeComplete.stdCompletes.append( ( pack , pack ))
 
 
-	def extract_types( self , path ) :
+	def extract_types( self , path , depth = 0 ) :
 		classes = []
 		packs = []
+		hasClasses = False
 
-		for f in os.listdir( path ) :
+		for fullpath in glob.glob( os.path.join(path,"*.hx") ) : 
+			f = os.path.basename(fullpath)
 			cl, ext = os.path.splitext( f )
-
-			if os.path.isdir( os.path.join( path , f ) ) and f not in HaxeComplete.stdPackages :
-				packs.append( f )
-				subclasses,subpacks = self.extract_types( os.path.join( path , f ) )
-				for cl in subclasses :
-					classes.append( f + "." + cl )
+								
+			if cl not in HaxeComplete.stdClasses:
 				
-				
-			if ext == ".hx"  and cl not in HaxeComplete.stdClasses:
 				s = open( os.path.join( path , f ) , "r" )
 				src = s.read() #comments.sub( s.read() , "" )
-				#print(src)
+				
+				clPack = "";
+				for ps in packageLine.findall( src ) :
+					clPack = ps
+				
+				if clPack == "" :
+					packDepth = 0
+				else:
+					packDepth = len(clPack.split("."))
+
 				for decl in typeDecl.findall( src ):
 					t = decl[1]
-					#print(t)
-					if( t == cl or cl == "StdTypes") :
+
+					if( packDepth == depth and t == cl or cl == "StdTypes") :
 						classes.append( t )
+						hasClasses = True
+		
+
+		if hasClasses : 
+			
+			for f in os.listdir( path ) :
 				
+				cl, ext = os.path.splitext( f )
+												
+				if os.path.isdir( os.path.join( path , f ) ) and f not in HaxeComplete.stdPackages :
+					packs.append( f )
+					subclasses,subpacks = self.extract_types( os.path.join( path , f ) , depth + 1 )
+					for cl in subclasses :
+						classes.append( f + "." + cl )
+					
+					
 		classes.sort()
 		packs.sort()
 		return classes, packs
@@ -711,6 +732,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def run_haxe( self, view , offset = None ) :
+
 		autocomplete = not offset is None
 		build = self.currentBuild
 		src = view.substr(sublime.Region(0, view.size()))
