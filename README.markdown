@@ -12,6 +12,10 @@ An HaXe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
 and more to come :)
 
 # Installation
+
+### Sublime Package Control
+The bundle is available through [Package Control](http://wbond.net/sublime_packages/package_control)
+
 ### Mac OSX
     cd /Users/<username>/Library/Application\ Support/Sublime\ Text\ 2/Packages
     git clone git://github.com/<fork author>/haxe-sublime2-bundle.git HaXe
