@@ -517,12 +517,20 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					else :
 						sublime.status_message( "Invalid build.hxml : lib not found" )
 					
-				for flag in ["lib" , "D"] :
+				for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" ] :
 					if l.startswith( "-"+flag ) :
 						currentBuild.args.append( tuple(l.split(" ") ) )
-						#for a in l.split(" ") :
-						#	currentArgs.append( a )
+						
 						break
+				
+				for flag in [ "resource" , "xml" , "x" , "swf-lib", "-remap" , "-php-front" , "-php-lib" ] :
+					if l.startswith( "-"+flag ) :
+						spl = l.split(" ")
+						outp = os.path.join( folder , " ".join(spl[1:]) )
+						currentBuild.args.append( ("-"+flag, outp) )
+						
+						break
+
 				for flag in HaxeBuild.targets :
 					if l.startswith( "-" + flag + " " ) :
 						spl = l.split(" ")
@@ -532,6 +540,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						currentBuild.target = flag
 						currentBuild.output = outp
 						break
+
 				if l.startswith("-cp "):
 					cp = l.split(" ")
 					#view.set_status( "haxe-status" , "Building..." )
