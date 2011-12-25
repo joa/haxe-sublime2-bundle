@@ -886,11 +886,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if not autocomplete :
 			self.panel_output( view , " ".join(cmd) )
 
-
 		#print( "err: %s" % err )
 		#print( "res: %s" % res )
-		
-		
 		
 		if autocomplete :
 			#os.remove(temp)
@@ -912,7 +909,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			# default message = build success
 			status = "Build success"
 
-		#try:
+		
 			
 		tree = ElementTree.XML( "<root>"+err+"</root>" )
 		hints = []
@@ -973,6 +970,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						hint = name + " [class]"
 					else :
 						hint = name + " [package]"
+
+				#if doc is not None :
+				#	hint += "\t" + doc
 				
 				if len(hint) > 40: # compact return type
 					m = compactProp.search(hint)
