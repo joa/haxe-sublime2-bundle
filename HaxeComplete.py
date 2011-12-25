@@ -736,6 +736,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			display = clname
 			if pack != "" :
 				display += " [" + pack + "]"
+			else :
+				display += " [class]"
+
 			cm = ( display , c )
 			if cm not in comps and ( build.target is None or (top not in HaxeBuild.targets) or (top == build.target) ) :
 				comps.append( cm )
@@ -909,35 +912,37 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			# default message = build success
 			status = "Build success"
 
-		try:
-			tree = ElementTree.XML( err )
-
-			if tree.tag == "type" :
-				hint = tree.text.strip()
-				types = hint.split(" -> ")
-				ret = types.pop()
-				msg = "";
-				
-				#if ( autocomplete and len(comps) == 0 and len(types) == 0 and ret in ["Int","Float"] ):
-					#comps.append((".. [range]","."))
-				#	comps.append((".","."))
-
-				if commas >= len(types) :
-					if commas == 0 :
-						msg = hint + ": No autocompletion available"
-						#view.window().run_command("insert" , {'characters':")"})
-						#comps.append((")",""))
-					else:
-						msg =  "Too many arguments."
-				else :
-					msg = ", ".join(types[commas:]) 
-
-				if msg :
-					#msg =  " ( " + " , ".join( types ) + " ) : " + ret + "      " + msg
-					status = msg
-				
+		#try:
 			
-			for i in tree.getiterator("i"):
+		tree = ElementTree.XML( "<root>"+err+"</root>" )
+		hints = []
+
+		for i in tree.getiterator("type") :
+			hint = i.text.strip()
+			types = hint.split(" -> ")
+			ret = types.pop()
+			msg = "";
+			
+			if commas >= len(types) :
+				if commas == 0 :
+					msg = hint + ": No autocompletion available"
+					#view.window().run_command("insert" , {'characters':")"})
+					#comps.append((")",""))
+				else:
+					msg =  "Too many arguments."
+			else :
+				msg = ", ".join(types[commas:]) 
+
+			if msg :
+				#msg =  " ( " + " , ".join( types ) + " ) : " + ret + "      " + msg
+				hints.append( msg )
+
+		if len(hints) > 0 :
+			status = " | ".join(hints)
+			
+		li = tree.find("list")
+		if li is not None :
+			for i in li.getiterator("i"):
 				name = i.get("n")
 				sig = i.find("t").text
 				doc = i.find("d").text #nothing to do
@@ -965,7 +970,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						hint = name + " : " + ret
 				else :
 					if re.match("^[A-Z]",name ) :
-						hint = name 
+						hint = name + " [class]"
 					else :
 						hint = name + " [package]"
 				
@@ -976,12 +981,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				
 				comps.append( ( hint, insert ) )
 
-			#if len(comps) > 0 :
-			#	status = ""
-				#status = "Autocompleting..."
-			
-		except xml.parsers.expat.ExpatError as e:
-
+		elif len(hints) == 0 :
+		
 			err = err.replace( temp , fn )
 			err = re.sub("\(display(.*)\)","",err)
 
@@ -990,9 +991,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			
 			if len(l) > 0:
 				status = l
-
-			#comps.append((" " , " "))
-			#comps.append(("[" + status + "]"," " ))
 
 			regions = []
 			
@@ -1027,7 +1025,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			self.highlight_errors( view )
 
-		
 		return ( err, comps, status )
 	
 
@@ -1043,11 +1040,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if 'source.haxe.2' in scopes:
 			ret , comps , status = self.run_haxe( view , offset )
 			view.set_status( "haxe-status", status )
-			#if( len(comps) <= 1 ):
-			#	comps.append((".","."));
-			#	comps.append(("...",".."));
-			#comps.append((".","."));
-
 		
 		return comps
 	
