@@ -61,8 +61,6 @@ class HaxeLib :
 		self.name = name
 		self.dev = dev
 		self.version = version
-		self.classes = None
-		self.packages = None
 
 		if self.dev :
 			self.path = self.version
@@ -71,14 +69,6 @@ class HaxeLib :
 			self.path = os.path.join( HaxeLib.basePath , self.name , ",".join(self.version.split(".")) )
 
 		#print(self.name + " => " + self.path)
-
-	def extract_types( self ):
-		if self.dev is True or ( self.classes is None and self.packages is None ):
-			self.classes, self.packages = HaxeComplete.inst.extract_types( self.path )
-		
-		return self.classes, self.packages
-	
-	
 	@staticmethod
 	def get( name ) :
 		return HaxeLib.available[name]
@@ -117,7 +107,7 @@ inst = None
 class HaxeBuild :
 
 	#auto = None
-	targets = ["js","cpp","flash9","flash","neko","php"]
+	targets = ["js","cpp","swf","swf9","neko","php"]
 
 	def __init__(self) :
 
@@ -164,10 +154,7 @@ class HaxeBuild :
 		cp.extend( self.classpaths )
 
 		for lib in self.libs :
-			c, p = lib.extract_types()
-			classes.extend( c )
-			packs.extend( p )
-			#cp.append( lib.path )
+			cp.append( lib.path )
 
 		for path in cp :
 			c, p = HaxeComplete.inst.extract_types( path )
@@ -334,18 +321,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def __init__(self):
 		HaxeComplete.inst = self
-		#print("starting")
 
 		out, err = runcmd( ["haxe", "-main", "Nothing", "-js", "nothing.js", "-v", "--no-output"] )
+		#print(out)
 		m = classpathLine.match(out)
 		if m is not None :
 			HaxeComplete.stdPaths = m.group(1).split(";")
 
 		for p in HaxeComplete.stdPaths :
 			if len(p) > 1 and os.path.exists(p) and os.path.isdir(p):
-				classes, packs = self.extract_types( p )
-				HaxeComplete.stdClasses.extend( classes )
-				HaxeComplete.stdPackages.extend( packs )
+				for f in os.listdir( p ) :
+					classes, packs = self.extract_types( p )
+					HaxeComplete.stdClasses.extend( classes )
+					HaxeComplete.stdPackages.extend( packs )
 
 		#for cl in HaxeComplete.stdClasses :
 		#	HaxeComplete.stdCompletes.append( ( cl + " [class]" , cl ))
@@ -353,31 +341,50 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#	HaxeComplete.stdCompletes.append( ( pack , pack ))
 
 
-	def extract_types( self , path ) :
+	def extract_types( self , path , depth = 0 ) :
 		classes = []
 		packs = []
-		#print("extracting "+path)
+		hasClasses = False
 
-		for f in os.listdir( path ) :
+		for fullpath in glob.glob( os.path.join(path,"*.hx") ) : 
+			f = os.path.basename(fullpath)
 			cl, ext = os.path.splitext( f )
-
-			if os.path.isdir( os.path.join( path , f ) ) and f not in HaxeComplete.stdPackages :
-				packs.append( f )
-				subclasses,subpacks = self.extract_types( os.path.join( path , f ) )
-				for cl in subclasses :
-					classes.append( f + "." + cl )
+								
+			if cl not in HaxeComplete.stdClasses:
 				
-				
-			if ext == ".hx"  and cl not in HaxeComplete.stdClasses:
 				s = open( os.path.join( path , f ) , "r" )
 				src = s.read() #comments.sub( s.read() , "" )
-				#print(src)
+				
+				clPack = "";
+				for ps in packageLine.findall( src ) :
+					clPack = ps
+				
+				if clPack == "" :
+					packDepth = 0
+				else:
+					packDepth = len(clPack.split("."))
+
 				for decl in typeDecl.findall( src ):
 					t = decl[1]
-					#print(t)
-					if( t == cl or cl == "StdTypes") :
+
+					if( packDepth == depth and t == cl or cl == "StdTypes") :
 						classes.append( t )
+						hasClasses = True
+		
+
+		if hasClasses : 
+			
+			for f in os.listdir( path ) :
 				
+				cl, ext = os.path.splitext( f )
+												
+				if os.path.isdir( os.path.join( path , f ) ) and f not in HaxeComplete.stdPackages :
+					packs.append( f )
+					subclasses,subpacks = self.extract_types( os.path.join( path , f ) , depth + 1 )
+					for cl in subclasses :
+						classes.append( f + "." + cl )
+					
+					
 		classes.sort()
 		packs.sort()
 		return classes, packs
@@ -510,12 +517,20 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					else :
 						sublime.status_message( "Invalid build.hxml : lib not found" )
 					
-				for flag in ["lib" , "D"] :
+				for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" ] :
 					if l.startswith( "-"+flag ) :
 						currentBuild.args.append( tuple(l.split(" ") ) )
-						#for a in l.split(" ") :
-						#	currentArgs.append( a )
+						
 						break
+				
+				for flag in [ "resource" , "xml" , "x" , "swf-lib", "-remap" , "-php-front" , "-php-lib" ] :
+					if l.startswith( "-"+flag ) :
+						spl = l.split(" ")
+						outp = os.path.join( folder , " ".join(spl[1:]) )
+						currentBuild.args.append( ("-"+flag, outp) )
+						
+						break
+
 				for flag in HaxeBuild.targets :
 					if l.startswith( "-" + flag + " " ) :
 						spl = l.split(" ")
@@ -525,6 +540,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						currentBuild.target = flag
 						currentBuild.output = outp
 						break
+
 				if l.startswith("-cp "):
 					cp = l.split(" ")
 					#view.set_status( "haxe-status" , "Building..." )
@@ -725,6 +741,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def run_haxe( self, view , offset = None ) :
+
 		autocomplete = not offset is None
 		build = self.currentBuild
 		src = view.substr(sublime.Region(0, view.size()))
@@ -943,9 +960,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					else :
 						hint = name + " [package]"
 				
-				#if doc is not None :
-				#	hint += "\t"+doc
-
 				if len(hint) > 40: # compact return type
 					m = compactProp.search(hint)
 					if not m is None:
@@ -1025,7 +1039,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#	comps.append(("...",".."));
 			#comps.append((".","."));
 
-		#print comps;
+		
 		return comps
 	
 
