@@ -58,17 +58,26 @@ class HaxeLib :
 	basePath = None
 
 	def __init__( self , name , dev , version ):
-		self.name = name
-		self.dev = dev
-		self.version = version
+ 		self.name = name
+ 		self.dev = dev
+ 		self.version = version
+		self.classes = None
+		self.packages = None
+ 
+ 		if self.dev :
+ 			self.path = self.version
+ 			self.version = "dev"
+ 		else : 
+ 			self.path = os.path.join( HaxeLib.basePath , self.name , ",".join(self.version.split(".")) )
+ 
+ 		#print(self.name + " => " + self.path)
 
-		if self.dev :
-			self.path = self.version
-			self.version = "dev"
-		else : 
-			self.path = os.path.join( HaxeLib.basePath , self.name , ",".join(self.version.split(".")) )
+	def extract_types( self ):
+		if self.dev is True or ( self.classes is None and self.packages is None ):
+			self.classes, self.packages = HaxeComplete.inst.extract_types( self.path )
+		
+		return self.classes, self.packages
 
-		#print(self.name + " => " + self.path)
 	@staticmethod
 	def get( name ) :
 		return HaxeLib.available[name]
