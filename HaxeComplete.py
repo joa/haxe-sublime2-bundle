@@ -61,6 +61,8 @@ class HaxeLib :
 		self.name = name
 		self.dev = dev
 		self.version = version
+		self.classes = None
+		self.packages = None
 
 		if self.dev :
 			self.path = self.version
@@ -69,6 +71,14 @@ class HaxeLib :
 			self.path = os.path.join( HaxeLib.basePath , self.name , ",".join(self.version.split(".")) )
 
 		#print(self.name + " => " + self.path)
+
+	def extract_types( self ):
+		if self.dev is True or ( self.classes is None and self.packages is None ):
+			self.classes, self.packages = HaxeComplete.inst.extract_types( self.path )
+		
+		return self.classes, self.packages
+	
+	
 	@staticmethod
 	def get( name ) :
 		return HaxeLib.available[name]
@@ -154,7 +164,10 @@ class HaxeBuild :
 		cp.extend( self.classpaths )
 
 		for lib in self.libs :
-			cp.append( lib.path )
+			c, p = lib.extract_types()
+			classes.extend( c )
+			packs.extend( p )
+			#cp.append( lib.path )
 
 		for path in cp :
 			c, p = HaxeComplete.inst.extract_types( path )
@@ -321,6 +334,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def __init__(self):
 		HaxeComplete.inst = self
+		#print("starting")
 
 		out, err = runcmd( ["haxe", "-main", "Nothing", "-js", "nothing.js", "-v", "--no-output"] )
 		m = classpathLine.match(out)
@@ -329,10 +343,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		for p in HaxeComplete.stdPaths :
 			if len(p) > 1 and os.path.exists(p) and os.path.isdir(p):
-				for f in os.listdir( p ) :
-					classes, packs = self.extract_types( p )
-					HaxeComplete.stdClasses.extend( classes )
-					HaxeComplete.stdPackages.extend( packs )
+				classes, packs = self.extract_types( p )
+				HaxeComplete.stdClasses.extend( classes )
+				HaxeComplete.stdPackages.extend( packs )
 
 		#for cl in HaxeComplete.stdClasses :
 		#	HaxeComplete.stdCompletes.append( ( cl + " [class]" , cl ))
@@ -343,6 +356,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	def extract_types( self , path ) :
 		classes = []
 		packs = []
+		#print("extracting "+path)
 
 		for f in os.listdir( path ) :
 			cl, ext = os.path.splitext( f )
@@ -929,6 +943,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					else :
 						hint = name + " [package]"
 				
+				#if doc is not None :
+				#	hint += "\t"+doc
+
 				if len(hint) > 40: # compact return type
 					m = compactProp.search(hint)
 					if not m is None:
@@ -1008,7 +1025,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#	comps.append(("...",".."));
 			#comps.append((".","."));
 
-		
+		#print comps;
 		return comps
 	
 
