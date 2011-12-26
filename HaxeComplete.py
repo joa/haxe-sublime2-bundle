@@ -1033,6 +1033,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		pos = locations[0]
 		scopes = view.scope_name(pos).split()
 		offset = pos - len(prefix)
+		comps = []
 		#print(scopes)
 		if 'source.hxml' in scopes:
 			comps = self.get_hxml_completions( view , offset );
@@ -1052,7 +1053,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			return HaxeLib.get_completions()
 		else :
 			return []
-
 	
 	def savetotemp( self, path, src ):
 		f = tempfile.NamedTemporaryFile( delete=False )

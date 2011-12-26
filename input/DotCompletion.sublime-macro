@@ -7,6 +7,9 @@
 			"exact": true
 		}
 	},
+	{	
+		"command" : "soft_undo" 
+	},
 	{
 		"command": "insert",
 		"args":
@@ -15,6 +18,10 @@
 		}
 	},
 	{
-		"command": "auto_complete"
+		"command": "auto_complete",
+        "args" : {
+            "api_completions_only" : true,
+            "disable_auto_insert" : true
+        }
 	}
 ]
