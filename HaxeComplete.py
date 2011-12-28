@@ -176,7 +176,6 @@ class HaxeBuild :
 
 
 
-
 class HaxeGenerateImport( sublime_plugin.TextCommand ):
 
 	start = None
@@ -276,6 +275,35 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 			return
 		
 		self.insert_import(edit, view, src)		
+
+
+class HaxeDisplayCompletion( sublime_plugin.TextCommand ):
+	
+	def run( self , edit ) :
+		#print("completing")
+		complete = HaxeComplete.inst
+		view = self.view
+		s = view.settings();
+		
+		view.run_command( "auto_complete" , {
+			"api_completions_only" : True,
+            "disable_auto_insert" : True
+		} )
+
+		
+
+class HaxeInsertCompletion( sublime_plugin.TextCommand ):
+	
+	def run( self , edit ) :
+		#print("insert completion")
+		complete = HaxeComplete.inst
+		view = self.view
+
+		view.run_command( "insert_best_completion" , {
+			"default" : ".",
+            "exact" : True
+		} )
+
 
 
 class HaxeRunBuild( sublime_plugin.TextCommand ):
@@ -417,7 +445,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				
 		view.add_regions("haxe-error" , regions , "invalid" , "dot" )
 
-
 	def on_load( self, view ) :
 		scopes = view.scope_name(view.sel()[0].end()).split()
 		#sublime.status_message( scopes[0] )
@@ -432,11 +459,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#sublime.status_message( scopes[0] )
 		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
 			return []
-		
+
 		self.generate_build(view)
 		self.extract_build_args( view )
 		self.highlight_errors( view )
 
+	#def on_modified( self , view ):
+	#	view.run_command("haxe_display_completion")
 
 	def generate_build(self, view) :	
 		fn = view.file_name()
@@ -973,6 +1002,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 				#if doc is not None :
 				#	hint += "\t" + doc
+				#	print(doc)
 				
 				if len(hint) > 40: # compact return type
 					m = compactProp.search(hint)
@@ -1029,11 +1059,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	
 
 	def on_query_completions(self, view, prefix, locations):
-		#print("completing");
 		pos = locations[0]
 		scopes = view.scope_name(pos).split()
 		offset = pos - len(prefix)
 		comps = []
+		if offset == 0 : 
+			return comps
 		#print(scopes)
 		if 'source.hxml' in scopes:
 			comps = self.get_hxml_completions( view , offset );

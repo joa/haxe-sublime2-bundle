@@ -1,15 +1,8 @@
 [
 	{
-		"command": "insert_best_completion",
-		"args":
-		{
-			"default": ".",
-			"exact": true
-		}
+		"command": "haxe_insert_completion"
 	},
-	{	
-		"command" : "soft_undo" 
-	},
+	{	"command" : "soft_undo"   },
 	{
 		"command": "insert",
 		"args":
@@ -18,10 +11,6 @@
 		}
 	},
 	{
-		"command": "auto_complete",
-        "args" : {
-            "api_completions_only" : true,
-            "disable_auto_insert" : true
-        }
+		"command": "haxe_display_completion"
 	}
 ]

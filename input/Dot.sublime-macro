@@ -7,10 +7,6 @@
         }
     },
     {
-        "command": "auto_complete",
-        "args" : {
-            "api_completions_only" : true,
-            "disable_auto_insert" : true
-        }
+        "command": "haxe_display_completion"
     }
 ]
