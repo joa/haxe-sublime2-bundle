@@ -7,9 +7,9 @@
 			"exact": true
 		}
 	},
-	{	
+	/*{
 		"command" : "soft_undo" 
-	}
+	},*/
 	{
 		"command": "insert",
 		"args":
@@ -17,13 +17,10 @@
 			"characters": ":"
 		}
 	},
-	/*{
-		"command": "haxe_hint"
-	}*/
 	{
 		"command": "auto_complete",
         "args" : {
-            "api_completions_only" : true,
+            "api_completions_only" : false,
             "disable_auto_insert" : true
         }
 	}

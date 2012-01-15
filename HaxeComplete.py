@@ -333,9 +333,9 @@ class HaxeHint( sublime_plugin.TextCommand ):
 		
 		sel = view.sel()
 		for r in sel :
-			ret , comps , status = complete.run_haxe( self.view , r.end() )
+			comps = complete.get_haxe_completions( self.view , r.end() )
 			#print(status);
-			view.set_status("haxe-status", status)
+			#view.set_status("haxe-status", status)
 			#sublime.status_message(status)
 			#if( len(comps) > 0 ) :
 			#	view.run_command('auto_complete', {'disable_auto_insert': True})
@@ -652,7 +652,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			else :
 				sublime.status_message("There is only one build")
 
-			self.run_haxe(view,False)
+			#self.run_haxe(view)
 
 			f = os.path.join(folder,"build.hxml")
 			if not self.currentBuild is None :
@@ -707,6 +707,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		else:
 			self.panel_output( view , err , "invalid" )
 		
+		#print(status)
 		view.set_status( "haxe-status" , status )
 		#if not "success" in status :
 			#sublime.error_message( err )
@@ -817,32 +818,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		return comps
 
 
-	def run_haxe( self, view , offset = None ) :
-
-		autocomplete = not offset is None
+	def get_build( self , view ) :
 		build = self.currentBuild
-		src = view.substr(sublime.Region(0, view.size()))
-		fn = view.file_name()
-		settings = view.settings()
-		src_dir = os.path.dirname(fn)
-		tdir = os.path.dirname(fn)
-		temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
 
-		comps = []
-
-		self.errors = []
-
-		pack = []
-		for ps in packageLine.findall( src ) :
-			pack = ps.split(".")
-			for p in reversed(pack) : 
-				spl = os.path.split( src_dir )
-				if( spl[1] == p ) :
-					src_dir = spl[0]
-
-		args = []
-		
-		#buildArgs = view.window().settings
 		if build is None:
 			build = HaxeBuild()
 			build.target = "js"
@@ -868,84 +846,54 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			build.args.append( ("-js" , build.output ) )
 			build.args.append( ("--no-output" , "-v" ) )
 			
-			self.currentBuild = build	
+			self.currentBuild = build
+			
+		return self.currentBuild	
+
+
+	def run_haxe( self, view , display = None , commas = 0 ) :
+
+		build = self.get_build( view )
+		settings = view.settings()
+
+		autocomplete = display is not None
+		fn = view.file_name()
+		src = view.substr(sublime.Region(0, view.size()))
+		src_dir = os.path.dirname(fn)
+		tdir = os.path.dirname(fn)
+		temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
+
+		comps = []
+
+		self.errors = []
+
+		pack = []
+		for ps in packageLine.findall( src ) :
+			pack = ps.split(".")
+			for p in reversed(pack) : 
+				spl = os.path.split( src_dir )
+				if( spl[1] == p ) :
+					src_dir = spl[0]
+
+		args = []
+		
+		#buildArgs = view.window().settings
+		
 		
 		args.extend( build.args )	
-		
-		#find actual autocompletable char.
-		if autocomplete : 
-			toplevelComplete = False
-			userOffset = completeOffset = offset
-			prev = src[offset-1]
-			commas = 0
-			#print("prev : "+prev)
-			if prev not in "(." :
-				fragment = view.substr(sublime.Region(0,offset))
-				prevDot = fragment.rfind(".")
-				prevPar = fragment.rfind("(")
-				prevComa = fragment.rfind(",")
-				prevColon = fragment.rfind(":")
-				prevBrace = fragment.rfind("{")
-				prevSymbol = max(prevDot,prevPar,prevComa,prevBrace,prevColon)
-				
-				if prevSymbol == prevComa:
-					closedPars = 0
-
-					for i in range( prevComa , 0 , -1 ) :
-						c = src[i]
-						if c == ")" :
-							closedPars += 1
-						elif c == "(" :
-							if closedPars < 1 :
-								completeOffset = i+1
-								break
-							else :
-								closedPars -= 1
-						elif c == "," :
-							if closedPars == 0 :
-								commas += 1
-					
-				else :
-
-					completeOffset = max( prevDot + 1, prevPar + 1 , prevColon + 1 )
-					skipped = src[completeOffset:offset]
-					toplevelComplete = skippable.search( skipped ) is None and inAnonymous.search( skipped ) is None
-				
-			#print(src[completeOffset-1])
-			if src[completeOffset-1] in ":(," or toplevelComplete :
-				#print("toplevel")
-				comps = self.get_toplevel_completion( src , src_dir , build )
-				#print(comps)
-
-			offset = completeOffset
 			
-			if src[offset-1]=="." and src[offset-2] in ".1234567890" :
-				#comps.append(("... [iterator]",".."))
-				comps.append((".","."))
-			
-			if not os.path.exists( tdir ):
-				os.mkdir( tdir )
-			
-			if os.path.exists( fn ):
-				# copy saved file to temp for future restoring
-				shutil.copy2( fn , temp )
-			
-			# write current source to file
-			f = codecs.open( fn , "wb" , "utf-8" )
-			f.write( src )
-			f.close()
 
 		if not autocomplete :
 			args.append( ("-main" , build.main ) )
 		else:
-			args.append( ("--display", fn + "@" + str(offset) ) )
+			args.append( ("--display", display ) )
 			args.append( ("--no-output" , "-v" ) )
 			
 		cmd = ["haxe"]
 		for a in args :
 			cmd.extend( list(a) )
 		
-		#print( " ".join(cmd))
+		#print(cmd)
 		res, err = runcmd( cmd, "" )
 		
 		if not autocomplete :
@@ -953,24 +901,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		#print( "err: %s" % err )
 		#print( "res: %s" % res )
-		
-		if autocomplete :
-			#os.remove(temp)
-			if os.path.exists( temp ) :
-				shutil.copy2( temp , fn )
-				os.remove( temp )
-			else:
-				# fn didn't exist in the first place, so we remove it
-				os.remove( fn )
-			
-			status = ""
-			#sublime.status_message("")
+		status = ""
 
-		elif build.hxml is None :
+		if build.hxml is None :
 			#status = "Please create an hxml file"
 			self.extract_build_args( view , True )
-			
-		else :
+		elif not autocomplete :
 			# default message = build success
 			status = "Build success"
 
@@ -981,7 +917,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		try :
 			tree = ElementTree.XML( "<root>"+err+"</root>" )
 		except xml.parsers.expat.ExpatError:
-			print("invalid xml ")
+			print("invalid xml")
 		
 		if tree is not None :
 			for i in tree.getiterator("type") :
@@ -1052,7 +988,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					
 					comps.append( ( hint, insert ) )
 
-		if tree is None or len(hints) == 0 :
+		if len(hints) == 0 and len(comps) == 0:
 		
 			err = err.replace( temp , fn )
 			err = re.sub("\(display(.*)\)","",err)
@@ -1095,7 +1031,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				#if not autocomplete
 
 			self.highlight_errors( view )
-
+		#print(status)
 		return ( err, comps, status )
 	
 
@@ -1108,14 +1044,107 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			return comps
 		#print(scopes)
 		if 'source.hxml' in scopes:
-			comps = self.get_hxml_completions( view , offset );
+			comps = self.get_hxml_completions( view , offset )
 		
 		if 'source.haxe.2' in scopes:
-			ret , comps , status = self.run_haxe( view , offset )
-			view.set_status( "haxe-status", status )
-		
+			comps = self.get_haxe_completions( view , offset )
+			
 		return comps
 	
+	def get_haxe_completions( self , view , offset ):
+
+		src = view.substr(sublime.Region(0, view.size()))
+		fn = view.file_name()
+		src_dir = os.path.dirname(fn)
+		tdir = os.path.dirname(fn)
+		temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
+
+		#find actual autocompletable char.
+		toplevelComplete = False
+		userOffset = completeOffset = offset
+		prev = src[offset-1]
+		commas = 0
+		#print("prev : "+prev)
+		if prev not in "(." :
+			fragment = view.substr(sublime.Region(0,offset))
+			prevDot = fragment.rfind(".")
+			prevPar = fragment.rfind("(")
+			prevComa = fragment.rfind(",")
+			prevColon = fragment.rfind(":")
+			prevBrace = fragment.rfind("{")
+			prevSymbol = max(prevDot,prevPar,prevComa,prevBrace,prevColon)
+			
+			if prevSymbol == prevComa:
+				closedPars = 0
+
+				for i in range( prevComa , 0 , -1 ) :
+					c = src[i]
+					if c == ")" :
+						closedPars += 1
+					elif c == "(" :
+						if closedPars < 1 :
+							completeOffset = i+1
+							break
+						else :
+							closedPars -= 1
+					elif c == "," :
+						if closedPars == 0 :
+							commas += 1
+				
+			else :
+
+				completeOffset = max( prevDot + 1, prevPar + 1 , prevColon + 1 )
+				skipped = src[completeOffset:offset]
+				toplevelComplete = skippable.search( skipped ) is None and inAnonymous.search( skipped ) is None
+		
+			
+		#print(src[completeOffset-1])
+		if src[completeOffset-1] in ":(," or toplevelComplete :
+			#print("toplevel")
+			comps = self.get_toplevel_completion( src , src_dir , self.currentBuild )
+			#print(comps)
+		
+		offset = completeOffset
+		
+		if src[offset-1]=="." and src[offset-2] in ".1234567890" :
+			#comps.append(("... [iterator]",".."))
+			comps.append((".","."))
+
+		if src[completeOffset-1] not in ".,(" or toplevelComplete:
+				return comps
+
+		if not os.path.exists( tdir ):
+			os.mkdir( tdir )
+			
+		if os.path.exists( fn ):
+			# copy saved file to temp for future restoring
+			shutil.copy2( fn , temp )
+		
+		# write current source to file
+		f = codecs.open( fn , "wb" , "utf-8" )
+		f.write( src )
+		f.close()
+
+		ret , comps , status = self.run_haxe( view , fn + "@" + str(offset) , commas )
+		
+		#print(ret)
+		#print(status)
+		#print(status)
+		
+		view.set_status( "haxe-status", status )
+
+		#os.remove(temp)
+		if os.path.exists( temp ) :
+			shutil.copy2( temp , fn )
+			os.remove( temp )
+		else:
+			# fn didn't exist in the first place, so we remove it
+			os.remove( fn )
+		
+		#sublime.status_message("")
+
+		return comps
+			
 
 	def get_hxml_completions( self , view , offset ):
 		src = view.substr(sublime.Region(0, offset))

@@ -2,7 +2,7 @@
 	{
 		"command": "haxe_insert_completion"
 	},
-	{	"command" : "soft_undo"   },
+	/*{	"command" : "soft_undo"   },*/
 	{
 		"command": "insert",
 		"args":
