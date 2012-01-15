@@ -1064,6 +1064,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		userOffset = completeOffset = offset
 		prev = src[offset-1]
 		commas = 0
+		comps = []
 		#print("prev : "+prev)
 		if prev not in "(." :
 			fragment = view.substr(sublime.Region(0,offset))
@@ -1111,7 +1112,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			comps.append((".","."))
 
 		if src[completeOffset-1] not in ".,(" or toplevelComplete:
-				return comps
+			return comps
 
 		if not os.path.exists( tdir ):
 			os.mkdir( tdir )
