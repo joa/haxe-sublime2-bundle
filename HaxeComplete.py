@@ -284,7 +284,6 @@ class HaxeDisplayCompletion( sublime_plugin.TextCommand ):
 	
 	def run( self , edit ) :
 		#print("completing")
-		complete = HaxeComplete.inst
 		view = self.view
 		s = view.settings();
 		
@@ -300,7 +299,6 @@ class HaxeInsertCompletion( sublime_plugin.TextCommand ):
 	
 	def run( self , edit ) :
 		#print("insert completion")
-		complete = HaxeComplete.inst
 		view = self.view
 
 		view.run_command( "insert_best_completion" , {
