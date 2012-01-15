@@ -83,6 +83,7 @@ class HaxeLib :
 		if( name in HaxeLib.available.keys()):
 			return HaxeLib.available[name]
 		else :
+			sublime.status_message( "Haxelib : "+ name +" project not installed" )
 			return None
 
 	@staticmethod
@@ -166,7 +167,8 @@ class HaxeBuild :
 		cp.extend( self.classpaths )
 
 		for lib in self.libs :
-			cp.append( lib.path )
+			if lib is not None :
+				cp.append( lib.path )
 
 		for path in cp :
 			c, p = HaxeComplete.inst.extract_types( path )
@@ -579,7 +581,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				if l.startswith("-lib") :
 					spl = l.split(" ")
 					if len( spl ) == 2 :
-						currentBuild.libs.append( HaxeLib.get( spl[1] ) )
+						lib = HaxeLib.get( spl[1] )
+						currentBuild.libs.append( lib )
 					else :
 						sublime.status_message( "Invalid build.hxml : lib not found" )
 					
@@ -1102,7 +1105,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print(src[completeOffset-1])
 		if src[completeOffset-1] in ":(," or toplevelComplete :
 			#print("toplevel")
-			comps = self.get_toplevel_completion( src , src_dir , self.currentBuild )
+			comps = self.get_toplevel_completion( src , src_dir , self.get_build( view ) )
 			#print(comps)
 		
 		offset = completeOffset
