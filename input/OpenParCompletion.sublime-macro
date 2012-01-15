@@ -7,9 +7,9 @@
 			"exact": true
 		}
 	},
-	{	
+	/*{	
 		"command" : "soft_undo" 
-	},
+	},*/
 	{
 		"command": "insert",
 		"args":
