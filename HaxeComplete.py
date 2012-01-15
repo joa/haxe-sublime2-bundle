@@ -788,9 +788,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		for c in cl :
 			spl = c.split(".")
-			top = spl[0]
-			if top == "flash9" :
+			if spl[0] == "flash9" :
 				spl[0] = "flash"
+
+			top = spl[0]
+			#print(spl)
+			
 			clname = spl.pop()
 			pack = ".".join(spl)
 			display = clname
@@ -798,8 +801,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				display += " [" + pack + "]"
 			else :
 				display += " [class]"
-
-			cm = ( display , c )
+			
+			spl.append(clname)
+			cm = ( display , ".".join(spl) )
 			if cm not in comps and ( build.target is None or (top not in HaxeBuild.targets) or (top == build.target) ) :
 				comps.append( cm )
 		
