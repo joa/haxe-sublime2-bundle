@@ -80,7 +80,10 @@ class HaxeLib :
 
 	@staticmethod
 	def get( name ) :
-		return HaxeLib.available[name]
+		if( name in HaxeLib.available.keys()):
+			return HaxeLib.available[name]
+		else :
+			return None
 
 	@staticmethod
 	def get_completions() :
@@ -974,79 +977,84 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			status = "Build success"
 
 		
-			
-		tree = ElementTree.XML( "<root>"+err+"</root>" )
+		#print(err)	
 		hints = []
-
-		for i in tree.getiterator("type") :
-			hint = i.text.strip()
-			types = hint.split(" -> ")
-			ret = types.pop()
-			msg = "";
-			
-			if commas >= len(types) :
-				if commas == 0 :
-					msg = hint + ": No autocompletion available"
-					#view.window().run_command("insert" , {'characters':")"})
-					#comps.append((")",""))
-				else:
-					msg =  "Too many arguments."
-			else :
-				msg = ", ".join(types[commas:]) 
-
-			if msg :
-				#msg =  " ( " + " , ".join( types ) + " ) : " + ret + "      " + msg
-				hints.append( msg )
-
-		if len(hints) > 0 :
-			status = " | ".join(hints)
-			
-		li = tree.find("list")
-		if li is not None :
-			for i in li.getiterator("i"):
-				name = i.get("n")
-				sig = i.find("t").text
-				doc = i.find("d").text #nothing to do
-				insert = name
-				hint = name
-
-				if sig is not None :
-					types = sig.split(" -> ")
-					ret = types.pop()
-
-					if( len(types) > 0 ) :
-						#cm = name + "("
-						cm = name
-						if len(types) == 1 and types[0] == "Void" :
-							types = []
-							#cm += ")"
-							hint = name + "() : "+ ret
-							insert = cm
-						else:
-							hint = name + "( " + " , ".join( types ) + " ) : " + ret
-							if len(hint) > 40: # compact arguments
-								hint = compactFunc.sub("(...)", hint);
-							insert = cm
-					else :
-						hint = name + " : " + ret
+		tree = None
+		try :
+			tree = ElementTree.XML( "<root>"+err+"</root>" )
+		except xml.parsers.expat.ExpatError:
+			print("invalid xml ")
+		
+		if tree is not None :
+			for i in tree.getiterator("type") :
+				hint = i.text.strip()
+				types = hint.split(" -> ")
+				ret = types.pop()
+				msg = "";
+				
+				if commas >= len(types) :
+					if commas == 0 :
+						msg = hint + ": No autocompletion available"
+						#view.window().run_command("insert" , {'characters':")"})
+						#comps.append((")",""))
+					else:
+						msg =  "Too many arguments."
 				else :
-					if re.match("^[A-Z]",name ) :
-						hint = name + " [class]"
+					msg = ", ".join(types[commas:]) 
+
+				if msg :
+					#msg =  " ( " + " , ".join( types ) + " ) : " + ret + "      " + msg
+					hints.append( msg )
+
+			if len(hints) > 0 :
+				status = " | ".join(hints)
+				
+			li = tree.find("list")
+			if li is not None :
+				for i in li.getiterator("i"):
+					name = i.get("n")
+					sig = i.find("t").text
+					doc = i.find("d").text #nothing to do
+					insert = name
+					hint = name
+
+					if sig is not None :
+						types = sig.split(" -> ")
+						ret = types.pop()
+
+						if( len(types) > 0 ) :
+							#cm = name + "("
+							cm = name
+							if len(types) == 1 and types[0] == "Void" :
+								types = []
+								#cm += ")"
+								hint = name + "() : "+ ret
+								insert = cm
+							else:
+								hint = name + "( " + " , ".join( types ) + " ) : " + ret
+								if len(hint) > 40: # compact arguments
+									hint = compactFunc.sub("(...)", hint);
+								insert = cm
+						else :
+							hint = name + " : " + ret
 					else :
-						hint = name + " [package]"
+						if re.match("^[A-Z]",name ) :
+							hint = name + " [class]"
+						else :
+							hint = name + " [package]"
 
-				#if doc is not None :
-				#	hint += "\t" + doc
-				#	print(doc)
-				
-				if len(hint) > 40: # compact return type
-					m = compactProp.search(hint)
-					if not m is None:
-						hint = compactProp.sub(": " + m.group(1), hint)
-				
-				comps.append( ( hint, insert ) )
+					#if doc is not None :
+					#	hint += "\t" + doc
+					#	print(doc)
+					
+					if len(hint) > 40: # compact return type
+						m = compactProp.search(hint)
+						if not m is None:
+							hint = compactProp.sub(": " + m.group(1), hint)
+					
+					comps.append( ( hint, insert ) )
 
-		elif len(hints) == 0 :
+		if tree is None or len(hints) == 0 :
 		
 			err = err.replace( temp , fn )
 			err = re.sub("\(display(.*)\)","",err)
