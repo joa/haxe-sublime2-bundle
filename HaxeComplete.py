@@ -287,7 +287,8 @@ class HaxeDisplayCompletion( sublime_plugin.TextCommand ):
 		
 		view.run_command( "auto_complete" , {
 			"api_completions_only" : True,
-            "disable_auto_insert" : True
+            "disable_auto_insert" : True,
+            "next_completion_if_showing" : False
 		} )
 
 		
@@ -464,8 +465,34 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		self.extract_build_args( view )
 		self.highlight_errors( view )
 
-	#def on_modified( self , view ):
-	#	view.run_command("haxe_display_completion")
+	def __on_modified( self , view ):
+		win = sublime.active_window()
+		if win is None :
+			return None
+
+		isOk = ( win.active_view().buffer_id() == view.buffer_id() )
+		if not isOk :
+			return None
+		
+		sel = view.sel()
+		caret = 0
+		for s in sel :
+			caret = s.a
+		
+		if caret == 0 :
+			return None
+
+		if view.score_selector(caret,"source.haxe") == 0 or view.score_selector(caret,"string") > 0 or view.score_selector(caret,"comment") :
+			return None
+
+		src = view.substr(sublime.Region(0, view.size()))
+		ch = src[caret-1]
+		#print(ch)
+		if ch not in ".(:, " :
+			#print("here")
+			view.run_command("haxe_display_completion")
+		#else :
+		#	view.run_command("haxe_insert_completion")
 
 	def generate_build(self, view) :	
 		fn = view.file_name()
@@ -743,6 +770,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print("target : "+build.target)
 		for p in HaxeComplete.stdPackages :
 			#print(p)
+			if p == "flash9" :
+				p = "flash"
 			if build.target is None or (p not in HaxeBuild.targets) or (p == build.target) :
 				stdPackages.append(p)
 
@@ -760,6 +789,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		for c in cl :
 			spl = c.split(".")
 			top = spl[0]
+			if top == "flash9" :
+				spl[0] = "flash"
 			clname = spl.pop()
 			pack = ".".join(spl)
 			display = clname
