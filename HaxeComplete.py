@@ -180,6 +180,28 @@ class HaxeBuild :
 		return classes, packs
 
 
+class HaxeInstallLib( sublime_plugin.WindowCommand ):
+	def run(self):
+		out,err = runcmd(["haxelib" , "search" , " "]);
+		libs = out.splitlines()
+		self.libs = libs[0:-1]
+
+		self.window.show_quick_panel(libs,self.install)
+
+	def install( self, i ):
+		lib = self.libs[i]
+		out,err = runcmd(["haxelib" , "install" , lib ])
+		lines = out.splitlines()
+		lines[1] = ""
+
+		panel = self.window.get_output_panel("haxelib")
+		edit = panel.begin_edit()
+		panel.insert(edit, panel.size(), "\n".join(lines) )
+		panel.end_edit( edit )
+		self.window.run_command("show_panel",{"panel":"output.haxelib"})
+
+
+
 
 class HaxeGenerateImport( sublime_plugin.TextCommand ):
 

@@ -36,6 +36,10 @@
         ]
     },
     {
+        "keys": ["ctrl+shift+l"],
+        "command": "haxe_install_lib"
+    },
+    {
         "keys": [" "],
         "command": "run_macro_file",
         "args":
