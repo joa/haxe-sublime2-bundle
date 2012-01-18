@@ -7,6 +7,7 @@ An HaXe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
  - **HaXe compiler completion**, code hints and error highlighting
  - **Package and classes discovery/completion** supporting hxml classpath (-cp) and haxelib libraries (-lib)
  - Automatic generation of hxml files, multiple build/hxml management, and -lib autocompletion based on haxelib
+ - Haxelib integration (haxelib install)
  - Code snippets, auto-import, NME support, Sublime build system integration
  
 and more to come :)
@@ -41,6 +42,7 @@ Restart Sublime Text 2
  - Press **Ctrl+Shift+B** to either automatically generate an hxml file if none exist, edit the build file if only one build exists or select among multiple builds (--next)
  - Press **Ctrl+Enter** to run the current/selected build
  - Press **Ctrl+I** on a qualified class name to shorten it and generate the import statement. Safe to use if the class is already imported.
+ - Press **Ctrl+Shift+L** to install a library through haxelib
 
 ### Targeting NME
 
