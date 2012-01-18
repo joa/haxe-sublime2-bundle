@@ -374,6 +374,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	builds = []
 	errors = []
 
+	currentCompletion = {
+		"inp" : None,
+		"outp" : None
+	}
+
 	stdPaths = []
 	stdPackages = []
 	#stdClasses = ["Void","Float","Int","UInt","Null","Bool","Dynamic","Iterator","Iterable","ArrayAccess"]
@@ -766,7 +771,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def get_toplevel_completion( self , src , src_dir , build ) :
 		cl = []
-		comps = []
+		comps = [("trace","trace")]
 
 		localTypes = typeDecl.findall( src )
 		for t in localTypes :
@@ -1151,7 +1156,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		f.write( src )
 		f.close()
 
-		ret , comps , status = self.run_haxe( view , fn + "@" + str(offset) , commas )
+		inp = (fn,offset,commas)
+		if self.currentCompletion["inp"] is None or inp != self.currentCompletion["inp"] :
+			ret , comps , status = self.run_haxe( view , fn + "@" + str(offset) , commas )
+			self.currentCompletion["outp"] = (ret,comps,status)
+		else :
+			ret, comps, status = self.currentCompletion["outp"]
+
+		self.currentCompletion["inp"] = inp
 		
 		#print(ret)
 		#print(status)

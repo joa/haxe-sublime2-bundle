@@ -1,11 +1,11 @@
 [
 	{
-		"command": "insert_best_completion",
+		"command": "haxe_insert_completion"/*,
 		"args":
 		{
 			"default": "(",
 			"exact": true
-		}
+		}*/
 	},
 	/*{	
 		"command" : "soft_undo" 
