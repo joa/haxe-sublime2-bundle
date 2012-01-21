@@ -571,6 +571,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			
 			outp = os.path.join( folder , outp )
 			currentBuild.args.append( ("-cpp", outp) )
+			currentBuild.args.append( ("--remap", "flash:nme") )
 			currentBuild.target = "cpp"
 			currentBuild.output = outp
 
