@@ -850,9 +850,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def get_build( self , view ) :
+
 		build = self.currentBuild
 
 		if build is None:
+			fn = view.file_name()
+			src_dir = os.path.dirname( fn )
+			src = view.substr(sublime.Region(0, view.size()))
+		
 			build = HaxeBuild()
 			build.target = "js"
 
@@ -861,6 +866,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			for f in folders:
 				if f in fn :
 					folder = f
+
+			pack = []
+			for ps in packageLine.findall( src ) :
+				pack = ps.split(".")
+				for p in reversed(pack) : 
+					spl = os.path.split( src_dir )
+					if( spl[1] == p ) :
+						src_dir = spl[0]
 
 			build.output = os.path.join(folder,"dummy.js")
 
@@ -898,14 +911,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		self.errors = []
 
-		pack = []
-		for ps in packageLine.findall( src ) :
-			pack = ps.split(".")
-			for p in reversed(pack) : 
-				spl = os.path.split( src_dir )
-				if( spl[1] == p ) :
-					src_dir = spl[0]
-
 		args = []
 		
 		#buildArgs = view.window().settings
@@ -934,7 +939,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print( "res: %s" % res )
 		status = ""
 
-		if build.hxml is None :
+		if not autocomplete and build.hxml is None :
 			#status = "Please create an hxml file"
 			self.extract_build_args( view , True )
 		elif not autocomplete :
