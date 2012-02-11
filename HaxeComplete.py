@@ -491,8 +491,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
 			return []
 
+		if 'source.haxe.2' in scopes :
+			self.get_build(view)
+			self.extract_build_args( view )
+		
 		self.generate_build(view)
-		self.extract_build_args( view )
 		self.highlight_errors( view )
 
 	def __on_modified( self , view ):
@@ -524,10 +527,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#else :
 		#	view.run_command("haxe_insert_completion")
 
-	def generate_build(self, view) :	
+	def generate_build(self, view) :
+
 		fn = view.file_name()
 
-		if not self.currentBuild is None and fn == self.currentBuild.hxml and view.size() == 0 :	
+		if self.currentBuild is not None and fn == self.currentBuild.hxml and view.size() == 0 :	
 			e = view.begin_edit()
 			hxmlSrc = self.currentBuild.make_hxml()
 			view.insert(e,0,hxmlSrc)
@@ -686,7 +690,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#self.run_haxe(view)
 
 			f = os.path.join(folder,"build.hxml")
-			if not self.currentBuild is None :
+			if self.currentBuild is not None :
 				self.currentBuild.hxml = f
 
 			#for whatever reason generate_build doesn't work without transient
@@ -723,7 +727,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			self.currentBuild = self.builds[id]
 			view.set_status( "haxe-build" , self.currentBuild.to_string() )
 		else:
-			self.currentBuild = None
+			#self.currentBuild = None
 			view.set_status( "haxe-build" , "No build" )
 			
 		self.selectingBuild = False
@@ -850,10 +854,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def get_build( self , view ) :
-
-		build = self.currentBuild
-
-		if build is None:
+		
+		if self.currentBuild is None:
 			fn = view.file_name()
 			src_dir = os.path.dirname( fn )
 			src = view.substr(sublime.Region(0, view.size()))
@@ -889,7 +891,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			build.args.append( ("-js" , build.output ) )
 			build.args.append( ("--no-output" , "-v" ) )
-			
+
+			build.hxml = os.path.join( src_dir , "build.hxml")
 			self.currentBuild = build
 			
 		return self.currentBuild	
@@ -939,7 +942,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print( "res: %s" % res )
 		status = ""
 
-		if not autocomplete and build.hxml is None :
+		if (not autocomplete) and (build.hxml is None) :
 			#status = "Please create an hxml file"
 			self.extract_build_args( view , True )
 		elif not autocomplete :
