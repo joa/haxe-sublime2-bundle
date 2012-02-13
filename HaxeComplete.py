@@ -121,6 +121,8 @@ class HaxeBuild :
 
 	#auto = None
 	targets = ["js","cpp","swf","swf9","neko","php"]
+	nme_targets = ["flash -debug","cpp","ios -simulator","android"]
+	nme_target = HaxeBuild.nme_targets[0]
 
 	def __init__(self) :
 
@@ -135,7 +137,10 @@ class HaxeBuild :
 
 	def to_string(self) :
 		out = os.path.basename(self.output)
-		return "{out}".format(self=self, out=out);
+		if self.nmml is not None:
+			return "{out} ({target})".format(self=self, out=out, target=HaxeBuild.nme_target);
+		else:
+			return "{out}".format(self=self, out=out);
 		#return "{self.main} {self.target}:{out}".format(self=self, out=out);
 	
 	def make_hxml( self ) :
@@ -524,6 +529,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#else :
 		#	view.run_command("haxe_insert_completion")
 
+
 	def generate_build(self, view) :	
 		fn = view.file_name()
 
@@ -532,6 +538,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			hxmlSrc = self.currentBuild.make_hxml()
 			view.insert(e,0,hxmlSrc)
 			view.end_edit(e)
+
 
 	def select_build( self , view ) :
 		self.extract_build_args( view , True )
@@ -546,6 +553,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			currentBuild.nmml = build
 			buildPath = os.path.dirname(build)
 
+			# TODO delegate compiler options extractions to NME 3.2:
+			# runcmd("nme diplay project.nmml nme_target")
+
 			outp = "NME"
 			f = open( build , "r+" )
 			while 1:
@@ -559,7 +569,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					name = m.group(3)
 					if (tag == "app"):
 						currentBuild.main = name
-						mFile = re.search("(file|title)=\"([a-z0-9_-]+)\"", l, re.I)
+						mFile = re.search("\\b(file|title)=\"([a-z0-9_-]+)\"", l, re.I)
 						if not mFile is None:
 							outp = mFile.group(2)
 					elif (tag == "haxelib"):
@@ -568,11 +578,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					elif (tag == "classpath"):
 						currentBuild.classpaths.append( os.path.join( buildPath , name ) )
 						currentBuild.args.append( ("-cp" , os.path.join( buildPath , name ) ) )
+				else: # NME 3.2
+					mPath = re.search("\\bpath=\"([a-z0-9_-]+)\"", l, re.I)
+					if not mPath is None:
+						#print(mPath.groups())
+						path = mPath.group(1)
+						currentBuild.classpaths.append( os.path.join( buildPath , path ) )
+						currentBuild.args.append( ("-cp" , os.path.join( buildPath , path ) ) )
 			
 			outp = os.path.join( folder , outp )
-			currentBuild.args.append( ("-cpp", outp) )
-			currentBuild.args.append( ("--remap", "flash:nme") )
 			currentBuild.target = "cpp"
+			currentBuild.args.append( ("--remap", "flash:nme") )
+			currentBuild.args.append( ("-cpp", outp) )
 			currentBuild.output = outp
 
 			if currentBuild.main is not None :
@@ -653,6 +670,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if currentBuild.main is not None :
 				self.builds.append( currentBuild )
 
+
 	def extract_build_args( self , view , forcePanel = False ) :
 		scopes = view.scope_name(view.sel()[0].end()).split()
 		#sublime.status_message( scopes[0] )
@@ -673,17 +691,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		# settings.set("haxe-complete-folder", folder)
 		self.find_hxml(folder)
-
-		if len(self.builds) <= 1:
-			self.find_nmml(folder)
+		self.find_nmml(folder)
 		
-		if len(self.builds) <= 1 and forcePanel :
-			if len(self.builds) == 0 :
-				sublime.status_message("No hxml or nmml file found")
-			else :
-				sublime.status_message("There is only one build")
+		if len(self.builds) == 1:
+			sublime.status_message("There is only one build")
+			self.set_current_build( view , int(0), forcePanel )
 
-			#self.run_haxe(view)
+		elif len(self.builds) == 0 and forcePanel :
+			sublime.status_message("No hxml or nmml file found")
 
 			f = os.path.join(folder,"build.hxml")
 			if not self.currentBuild is None :
@@ -701,17 +716,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			self.selectingBuild = True
 			sublime.status_message("Please select your build")
-			view.window().show_quick_panel( buildsView , lambda i : self.set_current_build(view, int(i)) , sublime.MONOSPACE_FONT )
+			view.window().show_quick_panel( buildsView , lambda i : self.set_current_build(view, int(i), forcePanel) , sublime.MONOSPACE_FONT )
 
 		elif settings.has("haxe-build-id"):
-			self.set_current_build( view , int(settings.get("haxe-build-id")) )
+			self.set_current_build( view , int(settings.get("haxe-build-id")), forcePanel )
 		
 		else:
-			self.set_current_build( view , int(0))
+			self.set_current_build( view , int(0), forcePanel )
 
 
-
-	def set_current_build( self , view , id ) :
+	def set_current_build( self , view , id , forcePanel ) :
 		#print("setting current build #"+str(id))
 		#print( self.builds )
 		if id < 0 or id >= len(self.builds) :
@@ -728,6 +742,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			
 		self.selectingBuild = False
 
+		if forcePanel and self.currentBuild is not None: # choose NME target
+			if self.currentBuild.nmml is not None:
+				sublime.status_message("Please select a NME target")
+				view.window().show_quick_panel(HaxeBuild.nme_targets, lambda i : self.select_nme_target(i, view))
+
+
+	def select_nme_target( self, i, view ):
+		target = HaxeBuild.nme_targets[i]
+		if self.currentBuild.nmml is not None:
+			HaxeBuild.nme_target = target
+			view.set_status( "haxe-build" , self.currentBuild.to_string() )
+
+
 	def run_build( self , view ) :
 		view.run_command("save")
 		self.clear_output_panel(view)
@@ -735,7 +762,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		err, comps, status = self.run_haxe( view )
 		if status == "Build success":
 			self.panel_output(view,status,"success")
-		else:
+		elif status != "Running...":
 			self.panel_output( view , err , "invalid" )
 		
 		#print(status)
@@ -882,12 +909,29 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		return self.currentBuild	
 
 
+	def run_nme( self, view, build ) :
+
+		cmd = [ "haxelib", "run", "nme", "test", os.path.basename(build.nmml) ]
+		target = HaxeBuild.nme_target.split(" ")
+		cmd.extend(target)
+
+		view.window().run_command("exec", {
+			"cmd": cmd,
+			"working_dir": os.path.dirname(build.nmml)
+		})
+		return ("" , [], "Running..." )
+
+
 	def run_haxe( self, view , display = None , commas = 0 ) :
 
 		build = self.get_build( view )
 		settings = view.settings()
 
 		autocomplete = display is not None
+
+		if autocomplete is False and build.nmml is not None:
+			return self.run_nme(view, build)
+		
 		fn = view.file_name()
 		src = view.substr(sublime.Region(0, view.size()))
 		src_dir = os.path.dirname(fn)
