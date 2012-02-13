@@ -38,7 +38,7 @@ Restart Sublime Text 2
  - Completion is triggered either automatically by dot and colon keys, or manually by Ctrl+Space.
  - Open parenthesis and comma keys display haxe type hints in the status bar
 
-### Shortcuts:
+### Shortcuts
 
  - Press **Ctrl+Shift+B** to either automatically generate an hxml file if none exist, edit the build file if only one build exists or select among multiple builds (--next)
  - Press **Ctrl+Enter** to run the current/selected build
@@ -49,7 +49,8 @@ Restart Sublime Text 2
 
 [haxe NME](http://www.haxenme.org/) is based on a specific .nmml file (the .hxml is generated) which is supported by this bundle.
 
-To build your NME project: select a NME target using Ctrl+Shift+B and press Ctrl+Enter to build & run (regular Sublime Text build system won't work).
+ - press **Ctrl+Shift+B** to select a NME target
+ - press **Ctrl+Enter** to build and run (regular Sublime Text build system won't work)
 
 # Troubleshooting
 
