@@ -121,8 +121,8 @@ class HaxeBuild :
 
 	#auto = None
 	targets = ["js","cpp","swf","swf9","neko","php"]
-	nme_targets = ["flash -debug","cpp","ios -simulator","android"]
-	nme_target = HaxeBuild.nme_targets[0]
+	nme_targets = ["flash","flash -debug","cpp","ios -simulator","android","webos"]
+	nme_target = "flash"
 
 	def __init__(self) :
 
@@ -696,7 +696,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		# settings.set("haxe-complete-folder", folder)
 		self.find_hxml(folder)
 		self.find_nmml(folder)
-		
+
 		if len(self.builds) == 1:
 			sublime.status_message("There is only one build")
 			self.set_current_build( view , int(0), forcePanel )
