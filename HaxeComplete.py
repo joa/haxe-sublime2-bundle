@@ -122,7 +122,7 @@ class HaxeBuild :
 	#auto = None
 	targets = ["js","cpp","swf","swf9","neko","php"]
 	nme_targets = ["flash -debug","cpp","ios -simulator","android"]
-	nme_target = HaxeBuild.nme_targets[0]
+	nme_target = "flash -debug"
 
 	def __init__(self) :
 
