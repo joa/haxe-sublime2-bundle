@@ -635,7 +635,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					else :
 						sublime.status_message( "Invalid build.hxml : lib not found" )
 					
-				for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib"] :
+				for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib" , "cmd"] :
 					if l.startswith( "-"+flag ) :
 						currentBuild.args.append( tuple(l.split(" ") ) )
 						
