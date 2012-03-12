@@ -621,12 +621,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					currentBuild.hxml = build
 					
 				l = l.strip()
+				
 				if l.startswith("-main") :
 					spl = l.split(" ")
 					if len( spl ) == 2 :
 						currentBuild.main = spl[1]
 					else :
 						sublime.status_message( "Invalid build.hxml : no Main class" )
+				
 				if l.startswith("-lib") :
 					spl = l.split(" ")
 					if len( spl ) == 2 :
@@ -634,8 +636,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						currentBuild.libs.append( lib )
 					else :
 						sublime.status_message( "Invalid build.hxml : lib not found" )
-					
-				for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib" , "cmd"] :
+
+				if l.startswith("-cmd") :
+					spl = l.split(" ")
+					currentBuild.args.append( ( "-cmd" , " ".join(spl[1:]) ) )
+
+				for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib" ] :
 					if l.startswith( "-"+flag ) :
 						currentBuild.args.append( tuple(l.split(" ") ) )
 						
