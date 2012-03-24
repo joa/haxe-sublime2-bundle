@@ -61,3 +61,4 @@ On Ubuntu, you'll probably need to install package python2.6
 # Reviews
 
 [haXe workflow with Sublime Text 2, Php & nme examples](http://www.aymericlamboley.fr/blog/haxe-workflow-with-sublime-text-2-php-and-nme-examples/)
+[haXe IDE Choices for Mac OS X](http://sambrick.wordpress.com/2012/03/23/haxe-ide-choices-for-mac/)
