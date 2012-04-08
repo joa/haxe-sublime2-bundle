@@ -861,7 +861,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		#TODO can we restrict this to local scope ?
 		for paramsText in functionParams.findall(src) :
-			#this might bring us some false positives e.g. if there was a string containing ","
 			cleanedParamsText = re.sub(paramDefault,"",paramsText)
 			print cleanedParamsText
 			paramsList = cleanedParamsText.split(",")
