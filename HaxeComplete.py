@@ -51,7 +51,8 @@ comments = re.compile( "/\*(.*)\*/" , re.M )
 extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main)=\"([a-z0-9_./-]+)\"", re.I)
 variables = re.compile("var\s+([^:;\s]*)", re.I)
 functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
-functionArgs = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)")
+functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
+paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
 
 class HaxeLib :
 
@@ -858,12 +859,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				comps.append(( f + " [function]" , f ))
 
 		
-
-		for argumentsText in functionArgs.findall(src) :
-			#this might bring us some false positives if there was a string containing ",""
-			argsList = argumentsText.split(",")
-			for arg in argsList:
-				a = arg.strip();
+		#TODO can we restrict this to local scope ?
+		for paramsText in functionParams.findall(src) :
+			#this might bring us some false positives e.g. if there was a string containing ","
+			cleanedParamsText = re.sub(paramDefault,"",paramsText)
+			print cleanedParamsText
+			paramsList = cleanedParamsText.split(",")
+			for param in paramsList:
+				a = param.strip();
 				if a.startswith("?"):
 					a = a[1:]
 				
