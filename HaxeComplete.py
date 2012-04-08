@@ -862,7 +862,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#TODO can we restrict this to local scope ?
 		for paramsText in functionParams.findall(src) :
 			cleanedParamsText = re.sub(paramDefault,"",paramsText)
-			print cleanedParamsText
 			paramsList = cleanedParamsText.split(",")
 			for param in paramsList:
 				a = param.strip();
