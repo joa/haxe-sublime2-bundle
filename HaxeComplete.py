@@ -51,6 +51,7 @@ comments = re.compile( "/\*(.*)\*/" , re.M )
 extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main)=\"([a-z0-9_./-]+)\"", re.I)
 variables = re.compile("var\s+([^:;\s]*)", re.I)
 functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
+functionArgs = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)")
 
 class HaxeLib :
 
@@ -856,6 +857,21 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if f not in ["new"] :
 				comps.append(( f + " [function]" , f ))
 
+		
+
+		for argumentsText in functionArgs.findall(src) :
+			#this might bring us some false positives if there was a string containing ",""
+			argsList = argumentsText.split(",")
+			for arg in argsList:
+				a = arg.strip();
+				if a.startswith("?"):
+					a = a[1:]
+				
+				idx = a.find(":") 
+				if idx > -1:
+					a = a[0:idx]
+				comps.append((a + "[arg]", a))
+
 		for c in cl :
 			spl = c.split(".")
 			if spl[0] == "flash9" :
@@ -882,7 +898,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if cm not in comps :
 				comps.append(cm)
 
-
+		#print comps
 		return comps
 
 
