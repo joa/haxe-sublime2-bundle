@@ -51,6 +51,8 @@ comments = re.compile( "/\*(.*)\*/" , re.M )
 extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main)=\"([a-z0-9_./-]+)\"", re.I)
 variables = re.compile("var\s+([^:;\s]*)", re.I)
 functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
+functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
+paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
 
 class HaxeLib :
 
@@ -856,6 +858,27 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if f not in ["new"] :
 				comps.append(( f + " [function]" , f ))
 
+		
+		#TODO can we restrict this to local scope ?
+		for paramsText in functionParams.findall(src) :
+			cleanedParamsText = re.sub(paramDefault,"",paramsText)
+			paramsList = cleanedParamsText.split(",")
+			for param in paramsList:
+				a = param.strip();
+				if a.startswith("?"):
+					a = a[1:]
+				
+				idx = a.find(":") 
+				if idx > -1:
+					a = a[0:idx]
+
+				idx = a.find("=")
+				if idx > -1:
+					a = a[0:idx]
+					
+				a = a.strip()
+				comps.append((a + "[arg]", a))
+
 		for c in cl :
 			spl = c.split(".")
 			if spl[0] == "flash9" :
@@ -882,8 +905,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if cm not in comps :
 				comps.append(cm)
 
-
 		return comps
+
 
 
 	def get_build( self , view ) :
@@ -1241,6 +1264,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#sublime.status_message("")
 
 		return comps
+
 			
 
 	def get_hxml_completions( self , view , offset ):
