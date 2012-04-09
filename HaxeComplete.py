@@ -871,6 +871,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				idx = a.find(":") 
 				if idx > -1:
 					a = a[0:idx]
+
+				idx = a.find("=")
+				if idx > -1:
+					a = a[0:idx]
+					
+				a = a.strip()
 				comps.append((a + "[arg]", a))
 
 		for c in cl :
@@ -899,8 +905,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if cm not in comps :
 				comps.append(cm)
 
-		#print comps
 		return comps
+
 
 
 	def get_build( self , view ) :
@@ -1258,6 +1264,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#sublime.status_message("")
 
 		return comps
+
 			
 
 	def get_hxml_completions( self , view , offset ):
