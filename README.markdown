@@ -1,10 +1,10 @@
 # Introduction
-An HaXe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
+An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
 
 # Features
 
  - **Syntax highlighting** for haxe sources, hxml build files and hss
- - **HaXe compiler completion**, code hints and error highlighting
+ - **Haxe compiler completion**, code hints and error highlighting
  - **Package and classes discovery/completion** supporting hxml classpath (-cp) and haxelib libraries (-lib)
  - **NME completion, target selection and compilation**
  - Automatic generation of hxml files, multiple build/hxml management, and -lib autocompletion based on haxelib
@@ -60,6 +60,6 @@ On Ubuntu, you'll probably need to install package python2.6
 
 # Reviews
 
-[haXe workflow with Sublime Text 2, Php & nme examples](http://www.aymericlamboley.fr/blog/haxe-workflow-with-sublime-text-2-php-and-nme-examples/)
+[Haxe workflow with Sublime Text 2, Php & nme examples](http://www.aymericlamboley.fr/blog/haxe-workflow-with-sublime-text-2-php-and-nme-examples/)
 
-[haXe IDE Choices for Mac OS X](http://sambrick.wordpress.com/2012/03/23/haxe-ide-choices-for-mac/)
+[Haxe IDE Choices for Mac OS X](http://sambrick.wordpress.com/2012/03/23/haxe-ide-choices-for-mac/)
