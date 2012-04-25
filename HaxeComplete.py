@@ -1230,7 +1230,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					elif c == "," :
 						if closedPars == 0 :
 							commas += 1
-					elif c == "{" :
+					elif c == "{" : # TODO : check for { ... , ... , ... } to have the right comma count
 						commas = 0
 				
 			else :
