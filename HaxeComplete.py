@@ -400,8 +400,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	panel = None
 	serverMode = False
+	serverStarted = False
 
 	def __init__(self):
+		#print("init haxecomplete")
 		HaxeComplete.inst = self
 
 		out, err = runcmd( ["haxe", "-main", "Nothing", "-v", "--no-output"] )
@@ -422,9 +424,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if ver is not None :
 			self.serverMode = int(ver.group(1)) >= 209
 		
-		if self.serverMode :
-			Popen(["haxe" , "-v" , "--wait" , str(serverPort) ], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
-
+		
 
 	def extract_types( self , path , depth = 0 ) :
 		classes = []
@@ -987,6 +987,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def run_haxe( self, view , display = None , commas = 0 ) :
 
+		if self.serverMode and not self.serverStarted:
+			Popen(["haxe" , "-v" , "--wait" , str(serverPort) ])
+			self.serverStarted = True
+
 		build = self.get_build( view )
 		settings = view.settings()
 
@@ -1211,6 +1215,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			
 			if prevSymbol == prevComa:
 				closedPars = 0
+				closedBrackets = 0
 
 				for i in range( prevComa , 0 , -1 ) :
 					c = src[i]
@@ -1225,6 +1230,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					elif c == "," :
 						if closedPars == 0 :
 							commas += 1
+					elif c == "{" :
+						commas = 0
 				
 			else :
 
