@@ -60,7 +60,7 @@
             }
         ]
     },
-    {
+    /*{
         "keys": ["."],
         "command": "run_macro_file",
         "args":
@@ -90,7 +90,7 @@
                 "operand": "comment"
             }
         ]
-    },
+    },*/
     /*{
         "keys": ["."],
         "command": "run_macro_file",

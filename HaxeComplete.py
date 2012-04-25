@@ -144,7 +144,7 @@ class HaxeBuild :
 		if self.nmml is not None:
 			return "{out} ({target})".format(self=self, out=out, target=HaxeBuild.nme_target);
 		else:
-			return "{out} ({target})".format(self=self, out=out, target=self.target);
+			return "{out}".format(self=self, out=out);
 		#return "{self.main} {self.target}:{out}".format(self=self, out=out);
 	
 	def make_hxml( self ) :
