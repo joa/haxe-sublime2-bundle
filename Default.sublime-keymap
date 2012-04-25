@@ -60,7 +60,7 @@
             }
         ]
     },
-    {
+    /*{
         "keys": ["."],
         "command": "run_macro_file",
         "args":
@@ -111,7 +111,7 @@
                 "operand": "source.haxe.2"
             }
         ]
-    },
+    },*/
    /* {
         "keys": [":"],
         "command": "run_macro_file",

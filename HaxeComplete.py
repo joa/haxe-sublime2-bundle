@@ -1156,6 +1156,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	
 
 	def on_query_completions(self, view, prefix, locations):
+		#print("complete")
 		pos = locations[0]
 		scopes = view.scope_name(pos).split()
 		offset = pos - len(prefix)
