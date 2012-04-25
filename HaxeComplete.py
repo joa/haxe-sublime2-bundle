@@ -54,6 +54,8 @@ variables = re.compile("var\s+([^:;\s]*)", re.I)
 functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
 functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
 paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
+serverPort = 6000
+haxeVersion = re.compile("haxe_([0-9]{3})",re.M)
 
 class HaxeLib :
 
@@ -397,12 +399,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	stdCompletes = []
 
 	panel = None
+	serverMode = False
 
 	def __init__(self):
 		HaxeComplete.inst = self
 
 		out, err = runcmd( ["haxe", "-main", "Nothing", "-v", "--no-output"] )
-		#print(out)
+		
 		m = classpathLine.match(out)
 		if m is not None :
 			HaxeComplete.stdPaths = set(m.group(1).split(";")) - set([".","./"])
@@ -413,6 +416,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		 		classes, packs = self.extract_types( p )
 		 		HaxeComplete.stdClasses.extend( classes )
 		 		HaxeComplete.stdPackages.extend( packs )
+
+		ver = re.search( haxeVersion , out )
+		
+		if ver is not None :
+			self.serverMode = int(ver.group(1)) >= 209
+		
+		if self.serverMode :
+			Popen(["haxe" , "-v" , "--wait" , str(serverPort) ], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
 
 
 	def extract_types( self , path , depth = 0 ) :
@@ -1000,8 +1011,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		
 		args.extend( build.args )	
-			
-
+		
+		if self.serverMode:
+			args.append(("--connect" , str(serverPort)))
+		#args.append( ("--times" , "-v" ) )
 		if not autocomplete :
 			args.append( ("-main" , build.main ) )
 			args.append( ("--times" , "-v" ) )
@@ -1013,7 +1026,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		for a in args :
 			cmd.extend( list(a) )
 		
-		#print(cmd)
+		#print(" ".join(cmd))
 		res, err = runcmd( cmd, "" )
 		
 		if not autocomplete :
