@@ -882,7 +882,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					a = a[0:idx]
 					
 				a = a.strip()
-				comps.append((a + "\targ", a))
+				cm = (a + "\tvar", a)
+				if cm not in comps:
+					comps.append( cm )
 
 		for c in cl :
 			spl = c.split(".")
