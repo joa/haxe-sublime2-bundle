@@ -15,6 +15,7 @@ import hashlib
 import shutil
 from xml.etree import ElementTree
 from subprocess import Popen, PIPE
+from datetime import datetime
 
 try:
     STARTUP_INFO = subprocess.STARTUPINFO()
@@ -75,6 +76,7 @@ class HaxeLib :
  		#print(self.name + " => " + self.path)
 
 	def extract_types( self ):
+
 		if self.dev is True or ( self.classes is None and self.packages is None ):
 			self.classes, self.packages = HaxeComplete.inst.extract_types( self.path )
 		
@@ -142,7 +144,7 @@ class HaxeBuild :
 		if self.nmml is not None:
 			return "{out} ({target})".format(self=self, out=out, target=HaxeBuild.nme_target);
 		else:
-			return "{out}".format(self=self, out=out);
+			return "{out} ({target})".format(self=self, out=out, target=self.target);
 		#return "{self.main} {self.target}:{out}".format(self=self, out=out);
 	
 	def make_hxml( self ) :
@@ -177,6 +179,8 @@ class HaxeBuild :
 			if lib is not None :
 				cp.append( lib.path )
 
+		#print("extract types :")
+		#print(cp)
 		for path in cp :
 			c, p = HaxeComplete.inst.extract_types( path )
 			classes.extend( c )
@@ -397,32 +401,28 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	def __init__(self):
 		HaxeComplete.inst = self
 
-		out, err = runcmd( ["haxe", "-main", "Nothing", "-js", "nothing.js", "-v", "--no-output"] )
+		out, err = runcmd( ["haxe", "-main", "Nothing", "-v", "--no-output"] )
 		#print(out)
 		m = classpathLine.match(out)
 		if m is not None :
-			HaxeComplete.stdPaths = m.group(1).split(";")
+			HaxeComplete.stdPaths = set(m.group(1).split(";")) - set([".","./"])
 
 		for p in HaxeComplete.stdPaths :
-			if len(p) > 1 and os.path.exists(p) and os.path.isdir(p):
-				for f in os.listdir( p ) :
-					classes, packs = self.extract_types( p )
-					HaxeComplete.stdClasses.extend( classes )
-					HaxeComplete.stdPackages.extend( packs )
-
-		#for cl in HaxeComplete.stdClasses :
-		#	HaxeComplete.stdCompletes.append( ( cl + " [class]" , cl ))
-		#for pack in HaxeComplete.stdPackages :
-		#	HaxeComplete.stdCompletes.append( ( pack , pack ))
+			#print("std path : "+p)
+		 	if len(p) > 1 and os.path.exists(p) and os.path.isdir(p):
+		 		classes, packs = self.extract_types( p )
+		 		HaxeComplete.stdClasses.extend( classes )
+		 		HaxeComplete.stdPackages.extend( packs )
 
 
 	def extract_types( self , path , depth = 0 ) :
 		classes = []
 		packs = []
 		hasClasses = False
-
+		
 		for fullpath in glob.glob( os.path.join(path,"*.hx") ) : 
 			f = os.path.basename(fullpath)
+
 			cl, ext = os.path.splitext( f )
 								
 			if cl not in HaxeComplete.stdClasses:
@@ -447,7 +447,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						hasClasses = True
 		
 
-		if hasClasses : 
+		if hasClasses or depth == 0 : 
 			
 			for f in os.listdir( path ) :
 				
@@ -771,9 +771,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		view.run_command("save")
 		self.clear_output_panel(view)
 		#view.set_status( "haxe-status" , "Building..." )
+		self.panel_output( view, "Building: " + self.currentBuild.to_string() , "success" )
 		err, comps, status = self.run_haxe( view )
-		if status == "Build success":
-			self.panel_output(view,status,"success")
+
+		if status == "Build success" or status.startswith("Total time"):
+			self.panel_output( view , "Build success!" , "success")
+			self.panel_output( view , err , "success")
 		elif status != "Running...":
 			self.panel_output( view , err , "invalid" )
 		
@@ -792,6 +795,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			self.panel = win.get_output_panel("haxe")
 
 		panel = self.panel
+
+		text = datetime.now().strftime("%H:%M:%S") + " " + text;
 		
 		edit = panel.begin_edit()
 		region = sublime.Region(panel.size(),panel.size() + len(text))
@@ -842,7 +847,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print("target : "+build.target)
 		for p in HaxeComplete.stdPackages :
 			#print(p)
-			if p == "flash9" :
+			if p == "flash9" or p == "flash8" :
 				p = "flash"
 			if build.target is None or (p not in HaxeBuild.targets) or (p == build.target) :
 				stdPackages.append(p)
@@ -852,11 +857,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		packs.sort()
 
 		for v in variables.findall(src) :
-			comps.append(( v + " [var]" , v ))
+			comps.append(( v + "\tvar" , v ))
 		
 		for f in functions.findall(src) :
 			if f not in ["new"] :
-				comps.append(( f + " [function]" , f ))
+				comps.append(( f + "\tfunction" , f ))
 
 		
 		#TODO can we restrict this to local scope ?
@@ -877,7 +882,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					a = a[0:idx]
 					
 				a = a.strip()
-				comps.append((a + "[arg]", a))
+				comps.append((a + "\targ", a))
 
 		for c in cl :
 			spl = c.split(".")
@@ -891,9 +896,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			pack = ".".join(spl)
 			display = clname
 			if pack != "" :
-				display += " [" + pack + "]"
+				display += "\t" + pack
 			else :
-				display += " [class]"
+				display += "\tclass"
 			
 			spl.append(clname)
 			cm = ( display , ".".join(spl) )
@@ -901,7 +906,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				comps.append( cm )
 		
 		for p in packs :
-			cm = (p + " [package]",p)
+			cm = (p + "\tpackage",p)
 			if cm not in comps :
 				comps.append(cm)
 
@@ -997,6 +1002,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		if not autocomplete :
 			args.append( ("-main" , build.main ) )
+			args.append( ("--times" , "-v" ) )
 		else:
 			args.append( ("--display", display ) )
 			args.append( ("--no-output" , "-v" ) )
