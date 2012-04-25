@@ -886,7 +886,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		for c in cl :
 			spl = c.split(".")
-			if spl[0] == "flash9" :
+			if spl[0] == "flash9" or spl[0] == "flash8" :
 				spl[0] = "flash"
 
 			top = spl[0]
@@ -1080,20 +1080,20 @@ class HaxeComplete( sublime_plugin.EventListener ):
 							if len(types) == 1 and types[0] == "Void" :
 								types = []
 								#cm += ")"
-								hint = name + "() : "+ ret
+								hint = name + "()\t"+ ret
 								insert = cm
 							else:
-								hint = name + "( " + " , ".join( types ) + " ) : " + ret
+								hint = name + "( " + " , ".join( types ) + " )\t" + ret
 								if len(hint) > 40: # compact arguments
 									hint = compactFunc.sub("(...)", hint);
 								insert = cm
 						else :
-							hint = name + " : " + ret
+							hint = name + "\t" + ret
 					else :
 						if re.match("^[A-Z]",name ) :
-							hint = name + " [class]"
+							hint = name + "\tclass"
 						else :
-							hint = name + " [package]"
+							hint = name + "\tpackage"
 
 					#if doc is not None :
 					#	hint += "\t" + doc
