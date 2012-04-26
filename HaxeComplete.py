@@ -199,19 +199,41 @@ class HaxeInstallLib( sublime_plugin.WindowCommand ):
 		libs = out.splitlines()
 		self.libs = libs[0:-1]
 
-		self.window.show_quick_panel(libs,self.install)
+		menu = []
+		for l in self.libs :
+			if l in HaxeLib.available :
+				menu.append( [ l + " [" + HaxeLib.available[l].version + "]" , "Remove" ] )
+			else :
+				menu.append( [ l , 'Install' ] )
+
+		menu.append( ["Upgrade libraries"] )
+
+		self.window.show_quick_panel(menu,self.install)
 
 	def install( self, i ):
-		lib = self.libs[i]
-		out,err = runcmd(["haxelib" , "install" , lib ])
+		if i < 0 :
+			return
+
+		if i == len(self.libs) :
+			cmd = ["haxelib" , "upgrade" ]
+		else :
+			lib = self.libs[i]
+			if lib in HaxeLib.available :
+				cmd = ["haxelib" , "remove" , lib ]	
+			else :
+				cmd = ["haxelib" , "install" , lib ]	
+
+		out,err = runcmd(cmd)
 		lines = out.splitlines()
-		lines[1] = ""
+		lines.append( "" )
 
 		panel = self.window.get_output_panel("haxelib")
 		edit = panel.begin_edit()
 		panel.insert(edit, panel.size(), "\n".join(lines) )
 		panel.end_edit( edit )
 		self.window.run_command("show_panel",{"panel":"output.haxelib"})
+
+		HaxeLib.scan()
 
 
 
