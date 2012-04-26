@@ -1284,7 +1284,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		f.write( src )
 		f.close()
 
-		inp = (fn,offset,commas)
+		inp = (fn,offset,commas,src[offset-1])
 		if self.currentCompletion["inp"] is None or inp != self.currentCompletion["inp"] :
 			ret , comps , status = self.run_haxe( view , fn + "@" + str(offset) , commas )
 			self.currentCompletion["outp"] = (ret,comps,status)
