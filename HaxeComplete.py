@@ -502,7 +502,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		self.generate_build(view)
 		self.highlight_errors( view )
-	
+
+	def on_post_save( self , view ) :
+		scopes = view.scope_name(view.sel()[0].end()).split()
+		#sublime.status_message( scopes[0] )
+		if 'source.hxml' in scopes:
+			self.clear_build(view)
+
 	def on_activated( self , view ) :
 		scopes = view.scope_name(view.sel()[0].end()).split()
 		#sublime.status_message( scopes[0] )
@@ -692,6 +698,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			
 			if currentBuild.main is not None :
 				self.builds.append( currentBuild )
+
 
 
 	def extract_build_args( self , view , forcePanel = False ) :
@@ -925,7 +932,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		return comps
 
-
+	def clear_build( self , view ) :
+		self.currentBuild = None
+		self.currentCompletion = {
+			"inp" : None,
+			"outp" : None
+		}
 
 	def get_build( self , view ) :
 		
@@ -1232,6 +1244,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 							commas += 1
 					elif c == "{" : # TODO : check for { ... , ... , ... } to have the right comma count
 						commas = 0
+						closedBrackets -= 1
+					elif c == "}" :
+						closedBrackets += 1
+
+				#print("closedBrackets : " + str(closedBrackets))
 				
 			else :
 
