@@ -7,7 +7,7 @@
             {
                 "key": "selector",
                 "operator": "equal",
-                "operand": "source.haxe.2,source.hxml"
+                "operand": "source.haxe.2,source.hxml,source.nmml"
             }
         ]
     },
@@ -19,7 +19,7 @@
             {
                 "key": "selector",
                 "operator": "equal",
-                "operand": "source.haxe.2,source.hxml"
+                "operand": "source.haxe.2,source.hxml,source.nmml"
             }
         ]
     },
@@ -43,7 +43,7 @@
             {
                 "key": "selector",
                 "operator": "equal",
-                "operand": "source.haxe.2,source.hxml"
+                "operand": "source.haxe.2,source.hxml,source.nmml"
             }
         ]
     },
