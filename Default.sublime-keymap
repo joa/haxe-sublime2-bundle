@@ -7,7 +7,7 @@
             {
                 "key": "selector",
                 "operator": "equal",
-                "operand": "source.haxe.2"
+                "operand": "source.haxe.2,source.hxml"
             }
         ]
     },
@@ -19,7 +19,7 @@
             {
                 "key": "selector",
                 "operator": "equal",
-                "operand": "source.haxe.2"
+                "operand": "source.haxe.2,source.hxml"
             }
         ]
     },
@@ -37,7 +37,15 @@
     },
     {
         "keys": ["ctrl+shift+l"],
-        "command": "haxe_install_lib"
+        "command": "haxe_install_lib",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2,source.hxml"
+            }
+        ]
     },
     {
         "keys": [" "],
