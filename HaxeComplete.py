@@ -1050,7 +1050,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		args.extend( build.args )	
 		
-		if self.serverMode:
+		if self.serverMode and autocomplete:
 			args.append(("--connect" , str(serverPort)))
 		#args.append( ("--times" , "-v" ) )
 		if not autocomplete :
