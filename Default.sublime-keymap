@@ -214,7 +214,7 @@
             }
         ]
     },  
-      {
+     {
         "keys": ["("],
         "command": "run_macro_file",
         "args":
