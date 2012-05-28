@@ -856,7 +856,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def get_toplevel_completion( self , src , src_dir , build ) :
 		cl = []
-		comps = [("trace","trace")]
+		comps = [("trace","trace"),("this","this"),("super","super")]
 
 		localTypes = typeDecl.findall( src )
 		for t in localTypes :

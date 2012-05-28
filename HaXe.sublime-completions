@@ -1,7 +1,9 @@
 {
   "scope": "source.haxe.2",
   "completions" : [
-  	{ "trigger":"trace" , "contents" : "trace" }
+  	{ "trigger":"trace" , "contents" : "trace" },
+  	{ "trigger":"this" , "contents" : "this" },
+  	{ "trigger":"super" , "contents" : "super" }
     /*{ "trigger" : "... [iterator]" , "contents" : "."},*/
     /*{ "trigger" : "<No completion available>" , "contents" : " "},*/
     /*{ "trigger" : "" , "contents" : ""},
