@@ -1,4 +1,5 @@
 [
+	{ "command" : "hide_auto_complete" },
 	/*{
 		"command": "haxe_insert_completion",
 		"args":

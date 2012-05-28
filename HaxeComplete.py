@@ -1100,7 +1100,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				if commas >= len(types) :
 					if commas == 0 :
 						msg = hint + ": No autocompletion available"
-						#view.window().run_command("insert" , {'characters':")"})
+						#view.window().run_command("hide_auto_complete")
 						#comps.append((")",""))
 					else:
 						msg =  "Too many arguments."
@@ -1280,7 +1280,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 			
 		#print(src[completeOffset-1])
-		if src[completeOffset-1] in ":(," or toplevelComplete :
+		toplevelComplete = toplevelComplete or src[completeOffset-1] in ":(,"
+		if toplevelComplete :
 			#print("toplevel")
 			comps = self.get_toplevel_completion( src , src_dir , self.get_build( view ) )
 			#print(comps)
@@ -1291,7 +1292,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#comps.append(("... [iterator]",".."))
 			comps.append((".","."))
 
-		if src[completeOffset-1] not in ".,(" or toplevelComplete:
+		if toplevelComplete :
 			return comps
 
 		if not os.path.exists( tdir ):
