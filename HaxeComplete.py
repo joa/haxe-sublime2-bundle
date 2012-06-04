@@ -1280,7 +1280,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 			
 		#print(src[completeOffset-1])
-		toplevelComplete = toplevelComplete or src[completeOffset-1] in ":(,"
+		toplevelComplete = toplevelComplete or src[completeOffset-1] == ":"
+
 		if toplevelComplete :
 			#print("toplevel")
 			comps = self.get_toplevel_completion( src , src_dir , self.get_build( view ) )
