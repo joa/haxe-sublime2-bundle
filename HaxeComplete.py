@@ -127,8 +127,8 @@ class HaxeBuild :
 
 	#auto = None
 	targets = ["js","cpp","swf","swf9","neko","php"]
-	nme_targets = ["flash","flash -debug","html5","cpp","ios -simulator","android","webos"]
-	nme_target = "flash -debug"
+	nme_targets = ["flash","html5","cpp","ios -simulator","android","webos"]
+	nme_target = "flash"
 
 	def __init__(self) :
 
@@ -1011,6 +1011,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		cmd = [ "haxelib", "run", "nme", "test", os.path.basename(build.nmml) ]
 		target = HaxeBuild.nme_target.split(" ")
 		cmd.extend(target)
+		cmd.append("-debug")
 
 		view.window().run_command("exec", {
 			"cmd": cmd,
