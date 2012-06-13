@@ -13,7 +13,11 @@
     },
     {
         "keys": ["ctrl+enter"],
-        "command": "haxe_run_build",
+        "command": "run_macro_file",
+        "args":
+        {
+            "file": "Packages/HaXe/RunBuild.sublime-macro"
+        },
         "context":
         [
             {
