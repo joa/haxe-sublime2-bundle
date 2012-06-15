@@ -365,7 +365,12 @@ class HaxeInsertCompletion( sublime_plugin.TextCommand ):
             "exact" : True
 		} )
 
-
+class HaxeSaveAllAndBuild( sublime_plugin.TextCommand ):
+	def run( self , edit ) :
+		complete = HaxeComplete.inst
+		view = self.view
+		view.window().run_command("save_all")
+		complete.run_build( view )
 
 class HaxeRunBuild( sublime_plugin.TextCommand ):
 	def run( self , edit ) :
@@ -808,7 +813,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def run_build( self , view ) :
-		view.run_command("save")
+		#view.run_command("save")
 		self.clear_output_panel(view)
 		#view.set_status( "haxe-status" , "Building..." )
 		self.panel_output( view, "Building: " + self.currentBuild.to_string() , "success" )

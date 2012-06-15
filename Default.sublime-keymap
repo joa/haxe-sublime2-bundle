@@ -16,7 +16,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/RunBuild.sublime-macro"
+            "file": "Packages/HaXe/SaveAllAndBuild.sublime-macro"
         },
         "context":
         [
