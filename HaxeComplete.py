@@ -1,7 +1,6 @@
-#fix for ubuntu
 import sys
-sys.path.append("/usr/lib/python2.6/")
-sys.path.append("/usr/lib/python2.6/lib-dynload")
+#sys.path.append("/usr/lib/python2.6/")
+#sys.path.append("/usr/lib/python2.6/lib-dynload")
 
 import sublime, sublime_plugin
 import subprocess
@@ -1324,7 +1323,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		f.write( src )
 		f.close()
 
-		inp = (fn,offset,commas,src[offset-1])
+		inp = (fn,offset,commas,src[0:offset-1])
 		if self.currentCompletion["inp"] is None or inp != self.currentCompletion["inp"] :
 			ret , comps , status = self.run_haxe( view , fn + "@" + str(offset) , commas )
 			self.currentCompletion["outp"] = (ret,comps,status)
