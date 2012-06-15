@@ -52,14 +52,6 @@ Restart Sublime Text 2
  - press **Ctrl+Shift+B** to select a NME target
  - press **Ctrl+Enter** to build and run (regular Sublime Text build system won't work)
 
-# Troubleshooting
-
-On Ubuntu, you'll probably need to install package python2.6
-
-    sudo apt-get install python2.6
-
-For Ubuntu 12.04 (Precise Pangolin) you will need to install python2.6 by following these instructions: [How can I install Python 2.6 on 12.04?](http://askubuntu.com/a/125501/64058)
-
 # Reviews
 
 [Haxe workflow with Sublime Text 2, Php & nme examples](http://www.aymericlamboley.fr/blog/haxe-workflow-with-sublime-text-2-php-and-nme-examples/)
