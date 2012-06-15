@@ -1180,8 +1180,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			lines = err.split("\n")
 			l = lines[0].strip()
 			
-			if len(l) > 0:
-				status = l
+			if len(l) > 0 :
+				if l == "<list>" :
+					status = "No autocompletion available"
+				else :
+					status = l
 
 			regions = []
 			
