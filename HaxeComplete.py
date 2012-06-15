@@ -7,13 +7,19 @@ import sublime, sublime_plugin
 import subprocess
 import tempfile
 import os
-import xml.parsers.expat
+#import xml.parsers.expat
 import re
 import codecs
 import glob
 import hashlib
 import shutil
+
 from xml.etree import ElementTree
+from xml.etree.ElementTree import XMLTreeBuilder
+#from xml.etree import ElementTree
+from elementtree import SimpleXMLTreeBuilder # part of your codebase
+ElementTree.XMLTreeBuilder = SimpleXMLTreeBuilder.TreeBuilder
+
 from subprocess import Popen, PIPE
 from datetime import datetime
 
@@ -1092,8 +1098,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		hints = []
 		tree = None
 		try :
-			tree = ElementTree.XML( "<root>"+err+"</root>" )
-		except xml.parsers.expat.ExpatError:
+			tree = ElementTree.XML( "<root>"+err.encode('ascii')+"</root>" )
+		except Exception, e:
+		#	print(e)
 			print("invalid xml")
 		
 		if tree is not None :
