@@ -273,6 +273,9 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 	def is_membername( self, token ) :
 		return token[0] >= "Z" or token == token.upper()
 
+	def is_module( self , token ) :
+		return re.search("[\.^][A-Z]+", token);
+
 	def get_classname( self, view, src ) :
 		loc = view.sel()[0]
 		end = max(loc.a, loc.b)
@@ -286,7 +289,7 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 
 		self.cname = view.substr(sublime.Region(self.start, end)).rpartition(".")
 		#print(self.cname)
-		while not self.cname[0] == "" and self.is_membername(self.cname[2]):
+		while (not self.cname[0] == "" and self.is_membername(self.cname[2])):
 			self.size -= 1 + len(self.cname[2])
 			self.cname = self.cname[0].rpartition(".")
 
@@ -337,7 +340,7 @@ class HaxeGenerateImport( sublime_plugin.TextCommand ):
 
 		self.compact_classname(edit, view)
 
-		if re.search("import\s+{0}".format("".join(self.cname)), src):
+		if re.search("import\s+{0};".format("".join(self.cname)), src):
 			sublime.status_message("Already imported")
 			return
 		
