@@ -485,8 +485,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				for decl in typeDecl.findall( src ):
 					t = decl[1]
 
-					if( packDepth == depth and t == cl or cl == "StdTypes") :
-						classes.append( t )
+					if( packDepth == depth ) : # and t == cl or cl == "StdTypes"
+						if t == cl or cl == "StdTypes":
+							classes.append( t )
+						else: 
+							classes.append( cl + "." + t )
+							
 						hasClasses = True
 		
 
