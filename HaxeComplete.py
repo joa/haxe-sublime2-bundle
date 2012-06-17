@@ -490,7 +490,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 							classes.append( t )
 						else: 
 							classes.append( cl + "." + t )
-							
+
 						hasClasses = True
 		
 
@@ -883,13 +883,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				cl.append( c )
 
 		imports = importLine.findall( src )
+		imported = []
 		for i in imports :
 			imp = i[1]
-			dot = imp.rfind(".")+1
-			clname = imp[dot:]
-			cl.append( clname )
+			imported.append(imp)
+			#dot = imp.rfind(".")+1
+			#clname = imp[dot:]
+			#cl.append( clname )
 			#print( i )
 
+		#print cl
 		buildClasses , buildPacks = build.get_types()
 		
 		cl.extend( HaxeComplete.stdClasses )
@@ -951,13 +954,21 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			clname = spl.pop()
 			pack = ".".join(spl)
 			display = clname
+
+			#if pack in imported:
+			#	pack = ""
+
 			if pack != "" :
 				display += "\t" + pack
 			else :
 				display += "\tclass"
 			
 			spl.append(clname)
-			cm = ( display , ".".join(spl) )
+			
+			if pack in imported or c in imported :
+				cm = ( display , clname )
+			else :
+				cm = ( display , ".".join(spl) )
 			if cm not in comps and ( build.target is None or (top not in HaxeBuild.targets) or (top == build.target) ) :
 				comps.append( cm )
 		
