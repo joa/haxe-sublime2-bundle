@@ -1051,7 +1051,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	def run_haxe( self, view , display = None , commas = 0 ) :
 
 		if self.serverMode and not self.serverStarted:
-			Popen(["haxe" , "-v" , "--wait" , str(serverPort) ])
+			Popen(["haxe" , "-v" , "--wait" , str(serverPort) ], startupinfo=STARTUP_INFO )
 			self.serverStarted = True
 
 		build = self.get_build( view )
