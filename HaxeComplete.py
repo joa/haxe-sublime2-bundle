@@ -472,8 +472,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			cl, ext = os.path.splitext( f )
 								
 			if cl not in HaxeComplete.stdClasses:
-				
-				s = open( os.path.join( path , f ) , "r" )
+				s = codecs.open( os.path.join( path , f ) , "r" , "utf-8" , "ignore" )
 				src = s.read() #comments.sub( s.read() , "" )
 				
 				clPack = "";
@@ -619,7 +618,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			# runcmd("nme diplay project.nmml nme_target")
 
 			outp = "NME"
-			f = open( build , "r+" )
+			f = codecs.open( build , "r+", "utf-8" , "ignore" )
 			while 1:
 				l = f.readline() 
 				if not l : 
@@ -667,7 +666,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			buildPath = os.path.dirname(build);
 
 			# print("build file exists")
-			f = open( build , "r+" )
+			f = codecs.open( build , "r+" , "utf-8" , "ignore" )
 			while 1:
 				l = f.readline() 
 				if not l : 
@@ -1338,7 +1337,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			shutil.copy2( fn , temp )
 		
 		# write current source to file
-		f = codecs.open( fn , "wb" , "utf-8" )
+		f = codecs.open( fn , "wb" , "utf-8" , "ignore" )
 		f.write( src )
 		f.close()
 
