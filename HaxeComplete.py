@@ -660,7 +660,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def find_hxml( self, folder ) :
 		hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
-
 		for build in hxmls:
 
 			currentBuild = HaxeBuild()
@@ -716,7 +715,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				for flag in HaxeBuild.targets :
 					if l.startswith( "-" + flag + " " ) :
 						spl = l.split(" ")
-						outp = os.path.join( folder , " ".join(spl[1:]) )
+						outp = os.path.join( folder , " ".join(spl[1:]) ) 
 						currentBuild.args.append( ("-"+flag, outp) )
 						
 						currentBuild.target = flag
@@ -728,8 +727,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					#view.set_status( "haxe-status" , "Building..." )
 					cp.pop(0)
 					classpath = " ".join( cp )
-					currentBuild.classpaths.append( os.path.join( buildPath , classpath ) )
-					currentBuild.args.append( ("-cp" , os.path.join( buildPath , classpath ) ) )
+					absClasspath = os.path.join( buildPath , classpath )
+					currentBuild.classpaths.append( absClasspath )
+					currentBuild.args.append( ("-cp" , absClasspath ) )
 			
 			if len(currentBuild.classpaths) == 0:
 				currentBuild.classpaths.append( buildPath )
@@ -749,6 +749,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		self.builds = []
 
 		fn = view.file_name()
+
 		settings = view.settings()
 
 		folder = os.path.dirname(fn)
