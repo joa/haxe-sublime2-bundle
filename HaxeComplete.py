@@ -61,6 +61,9 @@ functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
 paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
 serverPort = 6000
 haxeVersion = re.compile("haxe_([0-9]{3})",re.M)
+bundleFile = __file__
+bundlePath = os.path.abspath(bundleFile)
+bundleDir = os.path.dirname(bundlePath)
 
 class HaxeLib :
 
@@ -1087,20 +1090,21 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			args.append( ("--times" , "-v" ) )
 		else:
 			args.append( ("--display", display ) )
-			args.append( ("--no-output" , "-v" ) )
+			args.append( ("--no-output" , "") )
+			#args.append( ("-cp" , bundleDir ) )
+			#args.append( ("--macro" , "SourceTools.complete()") )
 			
 		cmd = ["haxe"]
 		for a in args :
 			cmd.extend( list(a) )
 		
-		#print(" ".join(cmd))
+		#print( cmd )
 		res, err = runcmd( cmd, "" )
 		
 		if not autocomplete :
 			self.panel_output( view , " ".join(cmd) )
 
-		#print( "err: %s" % err )
-		#print( "res: %s" % res )
+		#print( res.encode("utf-8") )
 		status = ""
 
 		if (not autocomplete) and (build.hxml is None) :
@@ -1114,8 +1118,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print(err)	
 		hints = []
 		tree = None
+		
 		try :
-			tree = ElementTree.XML( "<root>"+err.encode('ascii')+"</root>" )
+			x = "<root>"+err.encode('utf-8')+"</root>";
+			tree = ElementTree.XML(x);
+			
 		except Exception, e:
 		#	print(e)
 			print("invalid xml")
@@ -1190,9 +1197,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					comps.append( ( hint, insert ) )
 
 		if len(hints) == 0 and len(comps) == 0:
-		
 			err = err.replace( temp , fn )
-			err = re.sub("\(display(.*)\)","",err)
+			err = re.sub( u"\(display(.*)\)" ,"",err)
 
 			lines = err.split("\n")
 			l = lines[0].strip()
