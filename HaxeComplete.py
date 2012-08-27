@@ -38,7 +38,7 @@ def runcmd( args, input=None ):
 		return (out.decode('utf-8') if out else '', err.decode('utf-8') if err else '')
 	except (OSError, ValueError) as e:
 		err = u'Error while running %s: %s' % (args[0], e)
-		return ("", err)
+		return ("", err.decode('utf-8'))
 
 compilerOutput = re.compile("^([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? : (.*)", re.M)
 compactFunc = re.compile("\(.*\)")
