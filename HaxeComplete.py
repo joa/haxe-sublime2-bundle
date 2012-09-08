@@ -134,7 +134,7 @@ inst = None
 class HaxeBuild :
 
 	#auto = None
-	targets = ["js","cpp","swf","swf9","neko","php"]
+	targets = ["js","cpp","swf","swf9","neko","php","java","cs"]
 	nme_targets = ["flash","html5","cpp","ios -simulator","android","webos"]
 	nme_target = "flash"
 
