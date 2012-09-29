@@ -31,7 +31,7 @@ except (AttributeError):
 
 def runcmd( args, input=None ):
 	try:
-		p = Popen(args, stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
+		p = Popen([a.encode(sys.getfilesystemencoding()) for a in args], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
 		if isinstance(input, unicode):
 			input = input.encode('utf-8')
 		out, err = p.communicate(input=input)
