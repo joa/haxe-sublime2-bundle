@@ -1319,7 +1319,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 			
 		#print(src[completeOffset-1])
-		toplevelComplete = toplevelComplete or src[completeOffset-1] == ":"
+		completeChar = src[completeOffset-1]
+		toplevelComplete = toplevelComplete or completeChar in ":(,"
 
 		if toplevelComplete :
 			#print("toplevel")
@@ -1332,7 +1333,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#comps.append(("... [iterator]",".."))
 			comps.append((".","."))
 
-		if toplevelComplete :
+		if toplevelComplete and completeChar not in "(," :
 			return comps
 
 		if not os.path.exists( tdir ):
@@ -1349,7 +1350,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		inp = (fn,offset,commas,src[0:offset-1])
 		if self.currentCompletion["inp"] is None or inp != self.currentCompletion["inp"] :
-			ret , comps , status = self.run_haxe( view , fn + "@" + str(offset) , commas )
+			ret , haxeComps , status = self.run_haxe( view , fn + "@" + str(offset) , commas )
+			
+			if completeChar not in "(," : 
+				comps = haxeComps
+
 			self.currentCompletion["outp"] = (ret,comps,status)
 		else :
 			ret, comps, status = self.currentCompletion["outp"]
