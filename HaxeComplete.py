@@ -764,20 +764,31 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		# settings.set("haxe-complete-folder", folder)
 		self.find_hxml(folder)
 		self.find_nmml(folder)
-		
+
 		if len(self.builds) == 1:
 			sublime.status_message("There is only one build")
+
+			# will open the build file
+			#if forcePanel :
+			#	b = self.builds[0]
+			#	f = b.hxml
+			#	v = view.window().open_file(f,sublime.TRANSIENT) 
+
 			self.set_current_build( view , int(0), forcePanel )
 
 		elif len(self.builds) == 0 and forcePanel :
 			sublime.status_message("No hxml or nmml file found")
 
 			f = os.path.join(folder,"build.hxml")
-			if self.currentBuild is not None :
-				self.currentBuild.hxml = f
+
+			self.currentBuild = None
+			self.get_build(view)
+			self.currentBuild.hxml = f
 
 			#for whatever reason generate_build doesn't work without transient
-			v = view.window().open_file(f,sublime.TRANSIENT) 
+			v = view.window().open_file(f,sublime.TRANSIENT)
+
+			self.set_current_build( view , int(0), forcePanel )
 
 		elif len(self.builds) > 1 and forcePanel :
 			buildsView = []
