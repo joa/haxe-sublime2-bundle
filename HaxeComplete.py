@@ -1253,7 +1253,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		comps = []
 		if offset == 0 : 
 			return comps
-		#print(scopes)
+			
+		for s in scopes : 
+			if s.split(".")[0] == "string" : 
+				return comps
+
 		if 'source.hxml' in scopes:
 			comps = self.get_hxml_completions( view , offset )
 		
