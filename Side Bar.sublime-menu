@@ -1,0 +1,15 @@
+[  
+{  
+    "id": "haxe",  
+    "caption" : "Haxe",
+    "children":  
+    [  
+        { 
+        	"id" : "haxe-create-class", 
+        	"caption" : "New class",
+        	"command" : "haxe_create_class",
+        	"args" : { "paths": [] }
+        }
+    ]  
+}  
+]  

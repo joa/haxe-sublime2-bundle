@@ -59,6 +59,7 @@ variables = re.compile("var\s+([^:;\s]*)", re.I)
 functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
 functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
 paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
+isType = re.compile("^[A-Z][a-zA-Z0-9_]*$")
 serverPort = 6000
 haxeVersion = re.compile("haxe_([0-9]{3})",re.M)
 bundleFile = __file__
@@ -416,6 +417,68 @@ class HaxeHint( sublime_plugin.TextCommand ):
 			#	view.run_command('auto_complete', {'disable_auto_insert': True})
 
 
+class HaxeCreateClass( sublime_plugin.WindowCommand ):
+
+	classpath = None
+
+	def run( self , paths = [] ) :
+		builds = HaxeComplete.inst.builds
+		
+		pack = [];
+		
+		for path in paths :
+
+			if not os.path.isdir( path ) :
+				path = os.path.dirname( path )
+
+			if self.classpath is None :
+				self.classpath = path
+
+			for b in builds :
+				for cp in b.classpaths :
+					if path.startswith( cp ) :
+						self.classpath = path[0:len(cp)]
+						pack = [p for p in path[len(cp):].split(os.sep) if p]
+
+		# so default text ends with .
+		if len(pack) > 0 :
+			pack.append("")
+						
+		win = sublime.active_window()
+		sublime.status_message( "Current classpath : " + self.classpath )
+		win.show_input_panel("Enter class name : " , ".".join(pack) , self.on_done , self.on_change , self.on_cancel )
+
+	def on_done( self , inp ) :
+
+		fn = self.classpath;
+		parts = inp.split(".")
+		pack = []
+
+		while( len(parts) > 0 ):
+			p = parts.pop(0)
+			
+			fn = os.path.join( fn , p )
+			if isType.match( p ) : 
+				cl = p
+				break;
+			else :
+				pack.append(p)
+
+		if len(parts) > 0 :
+			cl = parts[0]
+
+		fn += ".hx"
+		v = sublime.active_window().open_file( fn )
+		edit = v.begin_edit()
+		v.insert(edit , 0 , "package " + ".".join(pack) + ";\n\nclass " + cl + "{\n\n\n\n}" )
+		v.end_edit(edit)
+
+	def on_change( self , inp ) :
+		print( inp )
+
+	def on_cancel( self ) :
+		None
+
 class HaxeComplete( sublime_plugin.EventListener ):
 
 	#folder = ""
@@ -766,7 +829,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		self.find_nmml(folder)
 
 		if len(self.builds) == 1:
-			sublime.status_message("There is only one build")
+			if forcePanel : 
+				sublime.status_message("There is only one build")
 
 			# will open the build file
 			#if forcePanel :
