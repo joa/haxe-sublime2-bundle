@@ -1387,8 +1387,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if 'source.hxml' in scopes:
 			comps = self.get_hxml_completions( view , offset )
 		
-		if 'source.haxe.2' in scopes:
-			comps = self.get_haxe_completions( view , offset )
+		if 'source.haxe.2' in scopes :
+			if view.file_name().endswith(".hxsl") :
+				comps = self.get_hxsl_completions( view , offset )
+			else :
+				comps = self.get_haxe_completions( view , offset )
 			
 		return comps
 	
@@ -1509,9 +1512,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		return comps
 
-			
+	def get_hxsl_completions( self , view , offset ) :
+		comps = []
+		for t in ["Float","Float2","Float3","Float4","Matrix","M44","M33","M34","M43","Texture","CubeTexture","Int","Color","include"] :
+			comps.append( ( t , "hxsl Type" ) )
+		return comps
 
-	def get_hxml_completions( self , view , offset ):
+	def get_hxml_completions( self , view , offset ) :
 		src = view.substr(sublime.Region(0, offset))
 		currentLine = src[src.rfind("\n")+1:offset]
 		m = libFlag.match( currentLine )
