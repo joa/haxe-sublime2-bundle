@@ -417,36 +417,52 @@ class HaxeHint( sublime_plugin.TextCommand ):
 			#	view.run_command('auto_complete', {'disable_auto_insert': True})
 
 
-class HaxeCreateClass( sublime_plugin.WindowCommand ):
+class HaxeCreateType( sublime_plugin.WindowCommand ):
 
 	classpath = None
+	currentFile = None
+	currentSrc = None
+	currentType = None
 
-	def run( self , paths = [] ) :
+	def run( self , paths = [] , t = "class" ) :
 		builds = HaxeComplete.inst.builds
+		HaxeCreateType.currentType = t
 		
 		pack = [];
-		
+
+		if len(paths) == 0 :
+			view = sublime.active_window().active_view()
+			fn = view.file_name()
+			paths.append(fn)
+
 		for path in paths :
 
-			if not os.path.isdir( path ) :
+			if os.path.isfile( path ) :
 				path = os.path.dirname( path )
 
-			if self.classpath is None :
-				self.classpath = path
+			if HaxeCreateType.classpath is None :
+				HaxeCreateType.classpath = path
 
 			for b in builds :
 				for cp in b.classpaths :
 					if path.startswith( cp ) :
-						self.classpath = path[0:len(cp)]
-						pack = [p for p in path[len(cp):].split(os.sep) if p]
+						HaxeCreateType.classpath = path[0:len(cp)]
+						for p in path[len(cp):].split(os.sep) :
+							if "." in p : 
+								break
+							elif p :
+								pack.append(p)
+
+		if HaxeCreateType.classpath is None and len(builds) > 0 :
+			HaxeCreateType.classpath = builds[0].classpaths[0]
 
 		# so default text ends with .
 		if len(pack) > 0 :
 			pack.append("")
 						
 		win = sublime.active_window()
-		sublime.status_message( "Current classpath : " + self.classpath )
-		win.show_input_panel("Enter class name : " , ".".join(pack) , self.on_done , self.on_change , self.on_cancel )
+		sublime.status_message( "Current classpath : " + HaxeCreateType.classpath )
+		win.show_input_panel("Enter "+t+" name : " , ".".join(pack) , self.on_done , self.on_change , self.on_cancel )
 
 	def on_done( self , inp ) :
 
@@ -468,13 +484,32 @@ class HaxeCreateClass( sublime_plugin.WindowCommand ):
 			cl = parts[0]
 
 		fn += ".hx"
+		
+		HaxeCreateType.currentFile = fn
+		t = HaxeCreateType.currentType
+		src = "\npackage " + ".".join(pack) + ";\n\n"+t+" "+cl+" " 
+		if t == "typedef" :
+			src += "= "
+		src += "{\n\n\t\n\n}"
+		HaxeCreateType.currentSrc = src
+
 		v = sublime.active_window().open_file( fn )
-		edit = v.begin_edit()
-		v.insert(edit , 0 , "package " + ".".join(pack) + ";\n\nclass " + cl + "{\n\n\n\n}" )
-		v.end_edit(edit)
+
+	@staticmethod
+	def on_activated( view ) : 
+		if view.file_name() == HaxeCreateType.currentFile and view.size() == 0 :
+			e = view.begin_edit()
+			view.insert(e,0,HaxeCreateType.currentSrc)
+			view.end_edit(e)
+			sel = view.sel()
+			sel.clear()
+			pt = view.text_point(5,1)
+			sel.add( sublime.Region(pt,pt) )
+
 
 	def on_change( self , inp ) :
-		print( inp )
+		sublime.status_message( "Current classpath : " + HaxeCreateType.classpath )
+		#print( inp )
 
 	def on_cancel( self ) :
 		None
@@ -604,6 +639,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
 			return []
 		
+		if 'source.haxe.2' in scopes :
+			HaxeCreateType.on_activated( view )
+
 		self.generate_build(view)
 		self.highlight_errors( view )
 
@@ -615,16 +653,28 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def on_activated( self , view ) :
 		scopes = view.scope_name(view.sel()[0].end()).split()
-		#sublime.status_message( scopes[0] )
+		
 		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes:
 			return []
 
 		if 'source.haxe.2' in scopes :
+			HaxeCreateType.on_activated( view )
 			self.get_build(view)
 			self.extract_build_args( view )
 		
 		self.generate_build(view)
 		self.highlight_errors( view )
+
+	def on_pre_save( self , view ) :
+		scopes = view.scope_name(view.sel()[0].end()).split()
+		
+		if 'source.haxe.2' not in scopes:
+			return []
+
+		fn = view.file_name()
+		path = os.path.dirname( fn )
+		if not os.path.isdir( path ) :
+			os.makedirs( path )
 
 	def __on_modified( self , view ):
 		win = sublime.active_window()

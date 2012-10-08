@@ -311,5 +311,19 @@
                 "operand": "comment"
             }
         ]
+    },
+    {
+        "keys": ["ctrl+shift+h","ctrl+shift+c"],
+        "command": "haxe_create_type"
+    },
+    {
+        "keys": ["ctrl+shift+h","ctrl+shift+i"],
+        "command": "haxe_create_type",
+        "args" : {"t" : "interface"}
+    },
+    {
+        "keys": ["ctrl+shift+h","ctrl+shift+t"],
+        "command": "haxe_create_type",
+        "args" : {"t" : "typedef"}
     }
 ]
