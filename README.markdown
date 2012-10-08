@@ -34,6 +34,7 @@ Restart Sublime Text 2
 # Usage
 
  - Open your project's directory (where the .hxml or .nmml resides) in Sublime Text, the build file should be detected automatically,
+ - Create new types through the sidebar's context menu
  - Edit your classes (check the cool snippets, like 'prop'-Tab)
  - Completion is triggered either automatically by dot and colon keys, or manually by Ctrl+Space.
  - Open parenthesis and comma keys display haxe type hints in the status bar
@@ -44,6 +45,10 @@ Restart Sublime Text 2
  - Press **Ctrl+Enter** to run the current/selected build
  - Press **Ctrl+I** on a qualified class name to shorten it and generate the import statement. Safe to use if the class is already imported.
  - Press **Ctrl+Shift+L** to install a library via haxelib
+ - Press **Ctrl+Shift+H** and then : 
+      - **Ctrl+Shift+C** to create a new class,
+      - **Ctrl+Shift+I** to create a new interface,
+      - **Ctrl+Shift+T** to create a new typedef
 
 ### Targeting NME
 
