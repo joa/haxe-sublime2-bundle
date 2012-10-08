@@ -427,11 +427,15 @@ class HaxeCreateType( sublime_plugin.WindowCommand ):
 	def run( self , paths = [] , t = "class" ) :
 		builds = HaxeComplete.inst.builds
 		HaxeCreateType.currentType = t
+		view = sublime.active_window().active_view()
+		scopes = view.scope_name(view.sel()[0].end()).split()
 		
 		pack = [];
 
+		if len(builds) == 0 :
+			HaxeComplete.inst.extract_build_args(view)
+
 		if len(paths) == 0 :
-			view = sublime.active_window().active_view()
 			fn = view.file_name()
 			paths.append(fn)
 
@@ -453,8 +457,9 @@ class HaxeCreateType( sublime_plugin.WindowCommand ):
 							elif p :
 								pack.append(p)
 
-		if HaxeCreateType.classpath is None and len(builds) > 0 :
-			HaxeCreateType.classpath = builds[0].classpaths[0]
+		if HaxeCreateType.classpath is None :
+		 	if len(builds) > 0 :
+				HaxeCreateType.classpath = builds[0].classpaths[0]
 
 		# so default text ends with .
 		if len(pack) > 0 :
@@ -856,10 +861,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def extract_build_args( self , view , forcePanel = False ) :
-		scopes = view.scope_name(view.sel()[0].end()).split()
-		#sublime.status_message( scopes[0] )
-		if 'source.haxe.2' not in scopes and 'source.hxml' not in scopes and 'source.nmml' not in scopes:
-			return []
 		
 		self.builds = []
 
