@@ -5,6 +5,7 @@
   <key>fileTypes</key>
   <array>
     <string>hx</string>
+    <string>hxsl</string>
   </array>
   <key>foldingStartMarker</key>
   <string>(\{\s*(//.*)?$|^\s*// \{\{\{|#if)</string>
