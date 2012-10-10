@@ -17,6 +17,12 @@
             "args" : { "paths": [] , "t" : "interface" }
         },
         { 
+            "id" : "haxe-create-enum", 
+            "caption" : "haxe-create-enum",
+            "command" : "haxe_create_type",
+            "args" : { "paths": [] , "t" : "enum" }
+        },
+        { 
             "id" : "haxe-create-typedef", 
             "caption" : "Typedef",
             "command" : "haxe_create_type",
