@@ -48,6 +48,7 @@ Restart Sublime Text 2
  - Press **Ctrl+Shift+H** and then : 
       - **Ctrl+Shift+C** to create a new class,
       - **Ctrl+Shift+I** to create a new interface,
+      - **Ctrl+Shift+E** to create a new enum,
       - **Ctrl+Shift+T** to create a new typedef
 
 ### Targeting NME
