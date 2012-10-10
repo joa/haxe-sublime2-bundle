@@ -325,5 +325,10 @@
         "keys": ["ctrl+shift+h","ctrl+shift+t"],
         "command": "haxe_create_type",
         "args" : {"t" : "typedef"}
+    },
+    {
+        "keys": ["ctrl+shift+h","ctrl+shift+e"],
+        "command": "haxe_create_type",
+        "args" : {"t" : "enum"}
     }
 ]
