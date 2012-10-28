@@ -78,10 +78,6 @@
 				</dict>
 				<dict>
 					<key>include</key>
-					<string>#variables</string>
-				</dict>
-				<dict>
-					<key>include</key>
 					<string>source.haxe.2</string>
 				</dict>
 			</array>
@@ -140,6 +136,17 @@
 			<string>\}</string>
 			<key>name</key>
 			<string>source.erazor</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#codeblock</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>source.haxe.2</string>
+				</dict>
+			</array>
 		</dict>
 		<key>variables</key>
 		<dict>
