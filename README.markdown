@@ -7,10 +7,10 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
  - **Haxe compiler completion**, code hints and error highlighting
  - **Package and classes discovery/completion** supporting hxml classpath (-cp) and haxelib libraries (-lib)
  - **NME completion, target selection and compilation**
- - Multiple build/hxml management and automatic generation of hxml files
- - Haxelib integration (install / remove libs) and -lib autocompletion
+ - **Multiple build/hxml management** and automatic generation of hxml files
+ - **Haxelib integration** (install / remove libs) with -lib autocompletion
  - Code snippets, auto-import, Sublime build system integration
- - [Erazor](https://github.com/ciscoheat/erazor) and [HSS](http://ncannasse.fr/projects/hss) support
+ - **[HScript](http://code.google.com/p/hscript/)**, **[Erazor](https://github.com/ciscoheat/erazor)** and **[HSS](http://ncannasse.fr/projects/hss)** support
  
 and more to come :)
 
