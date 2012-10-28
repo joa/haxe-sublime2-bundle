@@ -10,6 +10,7 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
  - Automatic generation of hxml files, multiple build/hxml management, and -lib autocompletion based on haxelib
  - Haxelib integration (haxelib install)
  - Code snippets, auto-import, Sublime build system integration
+ - [Erazor](https://github.com/ciscoheat/erazor) and [HSS](http://ncannasse.fr/projects/hss) support
  
 and more to come :)
 
