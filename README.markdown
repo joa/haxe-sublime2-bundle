@@ -59,6 +59,11 @@ Restart Sublime Text 2
  - press **Ctrl+Shift+B** to select a NME target
  - press **Ctrl+Enter** to build and run (regular Sublime Text build system won't work)
 
+### Tips & tricks
+
+As this bundle displays code hinting for method calls in the “status bar”, 
+you may find it useful to [increase its font-size](http://superuser.com/questions/469161/increase-the-font-size-on-sublime-text-2-status-bar).
+
 # Reviews
 
 [SublimeText Editor Video Tutorial](http://haxe.org/doc/videos/editors/Sublimetext)
