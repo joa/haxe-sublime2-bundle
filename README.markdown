@@ -16,8 +16,12 @@ and more to come :)
 
 # Installation
 
-### Sublime Package Control
-The bundle is available through [Package Control](http://wbond.net/sublime_packages/package_control)
+## Sublime Package Control
+
+The most straight-forward way to install the bundle and to keep it up-to-date 
+is through [Package Control](http://wbond.net/sublime_packages/package_control).
+
+## Manual installation
 
 ### Mac OSX
     cd /Users/<username>/Library/Application\ Support/Sublime\ Text\ 2/Packages
