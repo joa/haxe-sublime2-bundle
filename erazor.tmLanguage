@@ -6,6 +6,7 @@
 	<array>
 		<string>erazor</string>
 		<string>ehtml</string>
+		<string>erazor.html</string>
 	</array>
 	<key>foldingStartMarker</key>
 	<string>\{\s*$</string>
