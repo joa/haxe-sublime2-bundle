@@ -7,17 +7,21 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
  - **Haxe compiler completion**, code hints and error highlighting
  - **Package and classes discovery/completion** supporting hxml classpath (-cp) and haxelib libraries (-lib)
  - **NME completion, target selection and compilation**
- - Multiple build/hxml management and automatic generation of hxml files
- - Haxelib integration (install / remove libs) and -lib autocompletion
+ - **Multiple build/hxml management** and automatic generation of hxml files
+ - **Haxelib integration** (install / remove libs) with -lib autocompletion
  - Code snippets, auto-import, Sublime build system integration
- - [Erazor](https://github.com/ciscoheat/erazor) and [HSS](http://ncannasse.fr/projects/hss) support
+ - **[HScript](http://code.google.com/p/hscript/)**, **[Erazor](https://github.com/ciscoheat/erazor)** and **[HSS](http://ncannasse.fr/projects/hss)** support
  
 and more to come :)
 
 # Installation
 
-### Sublime Package Control
-The bundle is available through [Package Control](http://wbond.net/sublime_packages/package_control)
+## Sublime Package Control
+
+The most straight-forward way to install the bundle and to keep it up-to-date 
+is through [Package Control](http://wbond.net/sublime_packages/package_control).
+
+## Manual installation
 
 ### Mac OSX
     cd /Users/<username>/Library/Application\ Support/Sublime\ Text\ 2/Packages
@@ -58,6 +62,11 @@ Restart Sublime Text 2
 
  - press **Ctrl+Shift+B** to select a NME target
  - press **Ctrl+Enter** to build and run (regular Sublime Text build system won't work)
+
+### Tips & tricks
+
+As this bundle displays code hinting for method calls in the “status bar”, 
+you may find it useful to [increase its font-size](http://superuser.com/questions/469161/increase-the-font-size-on-sublime-text-2-status-bar).
 
 # Reviews
 
