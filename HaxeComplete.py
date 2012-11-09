@@ -1172,7 +1172,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		view.window().run_command("exec", {
 			"cmd": cmd,
-			"working_dir": os.path.dirname(build.nmml)
+			"working_dir": os.path.dirname(build.nmml),
+			"file_regex": "^([^:]*):([0-9]+): characters [0-9]+-([0-9]+) :.*$"
 		})
 		return ("" , [], "Running..." )
 
