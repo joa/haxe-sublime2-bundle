@@ -1226,6 +1226,17 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			cmd.extend( list(a) )
 		
 		#print( cmd )
+		#
+		# TODO: replace runcmd with run_command('exec') when possible (haxelib, maybe build)
+		#
+		#if not autocomplete :
+		#	view.window().run_command("exec", {
+		#		"cmd": cmd,
+		#		#"working_dir": os.path.dirname()
+		#		"file_regex": "^([^:]*):([0-9]+): characters [0-9]+-([0-9]+) :(.*)$"
+		#	})
+		#	return ("" , [], "Running..." )
+
 		res, err = runcmd( cmd, "" )
 		
 		if not autocomplete :
