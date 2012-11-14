@@ -22,6 +22,8 @@ ElementTree.XMLTreeBuilder = SimpleXMLTreeBuilder.TreeBuilder
 from subprocess import Popen, PIPE
 from datetime import datetime
 
+stexec = __import__("exec")
+
 try:
     STARTUP_INFO = subprocess.STARTUPINFO()
     STARTUP_INFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -233,19 +235,11 @@ class HaxeInstallLib( sublime_plugin.WindowCommand ):
 			else :
 				cmd = ["haxelib" , "install" , lib ]	
 
-		out,err = runcmd(cmd)
-		lines = out.splitlines()
-		lines.append( "" )
-
-		panel = self.window.get_output_panel("haxelib")
-		edit = panel.begin_edit()
-		panel.insert(edit, panel.size(), "\n".join(lines) )
-		panel.end_edit( edit )
-		self.window.run_command("show_panel",{"panel":"output.haxelib"})
-
-		HaxeLib.scan()
-
-
+		
+		self.window.run_command("haxelib_exec", {
+			"cmd": cmd,
+			#"working_dir": os.path.dirname()
+		})
 
 
 class HaxeGenerateImport( sublime_plugin.TextCommand ):
@@ -624,15 +618,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	def highlight_errors( self , view ) :
 		fn = view.file_name()
 		regions = []
-
-		#for w in sublime.windows() :
-		#	exec_panel = w.get_output_panel("exec")
-		#	output = exec_panel.substr(sublime.Region(0, exec_panel.size()))
-		#	errors = self.extract_errors( output )
-		#
-		#	print(output)
-		#	print(errors)
-
+		
 		for e in self.errors :
 			if e["file"] == fn :
 				l = e["line"]
@@ -1243,7 +1229,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		# TODO: replace runcmd with run_command('exec') when possible (haxelib, maybe build)
 		#
 		if not autocomplete :
-			view.window().run_command("exec", {
+			view.window().run_command("haxe_exec", {
 				"cmd": cmd,
 				#"working_dir": os.path.dirname()
 				"file_regex": haxeFileRegex
@@ -1420,7 +1406,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				"message" : m
 			})
 
-		print(errors)
+		#print(errors)
 
 		return errors
 
@@ -1587,3 +1573,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		return f
 
 	
+class HaxeExecCommand(stexec.ExecCommand):
+    def finish(self, *args, **kwargs):
+        super(HaxeExecCommand, self).finish(*args, **kwargs)  
+        outp = self.output_view.substr(sublime.Region(0, self.output_view.size()))
+        hc = HaxeComplete.inst
+        hc.errors = hc.extract_errors( outp )
+        hc.highlight_errors( self.window.active_view() )
+
+class HaxelibExecCommand(stexec.ExecCommand):
+    def finish(self, *args, **kwargs):
+        super(HaxelibExecCommand, self).finish(*args, **kwargs)  
+        HaxeLib.scan()
