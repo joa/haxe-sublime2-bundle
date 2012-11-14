@@ -1581,7 +1581,14 @@ class HaxeExecCommand(stexec.ExecCommand):
         hc.errors = hc.extract_errors( outp )
         hc.highlight_errors( self.window.active_view() )
 
+    def is_visible():
+    	return false
+
+
 class HaxelibExecCommand(stexec.ExecCommand):
     def finish(self, *args, **kwargs):
         super(HaxelibExecCommand, self).finish(*args, **kwargs)  
         HaxeLib.scan()
+
+    def is_visible():
+    	return false
