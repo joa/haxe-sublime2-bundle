@@ -65,6 +65,7 @@ haxeVersion = re.compile("haxe_([0-9]{3})",re.M)
 bundleFile = __file__
 bundlePath = os.path.abspath(bundleFile)
 bundleDir = os.path.dirname(bundlePath)
+haxeFileRegex = "^([^:]*):([0-9]+): characters? ([0-9]+)-?[0-9]* :(.*)$"
 
 class HaxeLib :
 
@@ -624,6 +625,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		fn = view.file_name()
 		regions = []
 
+		#for w in sublime.windows() :
+		#	exec_panel = w.get_output_panel("exec")
+		#	output = exec_panel.substr(sublime.Region(0, exec_panel.size()))
+		#	errors = self.extract_errors( output )
+		#
+		#	print(output)
+		#	print(errors)
+
 		for e in self.errors :
 			if e["file"] == fn :
 				l = e["line"]
@@ -954,17 +963,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def run_build( self , view ) :
-		#view.run_command("save")
-		self.clear_output_panel(view)
-		#view.set_status( "haxe-status" , "Building..." )
-		self.panel_output( view, "Building: " + self.currentBuild.to_string() , "success" )
+		
+		#self.clear_output_panel(view)
+		
+		#self.panel_output( view, "Building: " + self.currentBuild.to_string() , "success" )
+		
 		err, comps, status = self.run_haxe( view )
 
-		if status == "Build success" or status.startswith("Total time"):
-			self.panel_output( view , "Build success!" , "success")
-			self.panel_output( view , err , "success")
-		elif status != "Running...":
-			self.panel_output( view , err , "invalid" )
+		#if status == "Build success" or status.startswith("Total time"):
+		#	self.panel_output( view , "Build success!" , "success")
+		#	self.panel_output( view , err , "success")
+		#elif status != "Running...":
+		#	self.panel_output( view , err , "invalid" )
 		
 		#print(status)
 		view.set_status( "haxe-status" , status )
@@ -973,6 +983,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def clear_output_panel(self, view) :
 		win = view.window()
+
 		self.panel = win.get_output_panel("haxe")
 
 	def panel_output( self , view , text , scope = None ) :
@@ -1158,6 +1169,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			build.args.append( ("--no-output" , "-v" ) )
 
 			build.hxml = os.path.join( src_dir , "build.hxml")
+			#build.hxml = os.path.join( src_dir , "build.hxml")
 			self.currentBuild = build
 			
 		return self.currentBuild	
@@ -1214,7 +1226,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#args.append( ("--times" , "-v" ) )
 		if not autocomplete :
 			args.append( ("-main" , build.main ) )
-			args.append( ("--times" , "-v" ) )
+			#args.append( ("--times" , "-v" ) )
+
 		else:
 			args.append( ("--display", display ) )
 			args.append( ("--no-output" , "") )
@@ -1229,13 +1242,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#
 		# TODO: replace runcmd with run_command('exec') when possible (haxelib, maybe build)
 		#
-		#if not autocomplete :
-		#	view.window().run_command("exec", {
-		#		"cmd": cmd,
-		#		#"working_dir": os.path.dirname()
-		#		"file_regex": "^([^:]*):([0-9]+): characters [0-9]+-([0-9]+) :(.*)$"
-		#	})
-		#	return ("" , [], "Running..." )
+		if not autocomplete :
+			view.window().run_command("exec", {
+				"cmd": cmd,
+				#"working_dir": os.path.dirname()
+				"file_regex": haxeFileRegex
+			})
+			return ("" , [], "" )
+
 
 		res, err = runcmd( cmd, "" )
 		
@@ -1349,39 +1363,67 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			regions = []
 			
-			for infos in compilerOutput.findall(err) :
-				infos = list(infos)
-				f = infos.pop(0)
-				l = int( infos.pop(0) )-1
-				left = int( infos.pop(0) )
-				right = infos.pop(0)
-				if right != "" :
-					right = int( right )
-				else :
-					right = left+1
-				m = infos.pop(0)
+			# for infos in compilerOutput.findall(err) :
+			# 	infos = list(infos)
+			# 	f = infos.pop(0)
+			# 	l = int( infos.pop(0) )-1
+			# 	left = int( infos.pop(0) )
+			# 	right = infos.pop(0)
+			# 	if right != "" :
+			# 		right = int( right )
+			# 	else :
+			# 		right = left+1
+			# 	m = infos.pop(0)
 
-				self.errors.append({
-					"file" : f,
-					"line" : l,
-					"from" : left,
-					"to" : right,
-					"message" : m
-				})
+			# 	self.errors.append({
+			# 		"file" : f,
+			# 		"line" : l,
+			# 		"from" : left,
+			# 		"to" : right,
+			# 		"message" : m
+			# 	})
 				
-				if( f == fn ):
-					status = m
+			# 	if( f == fn ):
+			# 		status = m
 				
-				if not autocomplete :
-					w = view.window()
-					if not w is None :
-						w.open_file(f+":"+str(l)+":"+str(right) , sublime.ENCODED_POSITION  )
-				#if not autocomplete
+			# 	if not autocomplete :
+			# 		w = view.window()
+			# 		if not w is None :
+			# 			w.open_file(f+":"+str(l)+":"+str(right) , sublime.ENCODED_POSITION  )
+			# 	#if not autocomplete
 
+			self.errors = self.extract_errors( err )
 			self.highlight_errors( view )
 		#print(status)
 		return ( err, comps, status )
 	
+	def extract_errors( self , str ):
+		errors = []
+
+		for infos in compilerOutput.findall(str) :
+			infos = list(infos)
+			f = infos.pop(0)
+			l = int( infos.pop(0) )-1
+			left = int( infos.pop(0) )
+			right = infos.pop(0)
+			if right != "" :
+				right = int( right )
+			else :
+				right = left+1
+			m = infos.pop(0)
+
+			errors.append({
+				"file" : f,
+				"line" : l,
+				"from" : left,
+				"to" : right,
+				"message" : m
+			})
+
+		print(errors)
+
+		return errors
+
 
 	def on_query_completions(self, view, prefix, locations):
 		#print("complete")
