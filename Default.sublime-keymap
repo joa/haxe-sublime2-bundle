@@ -314,7 +314,8 @@
     },
     {
         "keys": ["ctrl+shift+h","ctrl+shift+c"],
-        "command": "haxe_create_type"
+        "command": "haxe_create_type",
+        "args" : {"t" : "class"}
     },
     {
         "keys": ["ctrl+shift+h","ctrl+shift+i"],
