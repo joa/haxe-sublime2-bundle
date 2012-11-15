@@ -648,8 +648,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if 'source.haxe.2' in scopes :
 			HaxeCreateType.on_activated( view )
 
-		self.generate_build(view)
+		self.generate_build( view )
 		self.highlight_errors( view )
+
 
 	def on_post_save( self , view ) :
 		scopes = view.scope_name(view.sel()[0].end()).split()
