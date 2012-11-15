@@ -1353,10 +1353,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if len(l) > 0 :
 				if l == "<list>" :
 					status = "No autocompletion available"
-				else :
+				elif not re.match( haxeFileRegex , l ):
 					status = l
+				else :
+					status = ""
 
-			regions = []
+			#regions = []
 			
 			# for infos in compilerOutput.findall(err) :
 			# 	infos = list(infos)
@@ -1388,7 +1390,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			# 	#if not autocomplete
 
 			self.errors = self.extract_errors( err )
-			self.highlight_errors( view )
+			#self.highlight_errors( view )
+
 		#print(status)
 		return ( err, comps, status )
 	
@@ -1416,6 +1419,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			})
 
 		#print(errors)
+		if len(errors) > 0:
+			sublime.status_message(errors[0]["message"])
 
 		return errors
 
