@@ -999,7 +999,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def get_toplevel_completion( self , src , src_dir , build ) :
 		cl = []
-		comps = [("trace","trace"),("this","this"),("super","super")]
+		comps = [("trace","trace"),("this","this"),("super","super"),("else","else")]
 
 		localTypes = typeDecl.findall( src )
 		for t in localTypes :
@@ -1430,7 +1430,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			return comps
 			
 		for s in scopes : 
-			if s.split(".")[0] == "string" : 
+			if s.split(".")[0] in ["string","comment"] : 
 				return comps
 
 		if 'source.hxml' in scopes:

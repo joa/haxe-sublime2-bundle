@@ -1,4 +1,4 @@
 {
-	"auto_complete_selectors": "source - string",
+	"auto_complete_selectors": "source - string - comment",
 	"auto_complete_triggers": [ {"selector": "source.haxe.2", "characters": "."} ]
 }

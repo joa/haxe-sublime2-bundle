@@ -3,14 +3,10 @@
   "completions" : [
   	{ "trigger":"trace" , "contents" : "trace" },
   	{ "trigger":"this" , "contents" : "this" },
-  	{ "trigger":"super" , "contents" : "super" }
-    /*{ "trigger" : "... [iterator]" , "contents" : "."},*/
-    /*{ "trigger" : "<No completion available>" , "contents" : " "},*/
-    /*{ "trigger" : "" , "contents" : ""},
-    { "trigger" : " " , "contents" : " "},
-    { "trigger" : "." , "contents" : "."}*/
-
-    
+  	{ "trigger":"super" , "contents" : "super" },
+    { "trigger": "else" , "contents" : "else"},
+    { "trigger" : "if" , "contents" : "if" },
+    { "trigger" : "switch" , "contents" : "switch" },  
   ]
 
 
