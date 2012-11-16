@@ -139,8 +139,8 @@ class HaxeBuild :
 
 	#auto = None
 	targets = ["js","cpp","swf","swf9","neko","php","java","cs"]
-	nme_targets = ["flash","html5","cpp","ios -simulator","android","webos","neko"]
-	nme_target = "flash"
+	nme_targets = [("Flash","flash","test"),("HTML5","html5","test"),("C++","cpp","test"),("iOS - iPhone Simulator","ios -simulator","test"),("iOS - iPad Simulator","ios -simulator -ipad","test"),("iOS - Update XCode Project","ios","update"),( "Android","android","test"),("WebOS", "webos","test"),("Neko","neko","test"),("BlackBerry","blackberry","test")]
+	nme_target = ("Flash","flash","test")
 
 	def __init__(self) :
 
@@ -156,9 +156,9 @@ class HaxeBuild :
 	def to_string(self) :
 		out = os.path.basename(self.output)
 		if self.nmml is not None:
-			return "{out} ({target})".format(self=self, out=out, target=HaxeBuild.nme_target);
+			return "{out} ({target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
 		else:
-			return "{out}".format(self=self, out=out);
+			return "{main} ({target}:{out})".format(self=self, out=out, main=self.main, target=self.target);
 		#return "{self.main} {self.target}:{out}".format(self=self, out=out);
 	
 	def make_hxml( self ) :
@@ -951,7 +951,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if forcePanel and self.currentBuild is not None: # choose NME target
 			if self.currentBuild.nmml is not None:
 				sublime.status_message("Please select a NME target")
-				view.window().show_quick_panel(HaxeBuild.nme_targets, lambda i : self.select_nme_target(i, view))
+				nme_targets = []
+				for t in HaxeBuild.nme_targets :
+					nme_targets.append( t[0] )
+
+				view.window().show_quick_panel(nme_targets, lambda i : self.select_nme_target(i, view))
 
 
 	def select_nme_target( self, i, view ):
@@ -1163,8 +1167,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def run_nme( self, view, build ) :
 
-		cmd = [ "haxelib", "run", "nme", "test", os.path.basename(build.nmml) ]
-		target = HaxeBuild.nme_target.split(" ")
+		cmd = [ "haxelib", "run", "nme", HaxeBuild.nme_target[2], os.path.basename(build.nmml) ]
+		target = HaxeBuild.nme_target[1].split(" ")
 		cmd.extend(target)
 		cmd.append("-debug")
 
@@ -1173,7 +1177,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			"working_dir": os.path.dirname(build.nmml),
 			"file_regex": "^([^:]*):([0-9]+): characters [0-9]+-([0-9]+) :.*$"
 		})
-		return ("" , [], "Running..." )
+		return ("" , [], "" )
 
 
 	def run_haxe( self, view , display = None , commas = 0 ) :
