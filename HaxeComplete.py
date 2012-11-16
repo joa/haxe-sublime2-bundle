@@ -48,7 +48,7 @@ compactProp = re.compile(":.*\.([a-z_0-9]+)", re.I)
 spaceChars = re.compile("\s")
 wordChars = re.compile("[a-z0-9._]", re.I)
 importLine = re.compile("^([ \t]*)import\s+([a-z0-9._]+);", re.I | re.M)
-packageLine = re.compile("package\s*([a-z0-9.]*);", re.I)
+packageLine = re.compile("package\s*([a-z0-9.]+);", re.I)
 libLine = re.compile("([^:]*):[^\[]*\[(dev\:)?(.*)\]")
 classpathLine = re.compile("Classpath : (.*)")
 typeDecl = re.compile("(class|typedef|enum)\s+([A-Z][a-zA-Z0-9_]*)(<[a-zA-Z0-9_,]+>)?" , re.M )
@@ -1148,8 +1148,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			cl = os.path.basename(fn)
 			cl = cl.encode('ascii','ignore')
 			cl = cl[0:cl.rfind(".")]
+
 			main = pack[0:]
-			main.extend( [ cl ] )
+			main.append( cl )
 			build.main = ".".join( main )
 
 			build.args.append( ("-cp" , src_dir) )
