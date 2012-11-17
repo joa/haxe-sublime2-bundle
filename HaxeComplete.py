@@ -3,9 +3,9 @@ import sys
 #sys.path.append("/usr/lib/python2.6/lib-dynload")
 
 import sublime, sublime_plugin
-import subprocess
+import subprocess, time
 import tempfile
-import os
+import os, signal
 #import xml.parsers.expat
 import re
 import codecs
@@ -414,6 +414,16 @@ class HaxeHint( sublime_plugin.TextCommand ):
 			#	view.run_command('auto_complete', {'disable_auto_insert': True})
 
 
+class HaxeRestartServer( sublime_plugin.WindowCommand ):
+
+	def run( self ) :
+		HaxeComplete.inst.stop_server()
+		HaxeComplete.inst.start_server()
+
+
+
+
+
 class HaxeCreateType( sublime_plugin.WindowCommand ):
 
 	classpath = None
@@ -538,7 +548,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	panel = None
 	serverMode = False
-	serverStarted = False
+	serverProc = None
 
 	def __init__(self):
 		#print("init haxecomplete")
@@ -1185,13 +1195,27 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		})
 		return ("" , [], "" )
 
+	def start_server( self ) :
+		
+		if self.serverProc is not None:
+			print(self.serverProc.poll())
+			print(self.serverProc.returncode)
+			
+		if self.serverMode and ( (self.serverProc is None) or (self.serverProc.returncode is not None) ) :
+			self.serverProc = Popen(["haxe" , "--wait" , str(serverPort) ], startupinfo=STARTUP_INFO )
+	
+	def stop_server( self ) :
+		if self.serverProc is not None :
+			self.serverProc.kill()
+			self.serverProc.wait()
+			self.serverProc = None
+			del self.serverProc
+			
 
 	def run_haxe( self, view , display = None , commas = 0 ) :
 
-		if self.serverMode and not self.serverStarted:
-			Popen(["haxe" , "--wait" , str(serverPort) ], startupinfo=STARTUP_INFO )
-			self.serverStarted = True
-
+		self.start_server()
+			
 		build = self.get_build( view )
 		settings = view.settings()
 
