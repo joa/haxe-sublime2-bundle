@@ -32,6 +32,7 @@ except (AttributeError):
 	STARTUP_INFO = None
 
 def runcmd( args, input=None ):
+	#print(args)
 	try:
 		p = Popen([a.encode(sys.getfilesystemencoding()) for a in args], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
 		if isinstance(input, unicode):
@@ -68,6 +69,7 @@ bundleFile = __file__
 bundlePath = os.path.abspath(bundleFile)
 bundleDir = os.path.dirname(bundlePath)
 haxeFileRegex = "^([^:]*):([0-9]+): characters? ([0-9]+)-?[0-9]* :(.*)$"
+controlStruct = re.compile( "\s*(if|switch|for|while)\($" );
 
 class HaxeLib :
 
@@ -1509,10 +1511,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				skipped = src[completeOffset:offset]
 				toplevelComplete = skippable.search( skipped ) is None and inAnonymous.search( skipped ) is None
 		
-			
-		#print(src[completeOffset-1])
 		completeChar = src[completeOffset-1]
-		toplevelComplete = toplevelComplete or completeChar in ":(,"
+		inControlStruct = controlStruct.search( src[0:completeOffset] ) is not None
+
+		toplevelComplete = toplevelComplete or completeChar in ":(," or inControlStruct
 
 		if toplevelComplete :
 			#print("toplevel")
@@ -1525,7 +1527,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#comps.append(("... [iterator]",".."))
 			comps.append((".","."))
 
-		if toplevelComplete and completeChar not in "(," :
+		if toplevelComplete and (inControlStruct or completeChar not in "(,") :
 			return comps
 
 		if not os.path.exists( tdir ):
