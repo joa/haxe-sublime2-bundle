@@ -747,6 +747,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def select_build( self , view ) :
+		scopes = view.scope_name(view.sel()[0].end()).split()
+		
+		if 'source.hxml' in scopes:
+			view.run_command("save")
+
 		self.extract_build_args( view , True )
 
 
@@ -800,7 +805,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			if currentBuild.main is not None :
 				self.builds.append( currentBuild )
-
 
 	def find_hxml( self, folder ) :
 		hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
@@ -1140,7 +1144,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def get_build( self , view ) :
 		
-		if self.currentBuild is None:
+		if self.currentBuild is None :
 			fn = view.file_name()
 			src_dir = os.path.dirname( fn )
 			src = view.substr(sublime.Region(0, view.size()))
@@ -1162,8 +1166,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					if( spl[1] == p ) :
 						src_dir = spl[0]
 
-			build.output = os.path.join(folder,"dummy.js")
-
 			cl = os.path.basename(fn)
 			cl = cl.encode('ascii','ignore')
 			cl = cl[0:cl.rfind(".")]
@@ -1172,11 +1174,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			main.append( cl )
 			build.main = ".".join( main )
 
+			build.output = os.path.join(folder,build.main.lower() + ".js")
+
 			build.args.append( ("-cp" , src_dir) )
 			#build.args.append( ("-main" , build.main ) )
 
 			build.args.append( ("-js" , build.output ) )
-			build.args.append( ("--no-output" , "-v" ) )
+			#build.args.append( ("--no-output" , "-v" ) )
 
 			build.hxml = os.path.join( src_dir , "build.hxml")
 			
