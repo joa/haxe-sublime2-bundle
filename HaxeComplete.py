@@ -635,7 +635,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		regions = []
 		
 		for e in self.errors :
-			if e["file"] == fn :
+			if fn.endswith(e["file"]) :
 				l = e["line"]
 				left = e["from"]
 				right = e["to"]
@@ -862,7 +862,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				for flag in HaxeBuild.targets :
 					if l.startswith( "-" + flag + " " ) :
 						spl = l.split(" ")
-						outp = os.path.join( folder , " ".join(spl[1:]) ) 
+						#outp = os.path.join( folder , " ".join(spl[1:]) ) 
+						outp = " ".join(spl[1:]) 
 						currentBuild.args.append( ("-"+flag, outp) )
 						
 						currentBuild.target = flag
@@ -874,7 +875,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					#view.set_status( "haxe-status" , "Building..." )
 					cp.pop(0)
 					classpath = " ".join( cp )
-					absClasspath = os.path.join( buildPath , classpath )
+					absClasspath = classpath#os.path.join( buildPath , classpath )
 					currentBuild.classpaths.append( absClasspath )
 					currentBuild.args.append( ("-cp" , absClasspath ) )
 			
@@ -1178,6 +1179,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			build.args.append( ("--no-output" , "-v" ) )
 
 			build.hxml = os.path.join( src_dir , "build.hxml")
+			
 			#build.hxml = os.path.join( src_dir , "build.hxml")
 			self.currentBuild = build
 			
@@ -1254,6 +1256,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		self.errors = []
 
 		args = []
+
+		cwd = os.path.dirname( build.hxml )
 		
 		#buildArgs = view.window().settings
 		
@@ -1263,6 +1267,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		if self.serverMode and (autocomplete or buildServerMode) : #and autocomplete:
 			args.append(("--connect" , str(HaxeComplete.inst.serverPort)))
+			args.append(("--cwd" , cwd ))
 		#args.append( ("--times" , "-v" ) )
 		if not autocomplete :
 			args.append( ("-main" , build.main ) )
@@ -1299,7 +1304,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			view.window().run_command("haxe_exec", {
 				"cmd": encoded_cmd,
-				#"working_dir": os.path.dirname()
+				"working_dir": cwd,
 				"file_regex": haxeFileRegex,
 				"env" : env
 			})
