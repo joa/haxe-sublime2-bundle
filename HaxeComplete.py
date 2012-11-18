@@ -1062,7 +1062,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		buildClasses , buildPacks = build.get_types()
 
 		tarPkg = None
-		targetPackages = ["flash","flash9","flash8","neko","js","php","cpp","java","nme","jeash","neash"]
+		targetPackages = ["flash","flash9","flash8","neko","js","php","cpp","cs","java","nme","jeash","neash"]
 
 		if build.target is not None :
 			tarPkg = build.target
