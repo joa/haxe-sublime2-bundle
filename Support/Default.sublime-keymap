@@ -16,7 +16,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/SaveAllAndBuild.sublime-macro"
+            "file": "Packages/HaXe/Macros/SaveAllAndBuild.sublime-macro"
         },
         "context":
         [
@@ -56,7 +56,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/input/SpaceCompletion.sublime-macro"
+            "file": "Packages/HaXe/Macros/input/SpaceCompletion.sublime-macro"
         },
         "context":
         [
@@ -72,127 +72,13 @@
             }
         ]
     },
-    /*{
-        "keys": ["."],
-        "command": "run_macro_file",
-        "args":
-        {
-            "file": "Packages/HaXe/input/Dot.sublime-macro"
-        },
-        "context":
-        [
-            {
-                "key": "auto_complete_visible",
-                "operator": "equal",
-                "operand": false
-            }, 
-            {
-                "key": "selector",
-                "operator": "equal",
-                "operand": "source.haxe.2"
-            },
-            {
-                "key": "selector",
-                "operator": "not_equal",
-                "operand": "string"
-            },
-            {
-                "key": "selector",
-                "operator": "not_equal",
-                "operand": "comment"
-            }
-        ]
-    },
-    {
-        "keys": ["."],
-        "command": "run_macro_file",
-        "args":
-        {
-            "file": "Packages/HaXe/input/DotCompletion.sublime-macro"
-        },
-        "context":
-        [
-            {
-                "key": "auto_complete_visible",
-                "operator": "equal",
-                "operand": true
-            },
-            {
-                "key": "selector",
-                "operator": "equal",
-                "operand": "source.haxe.2"
-            }
-        ]
-    },*/
-   /* {
-        "keys": [":"],
-        "command": "run_macro_file",
-        "args":
-        {
-            "file": "Packages/HaXe/input/Colon.sublime-macro"
-        },
-        "context":
-        [
-            {
-                "key": "auto_complete_visible",
-                "operator": "equal",
-                "operand": false
-            },
-            {
-                "key": "selector",
-                "operator": "equal",
-                "operand": "source.haxe.2"
-            },
-            {
-                "key": "selector",
-                "operator": "not_equal",
-                "operand": "string"
-            },
-            {
-                "key": "selector",
-                "operator": "not_equal",
-                "operand": "comment"
-            }
-        ]
-    },
-    {
-        "keys": [":"],
-        "command": "run_macro_file",
-        "args":
-        {
-            "file": "Packages/HaXe/input/ColonCompletion.sublime-macro"
-        },
-        "context":
-        [
-            {
-                "key": "auto_complete_visible",
-                "operator": "equal",
-                "operand": true
-            },
-            {
-                "key": "selector",
-                "operator": "equal",
-                "operand": "source.haxe.2"
-            },
-            {
-                "key": "selector",
-                "operator": "not_equal",
-                "operand": "string"
-            },
-            {
-                "key": "selector",
-                "operator": "not_equal",
-                "operand": "comment"
-            }
-        ]
-    },*/
     
     {
         "keys": ["-"],
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/input/Hyphen.sublime-macro"
+            "file": "Packages/HaXe/Macros/input/Hyphen.sublime-macro"
         },
         "context":
         [
@@ -223,7 +109,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/input/OpenPar.sublime-macro"
+            "file": "Packages/HaXe/Macros/input/OpenPar.sublime-macro"
         },
         "context":
         [
@@ -254,7 +140,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/input/OpenParCompletion.sublime-macro"
+            "file": "Packages/HaXe/Macros/input/OpenParCompletion.sublime-macro"
         },
         "context":
         [
@@ -286,7 +172,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/input/Comma.sublime-macro"
+            "file": "Packages/HaXe/Macros/input/Comma.sublime-macro"
         },
         "context":
         [
