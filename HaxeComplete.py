@@ -62,7 +62,7 @@ functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
 functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
 paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
 isType = re.compile("^[A-Z][a-zA-Z0-9_]*$")
-comments = re.compile("(//[^\n\r]*[\n\r]|/\*(.*)\*/)", re.MULTILINE | re.DOTALL )
+comments = re.compile("(//[^\n\r]*?[\n\r]|/\*(.*?)\*/)", re.MULTILINE | re.DOTALL )
 
 haxeVersion = re.compile("haxe_([0-9]{3})",re.M)
 bundleFile = __file__
@@ -1052,8 +1052,26 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		#print cl
 		buildClasses , buildPacks = build.get_types()
+
+		tarPkg = None
+		targetPackages = ["flash","flash9","flash8","neko","js","php","cpp","java"]
+
+		if build.target is not None :
+			tarPkg = build.target
+			if tarPkg == "swf9" :
+				tarPkg = "flash"
+			if tarPkg == "swf" :
+				tarPkg = "flash"
+
+		if build.nmml is not None :
+			tarPkg = "flash"
 		
-		cl.extend( HaxeComplete.stdClasses )
+		for c in HaxeComplete.stdClasses :
+			p = c.split(".")[0]
+			if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
+				cl.append(c)
+
+		#cl.extend( HaxeComplete.stdClasses )
 		cl.extend( buildClasses )
 		cl.sort();
 
@@ -1064,7 +1082,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#print(p)
 			if p == "flash9" or p == "flash8" :
 				p = "flash"
-			if build.target is None or (p not in HaxeBuild.targets) or (p == build.target) :
+			if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
 				stdPackages.append(p)
 
 		packs.extend( stdPackages )
