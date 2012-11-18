@@ -154,6 +154,8 @@ class HaxeBuild :
 		self.nmml = None
 		self.classpaths = []
 		self.libs = []
+		self.classes = None
+		self.packages = None
 
 	def to_string(self) :
 		out = os.path.basename(self.output)
@@ -185,26 +187,31 @@ class HaxeBuild :
 		return outp.strip()
 
 	def get_types( self ) :
-		classes = []
-		packs = []
+		if self.classes is None or self.packs is None :
+			classes = []
+			packs = []
 
-		cp = []
-		cp.extend( self.classpaths )
+			cp = []
+			cp.extend( self.classpaths )
 
-		for lib in self.libs :
-			if lib is not None :
-				cp.append( lib.path )
+			for lib in self.libs :
+				if lib is not None :
+					cp.append( lib.path )
 
-		#print("extract types :")
-		#print(cp)
-		for path in cp :
-			c, p = HaxeComplete.inst.extract_types( os.path.join( os.path.dirname( self.hxml ), path ) )
-			classes.extend( c )
-			packs.extend( p )
+			#print("extract types :")
+			#print(cp)
+			for path in cp :
+				c, p = HaxeComplete.inst.extract_types( os.path.join( os.path.dirname( self.hxml ), path ) )
+				classes.extend( c )
+				packs.extend( p )
 
-		classes.sort()
-		packs.sort()
-		return classes, packs
+			classes.sort()
+			packs.sort()
+
+			self.classes = classes;
+			self.packs = packs;
+
+		return self.classes, self.packs
 
 
 class HaxeInstallLib( sublime_plugin.WindowCommand ):
@@ -578,6 +585,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 
 	def extract_types( self , path , depth = 0 ) :
+
 		classes = []
 		packs = []
 		hasClasses = False
@@ -1054,7 +1062,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		buildClasses , buildPacks = build.get_types()
 
 		tarPkg = None
-		targetPackages = ["flash","flash9","flash8","neko","js","php","cpp","java"]
+		targetPackages = ["flash","flash9","flash8","neko","js","php","cpp","java","nme","jeash","neash"]
 
 		if build.target is not None :
 			tarPkg = build.target
@@ -1066,12 +1074,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if build.nmml is not None :
 			tarPkg = "flash"
 		
-		for c in HaxeComplete.stdClasses :
-			p = c.split(".")[0]
-			if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
-				cl.append(c)
+		#for c in HaxeComplete.stdClasses :
+		#	p = c.split(".")[0]
+		#	if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
+		#		cl.append(c)
 
-		#cl.extend( HaxeComplete.stdClasses )
+		cl.extend( HaxeComplete.stdClasses )
 		cl.extend( buildClasses )
 		cl.sort();
 
@@ -1082,8 +1090,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#print(p)
 			if p == "flash9" or p == "flash8" :
 				p = "flash"
-			if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
-				stdPackages.append(p)
+		#	if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
+			stdPackages.append(p)
 
 		packs.extend( stdPackages )
 		packs.extend( buildPacks )
@@ -1145,7 +1153,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				cm = ( display , clname )
 			else :
 				cm = ( display , ".".join(spl) )
-			if cm not in comps and ( build.target is None or (top not in HaxeBuild.targets) or (top == build.target) ) :
+			if cm not in comps and tarPkg is None or (top not in targetPackages) or (top == tarPkg) : #( build.target is None or (top not in HaxeBuild.targets) or (top == build.target) ) :
 				comps.append( cm )
 		
 		for p in packs :
@@ -1233,6 +1241,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			try:
 				haxepath = "haxe"
 				env = {}
+
+				merged_env = env.copy()
+				
+				if view is not None :
+					user_env = view.settings().get('build_env')
+					if user_env:
+						merged_env.update(user_env)
+
+
 				if view is not None :
 					settings = view.settings()
 					if settings.has("haxe_library_path") :
@@ -1240,10 +1257,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 					haxepath = settings.get("haxe_path" , "haxe")
 		
-				
 				self.serverPort+=1 
 				cmd = [haxepath , "--wait" , str(self.serverPort) ]
-				self.serverProc = Popen(cmd, env=env)
+				#self.serverProc = Popen(cmd, env=env , startupinfo=STARTUP_INFO)
+				self.serverProc = Popen(cmd, env = merged_env, startupinfo=STARTUP_INFO)
 				self.serverProc.poll()
 			except(OSError, ValueError) as e:
 				err = u'Error starting server %s: %s' % (" ".join(cmd), e)
