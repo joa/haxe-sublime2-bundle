@@ -417,11 +417,9 @@ class HaxeHint( sublime_plugin.TextCommand ):
 class HaxeRestartServer( sublime_plugin.WindowCommand ):
 
 	def run( self ) :
+		view = sublime.active_window().active_view()
 		HaxeComplete.inst.stop_server()
-		HaxeComplete.inst.start_server()
-
-
-
+		HaxeComplete.inst.start_server( view )
 
 
 class HaxeCreateType( sublime_plugin.WindowCommand ):
@@ -1200,14 +1198,27 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		})
 		return ("" , [], "" )
 
-	def start_server( self ) :
-		#self.stop_server()
-		
+	def start_server( self , view = None ) :
+		#self.stop_server()	
 		if self.serverMode and self.serverProc is None :
-			self.serverPort+=1 
-			cmd = ["haxe" , "--wait" , str(self.serverPort) ]
-			self.serverProc = Popen(cmd)
-			self.serverProc.poll()
+			try:
+				haxepath = "haxe"
+				env = {}
+				if view is not None :
+					settings = view.settings()
+					if settings.has("haxe_library_path") :
+						env["HAXE_LIBRARY_PATH"] = settings.get("haxe_library_path",".")
+
+					haxepath = settings.get("haxe_path" , "haxe")
+		
+				
+				self.serverPort+=1 
+				cmd = [haxepath , "--wait" , str(self.serverPort) ]
+				self.serverProc = Popen(cmd, env=env)
+				self.serverProc.poll()
+			except(OSError, ValueError) as e:
+				err = u'Error starting server %s: %s' % (" ".join(cmd), e)
+				sublime.error_message(err)
 	
 	def stop_server( self ) :
 		
@@ -1222,7 +1233,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def run_haxe( self, view , display = None , commas = 0 ) :
 
-		self.start_server()
+		self.start_server( view )
 			
 		build = self.get_build( view )
 		settings = view.settings()
@@ -1262,7 +1273,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			#args.append( ("-cp" , bundleDir ) )
 			#args.append( ("--macro" , "SourceTools.complete()") )
 			
-		cmd = ["haxe"]
+
+		haxepath = settings.get( 'haxe_path' , 'haxe' )
+		cmd = [haxepath]
 		for a in args :
 			cmd.extend( list(a) )
 		
@@ -1280,10 +1293,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			#print(encoded_cmd)
 
+			env = {}
+			if settings.has("haxe_library_path") :
+				env["HAXE_LIBRARY_PATH"] = settings.get("haxe_library_path",".")
+
 			view.window().run_command("haxe_exec", {
 				"cmd": encoded_cmd,
 				#"working_dir": os.path.dirname()
-				"file_regex": haxeFileRegex
+				"file_regex": haxeFileRegex,
+				"env" : env
 			})
 			return ("" , [], "" )
 
