@@ -1240,7 +1240,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if self.serverMode and self.serverProc is None :
 			try:
 				haxepath = "haxe"
-				env = {}
+				
+				env = os.environ.copy()
 
 				merged_env = env.copy()
 				
@@ -1355,7 +1356,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			return ("" , [], "" )
 
 
+		print(cmd)
 		res, err = runcmd( cmd, "" )
+		print(err)
 		
 		if not autocomplete :
 			self.panel_output( view , " ".join(cmd) )
