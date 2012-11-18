@@ -198,7 +198,7 @@ class HaxeBuild :
 		#print("extract types :")
 		#print(cp)
 		for path in cp :
-			c, p = HaxeComplete.inst.extract_types( path )
+			c, p = HaxeComplete.inst.extract_types( os.path.join( os.path.dirname( self.hxml ), path ) )
 			classes.extend( c )
 			packs.extend( p )
 
