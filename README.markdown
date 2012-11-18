@@ -56,6 +56,12 @@ Restart Sublime Text 2
       - **Ctrl+Shift+E** to create a new enum,
       - **Ctrl+Shift+T** to create a new typedef
 
+### Settings
+
+ - `haxe_path` : Full path to the haxe compiler, if not already in your PATH ("/usr/bin/haxe" or "C:\Program Files\Haxe\haxe.exe")
+ - `haxe_library_path` : Full path to the standard lib, overriding HAXE_LIBRARY_PATH
+ - `haxe_build_server_mode` (`true` by default) : Uses [compilation server](http://haxe.org/manual/completion#compilation-cache-server) for building. The server is always used for completion, and may be restarted if needed through the command palette.
+
 ### Targeting NME
 
 [haxe NME](http://www.haxenme.org/) is based on a specific .nmml file (the .hxml is generated) which is supported by this bundle.
