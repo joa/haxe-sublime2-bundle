@@ -63,7 +63,7 @@ functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
 functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
 paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
 isType = re.compile("^[A-Z][a-zA-Z0-9_]*$")
-serverPort = 6000
+
 haxeVersion = re.compile("haxe_([0-9]{3})",re.M)
 bundleFile = __file__
 bundlePath = os.path.abspath(bundleFile)
@@ -549,6 +549,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	panel = None
 	serverMode = False
 	serverProc = None
+	serverPort = 6000
 
 	def __init__(self):
 		#print("init haxecomplete")
@@ -571,7 +572,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		if ver is not None :
 			self.serverMode = int(ver.group(1)) >= 209
+
+		#self.start_server()
 		
+	def __del__(self) :
+		self.stop_server()	
 		
 
 	def extract_types( self , path , depth = 0 ) :
@@ -839,8 +844,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					spl = l.split(" ")
 					currentBuild.args.append( ( "-cmd" , " ".join(spl[1:]) ) )
 
-				if l.startswith("--connect") and HaxeComplete.inst.serverMode :
-					currentBuild.args.append( ( "--connect" , str(serverPort) ))
+				#if l.startswith("--connect") and HaxeComplete.inst.serverMode :
+				#	currentBuild.args.append( ( "--connect" , str(self.serverPort) ))
 
 				for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib" ] :
 					if l.startswith( "-"+flag ) :
@@ -1196,20 +1201,23 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		return ("" , [], "" )
 
 	def start_server( self ) :
+		#self.stop_server()
 		
-		if self.serverProc is not None:
-			print(self.serverProc.poll())
-			print(self.serverProc.returncode)
-			
-		if self.serverMode and ( (self.serverProc is None) or (self.serverProc.returncode is not None) ) :
-			self.serverProc = Popen(["haxe" , "--wait" , str(serverPort) ], startupinfo=STARTUP_INFO )
+		if self.serverMode and self.serverProc is None :
+			self.serverPort+=1 
+			cmd = ["haxe" , "--wait" , str(self.serverPort) ]
+			self.serverProc = Popen(cmd)
+			self.serverProc.poll()
 	
 	def stop_server( self ) :
+		
 		if self.serverProc is not None :
+			self.serverProc.terminate()
 			self.serverProc.kill()
 			self.serverProc.wait()
-			self.serverProc = None
-			del self.serverProc
+		
+		self.serverProc = None
+		del self.serverProc
 			
 
 	def run_haxe( self, view , display = None , commas = 0 ) :
@@ -1240,9 +1248,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		
 		args.extend( build.args )	
+		buildServerMode = settings.get('haxe_build_server_mode', True)
 		
-		if self.serverMode and autocomplete:
-			args.append(("--connect" , str(serverPort)))
+		if self.serverMode and (autocomplete or buildServerMode) : #and autocomplete:
+			args.append(("--connect" , str(HaxeComplete.inst.serverPort)))
 		#args.append( ("--times" , "-v" ) )
 		if not autocomplete :
 			args.append( ("-main" , build.main ) )

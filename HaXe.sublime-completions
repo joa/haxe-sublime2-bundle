@@ -6,7 +6,7 @@
   	{ "trigger":"super" , "contents" : "super" },
     { "trigger": "else" , "contents" : "else"},
     { "trigger" : "if" , "contents" : "if" },
-    { "trigger" : "switch" , "contents" : "switch" },  
+    { "trigger" : "switch" , "contents" : "switch" }
   ]
 
 
