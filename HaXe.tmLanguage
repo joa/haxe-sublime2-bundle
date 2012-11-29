@@ -24,6 +24,10 @@
     </dict>
     <dict>
       <key>include</key>
+      <string>#regex</string>
+    </dict>
+    <dict>
+      <key>include</key>
       <string>#strings</string>
     </dict>
     <dict>
@@ -49,10 +53,6 @@
     <dict>
       <key>include</key>
       <string>#keywords</string>
-    </dict>
-    <dict>
-      <key>include</key>
-      <string>#regex</string>
     </dict>
     <dict>
       <key>include</key>
@@ -408,10 +408,10 @@
       <key>patterns</key>
       <array>
         <dict>
-          <key>captures</key>
-          <dict/>
+          <key>name</key>
+          <string>support.regex.haxe.2</string>
           <key>match</key>
-          <string>~/([^/]+)/</string>
+          <string>~/((?:\\/|[^/])+)/</string>
         </dict>
       </array>
     </dict>
