@@ -657,44 +657,25 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		view.add_regions("haxe-error" , regions , "invalid" , "dot" )
 
 	def on_load( self, view ) :
-		scopes = view.scope_name(view.sel()[0].end()).split()
-		
-		ignore = True
-		for s in ['source.haxe.2','source.hxml','source.erazor','source.nmml'] :
-			if s in scopes :
-				ignore = False
-				break
-		
-		if ignore :
-			return
 
-		if 'source.haxe.2' in scopes :
+		if view.score_selector(0,'source.haxe.2') > 0 :
 			HaxeCreateType.on_activated( view )
+		elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
+			return
 
 		self.generate_build( view )
 		self.highlight_errors( view )
 
 
 	def on_post_save( self , view ) :
-		scopes = view.scope_name(view.sel()[0].end()).split()
-		#sublime.status_message( scopes[0] )
-		if 'source.hxml' in scopes:
+		if view.score_selector(0,'source.hxml') > 0:
 			self.clear_build(view)
 
 	def on_activated( self , view ) :
-		scopes = view.scope_name(view.sel()[0].end()).split()
-		
-		ignore = True
-		for s in ['source.haxe.2','source.hxml','source.erazor','source.nmml'] :
-			if s in scopes :
-				ignore = False
-				break
-		
-		if ignore :
-			return
-
-		if 'source.haxe.2' in scopes :
+		if view.score_selector(0,'source.haxe.2') > 0 :
 			HaxeCreateType.on_activated( view )
+		elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
+			return
 		
 		self.get_build(view)
 		self.extract_build_args( view )
@@ -703,9 +684,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		self.highlight_errors( view )
 
 	def on_pre_save( self , view ) :
-		scopes = view.scope_name(view.sel()[0].end()).split()
-		
-		if 'source.haxe.2' not in scopes:
+		if view.score_selector(0,'source.haxe.2') > 0 :
 			return []
 
 		fn = view.file_name()
@@ -912,7 +891,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		
 		folders = view.window().folders()
 		for f in folders:
-			if f in fn :
+			if f + "/" in fn :
 				folder = f
 
 		# settings.set("haxe-complete-folder", folder)
@@ -1172,7 +1151,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def get_build( self , view ) :
 		
-		if self.currentBuild is None :
+		if self.currentBuild is None and view.score_selector(0,"source.haxe.2") > 0 :
+
 			fn = view.file_name()
 			src_dir = os.path.dirname( fn )
 			src = view.substr(sublime.Region(0, view.size()))
