@@ -3,7 +3,7 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
 
 # Features
 
- - **Syntax highlighting** for Haxe sources, hxml build files and hss
+ - **Syntax highlighting** for Haxe sources, hxml build files and HSS
  - **Haxe compiler completion**, code hints and error highlighting
  - **Package and classes discovery/completion** supporting hxml classpath (-cp) and haxelib libraries (-lib)
  - **NME completion, target selection and compilation**
@@ -23,24 +23,26 @@ is through [Package Control](http://wbond.net/sublime_packages/package_control).
 
 ## Manual installation
 
+If you want to develop on a forked repo, you can clone it into the *Packages* folder:
+
 ### Mac OSX
 
     cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
-    git clone git://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
+    git clone https://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
 
 ### Linux
 
     cd ~/.config/sublime-text-2/Packages
-    git clone git://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
+    git clone https://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
 
 ### Windows
 
 Using git bash http://code.google.com/p/msysgit/
 
     cd /c/Users/<username>/AppData/Roaming/Sublime\ Text\ 2/Packages
-    git clone git://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
+    git clone https://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
 
-Restart Sublime Text 2
+Restart Sublime Text 2.
 
 # Usage
 
