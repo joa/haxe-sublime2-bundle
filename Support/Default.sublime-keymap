@@ -16,7 +16,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/Macros/SaveAllAndBuild.sublime-macro"
+            "file": "Packages/Haxe/Macros/SaveAllAndBuild.sublime-macro"
         },
         "context":
         [
@@ -56,7 +56,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/Macros/input/SpaceCompletion.sublime-macro"
+            "file": "Packages/Haxe/Macros/input/SpaceCompletion.sublime-macro"
         },
         "context":
         [
@@ -78,7 +78,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/Macros/input/Hyphen.sublime-macro"
+            "file": "Packages/Haxe/Macros/input/Hyphen.sublime-macro"
         },
         "context":
         [
@@ -109,7 +109,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/Macros/input/OpenPar.sublime-macro"
+            "file": "Packages/Haxe/Macros/input/OpenPar.sublime-macro"
         },
         "context":
         [
@@ -140,7 +140,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/Macros/input/OpenParCompletion.sublime-macro"
+            "file": "Packages/Haxe/Macros/input/OpenParCompletion.sublime-macro"
         },
         "context":
         [
@@ -172,7 +172,7 @@
         "command": "run_macro_file",
         "args":
         {
-            "file": "Packages/HaXe/Macros/input/Comma.sublime-macro"
+            "file": "Packages/Haxe/Macros/input/Comma.sublime-macro"
         },
         "context":
         [
