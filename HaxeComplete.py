@@ -1267,7 +1267,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		autocomplete = display is not None
 
-		if autocomplete is False and build.nmml is not None:
+		if autocomplete is False and build is not None and build.nmml is not None:
 			return self.run_nme(view, build)
 		
 		fn = view.file_name()
