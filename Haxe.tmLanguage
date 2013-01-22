@@ -15,7 +15,7 @@
   <key>keyEquivalent</key>
   <string>^~H</string>
   <key>name</key>
-  <string>HaXe2</string>
+  <string>Haxe2</string>
   <key>patterns</key>
   <array>
     <dict>

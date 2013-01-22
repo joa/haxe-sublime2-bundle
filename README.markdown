@@ -3,7 +3,7 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
 
 # Features
 
- - **Syntax highlighting** for haxe sources, hxml build files and hss
+ - **Syntax highlighting** for Haxe sources, hxml build files and HSS
  - **Haxe compiler completion**, code hints and error highlighting
  - **Package and classes discovery/completion** supporting hxml classpath (-cp) and haxelib libraries (-lib)
  - **NME completion, target selection and compilation**
@@ -23,18 +23,26 @@ is through [Package Control](http://wbond.net/sublime_packages/package_control).
 
 ## Manual installation
 
-### Mac OSX
-    cd /Users/<username>/Library/Application\ Support/Sublime\ Text\ 2/Packages
-    git clone git://github.com/<fork author>/haxe-sublime2-bundle.git HaXe
-### Linux
-    cd ~/.config/sublime-text-2/Packages
-    git clone git://github.com/<fork author>/haxe-sublime2-bundle.git HaXe
-### Windows
-    (Using git bash http://code.google.com/p/msysgit/)
-    cd /c/Users/<username>/AppData/Roaming/Sublime\ Text\ 2/Packages
-    git clone git://github.com/<fork author>/haxe-sublime2-bundle.git HaXe
+If you want to develop on a forked repo, you can clone it into the *Packages* folder:
 
-Restart Sublime Text 2
+### Mac OSX
+
+    cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
+    git clone https://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
+
+### Linux
+
+    cd ~/.config/sublime-text-2/Packages
+    git clone https://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
+
+### Windows
+
+Using git bash http://code.google.com/p/msysgit/
+
+    cd /c/Users/<username>/AppData/Roaming/Sublime\ Text\ 2/Packages
+    git clone https://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
+
+Restart Sublime Text 2.
 
 # Usage
 
@@ -42,7 +50,7 @@ Restart Sublime Text 2
  - Create new types through the sidebar's context menu
  - Edit your classes (check the cool snippets, like 'prop'-Tab)
  - Completion is triggered either automatically by dot and colon keys, or manually by Ctrl+Space.
- - Open parenthesis and comma keys display haxe type hints in the status bar
+ - Open parenthesis and comma keys display Haxe type hints in the status bar
 
 ### Shortcuts
 
@@ -58,13 +66,13 @@ Restart Sublime Text 2
 
 ### Settings
 
- - `haxe_path` : Full path to the haxe compiler, if not already in your PATH ("/usr/bin/haxe" or "C:\Program Files\Haxe\haxe.exe")
+ - `haxe_path` : Full path to the Haxe compiler, if not already in your PATH ("/usr/bin/haxe" or "C:\Program Files\Haxe\haxe.exe")
  - `haxe_library_path` : Full path to the standard lib, overriding HAXE_LIBRARY_PATH
  - `haxe_build_server_mode` (`true` by default) : Uses [compilation server](http://haxe.org/manual/completion#compilation-cache-server) for building. The server is always used for completion, and may be restarted if needed through the command palette.
 
 ### Targeting NME
 
-[haxe NME](http://www.haxenme.org/) is based on a specific .nmml file (the .hxml is generated) which is supported by this bundle.
+[Haxe NME](http://www.haxenme.org/) is based on a specific .nmml file (the .hxml is generated) which is supported by this bundle.
 
  - press **Ctrl+Shift+B** to select a NME target
  - press **Ctrl+Enter** to build and run (regular Sublime Text build system won't work)

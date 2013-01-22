@@ -1,8 +1,0 @@
-[
-    { "caption": "HaXe: New Class", "command": "haxe_create_type" , "args" : { "t" : "class"} },
-    { "caption": "HaXe: New Interface", "command": "haxe_create_type" , "args" : { "t" : "interface"} },
-    { "caption": "HaXe: New Enum", "command": "haxe_create_type" , "args" : { "t" : "enum"} },
-    { "caption": "HaXe: New Typedef", "command": "haxe_create_type" , "args" : { "t" : "typedef"} },
-    { "caption": "HaXe: Manage libraries", "command": "haxe_install_lib" },
-    { "caption": "HaXe: Restart Server", "command": "haxe_restart_server" }
-]
