@@ -1298,6 +1298,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			args.append( ("-main" , build.main ) )
 			#args.append( ("--times" , "-v" ) )
 		else:
+			args.append( ("-D", "st_display" ) )
 			args.append( ("--display", display ) )
 			args.append( ("--no-output" , "") )
 			#args.append( ("-cp" , bundleDir ) )
