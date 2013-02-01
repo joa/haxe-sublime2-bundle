@@ -141,7 +141,7 @@ class HaxeBuild :
 
 	#auto = None
 	targets = ["js","cpp","swf","swf9","neko","php","java","cs"]
-	nme_targets = [("Flash","flash","test"),("HTML5","html5","test"),("C++","cpp","test"),("Linux 64","linux -64","test"),("iOS - iPhone Simulator","ios -simulator","test"),("iOS - iPad Simulator","ios -simulator -ipad","test"),("iOS - Update XCode Project","ios","update"),( "Android","android","test"),("WebOS", "webos","test"),("Neko","neko","test"),("BlackBerry","blackberry","test")]
+	nme_targets = [("Flash","flash -debug","test"),("HTML5","html5 -debug","test"),("C++","cpp -debug","test"),("Linux","linux -debug","test"), ("Linux 64","linux -64 -debug","test"),("iOS - iPhone Simulator","ios -simulator -debug","test"),("iOS - iPad Simulator","ios -simulator -ipad -debug","test"),("iOS - Update XCode Project","ios -debug","update"),( "Android","android -debug","test"),("WebOS", "webos -debug","test"),("Neko","neko -debug","test"),("Neko 64","neko -64 -debug","test"),("BlackBerry","blackberry -debug","test"), ("Flash Debug","flash -debug","test"),("HTML5 Debug","html5 -debug","test"),("C++ Debug","cpp -debug","test"),("Linux 64 Debug","linux -64 -debug","test "),("Linux  Debug","linux -debug","test "),("iOS - iPhone Simulator Debug","ios -simulator -debug","test"),("iOS - iPad Simulator Debug","ios -simulator -ipad -debug","test"),("iOS - Update XCode Project Debug","ios -debug","update"),( "Android Debug","android -debug","test"),("WebOS Debug", "webos -debug","test"),("Neko Debug","neko -64","test"),("Neko 64 Debug","neko -64 -debug","test"),("BlackBerry Debug","blackberry -debug","test")]
 	nme_target = ("Flash","flash","test")
 
 	def __init__(self) :
