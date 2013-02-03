@@ -56,7 +56,7 @@ typeDecl = re.compile("(class|typedef|enum|typedef)\s+([A-Z][a-zA-Z0-9_]*)\s*(<[
 libFlag = re.compile("-lib\s+(.*?)")
 skippable = re.compile("^[a-zA-Z0-9_\s]*$")
 inAnonymous = re.compile("[{,]\s*([a-zA-Z0-9_\"\']+)\s*:\s*$" , re.M | re.U )
-extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main)=\"([a-z0-9_./-]+)\"", re.I)
+extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main|path)=\"([a-z0-9_./-]+)\"", re.I)
 variables = re.compile("var\s+([^:;\s]*)", re.I)
 functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
 functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
@@ -773,7 +773,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					elif (tag == "haxelib"):
 						currentBuild.libs.append( HaxeLib.get( name ) )
 						currentBuild.args.append( ("-lib" , name) )
-					elif (tag == "classpath"):
+					elif (tag == "classpath" or tag == "source"):
 						currentBuild.classpaths.append( os.path.join( buildPath , name ) )
 						currentBuild.args.append( ("-cp" , os.path.join( buildPath , name ) ) )
 				else: # NME 3.2
