@@ -890,9 +890,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		folder = os.path.dirname(fn)
 		
 		folders = view.window().folders()
-		for f in folders:
-			if f + "/" in fn :
-				folder = f
+		if len(folders) == 1:
+			folder = folders[0]
+		else:
+			for f in folders:
+				if f + "/" in fn :
+					folder = f
 
 		# settings.set("haxe-complete-folder", folder)
 		self.find_hxml(folder)
