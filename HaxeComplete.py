@@ -56,7 +56,7 @@ typeDecl = re.compile("(class|typedef|enum|typedef)\s+([A-Z][a-zA-Z0-9_]*)\s*(<[
 libFlag = re.compile("-lib\s+(.*?)")
 skippable = re.compile("^[a-zA-Z0-9_\s]*$")
 inAnonymous = re.compile("[{,]\s*([a-zA-Z0-9_\"\']+)\s*:\s*$" , re.M | re.U )
-extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main)=\"([a-z0-9_./-]+)\"", re.I)
+extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main|path)=\"([a-z0-9_./-]+)\"", re.I)
 variables = re.compile("var\s+([^:;\s]*)", re.I)
 functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
 functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
@@ -141,7 +141,7 @@ class HaxeBuild :
 
 	#auto = None
 	targets = ["js","cpp","swf","swf9","neko","php","java","cs"]
-	nme_targets = [("Flash","flash","test"),("HTML5","html5","test"),("C++","cpp","test"),("Linux 64","linux -64","test"),("iOS - iPhone Simulator","ios -simulator","test"),("iOS - iPad Simulator","ios -simulator -ipad","test"),("iOS - Update XCode Project","ios","update"),( "Android","android","test"),("WebOS", "webos","test"),("Neko","neko","test"),("BlackBerry","blackberry","test")]
+	nme_targets = [("Flash","flash -debug","test"),("HTML5","html5 -debug","test"),("C++","cpp -debug","test"),("Linux","linux -debug","test"), ("Linux 64","linux -64 -debug","test"),("iOS - iPhone Simulator","ios -simulator -debug","test"),("iOS - iPad Simulator","ios -simulator -ipad -debug","test"),("iOS - Update XCode Project","ios -debug","update"),( "Android","android -debug","test"),("WebOS", "webos -debug","test"),("Neko","neko -debug","test"),("Neko 64","neko -64 -debug","test"),("BlackBerry","blackberry -debug","test"), ("Flash Debug","flash -debug","test"),("HTML5 Debug","html5 -debug","test"),("C++ Debug","cpp -debug","test"),("Linux 64 Debug","linux -64 -debug","test "),("Linux  Debug","linux -debug","test "),("iOS - iPhone Simulator Debug","ios -simulator -debug","test"),("iOS - iPad Simulator Debug","ios -simulator -ipad -debug","test"),("iOS - Update XCode Project Debug","ios -debug","update"),( "Android Debug","android -debug","test"),("WebOS Debug", "webos -debug","test"),("Neko Debug","neko -64","test"),("Neko 64 Debug","neko -64 -debug","test"),("BlackBerry Debug","blackberry -debug","test")]
 	nme_target = ("Flash","flash","test")
 
 	def __init__(self) :
@@ -773,7 +773,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					elif (tag == "haxelib"):
 						currentBuild.libs.append( HaxeLib.get( name ) )
 						currentBuild.args.append( ("-lib" , name) )
-					elif (tag == "classpath"):
+					elif (tag == "classpath" or tag == "source"):
 						currentBuild.classpaths.append( os.path.join( buildPath , name ) )
 						currentBuild.args.append( ("-cp" , os.path.join( buildPath , name ) ) )
 				else: # NME 3.2
@@ -890,9 +890,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		folder = os.path.dirname(fn)
 		
 		folders = view.window().folders()
-		for f in folders:
-			if f + "/" in fn :
-				folder = f
+		if len(folders) == 1:
+			folder = folders[0]
+		else:
+			for f in folders:
+				if f + "/" in fn :
+					folder = f
 
 		# settings.set("haxe-complete-folder", folder)
 		self.find_hxml(folder)
