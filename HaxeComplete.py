@@ -1053,7 +1053,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if tarPkg == "swf" :
 				tarPkg = "flash"
 
-		if build.nmml is not None :
+		if build.nmml is not None or HaxeLib.get("nme") in build.libs :
 			tarPkg = "nme"
 			targetPackages.extend( ["jeash","neash","browser","native"] )
 		
