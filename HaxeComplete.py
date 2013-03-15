@@ -1035,9 +1035,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		for i in imports :
 			imp = i[1]
 			imported.append(imp)
-			dot = imp.rfind(".")+1
-			clname = imp[dot:]
-			cl.append( clname )
+			#dot = imp.rfind(".")+1
+			#clname = imp[dot:]
+			#cl.append( imp )
 			#print( i )
 
 		#print cl
@@ -1062,9 +1062,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#	if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
 		#		cl.append(c)
 
+		cl.extend( imported )
 		cl.extend( HaxeComplete.stdClasses )
 		cl.extend( buildClasses )
-		cl = list(set(cl))
+		cl = list(set(cl)) # unique
 		cl.sort();
 
 		packs = []
