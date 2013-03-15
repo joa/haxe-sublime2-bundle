@@ -1035,16 +1035,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		for i in imports :
 			imp = i[1]
 			imported.append(imp)
-			#dot = imp.rfind(".")+1
-			#clname = imp[dot:]
-			#cl.append( clname )
+			dot = imp.rfind(".")+1
+			clname = imp[dot:]
+			cl.append( clname )
 			#print( i )
 
 		#print cl
 		buildClasses , buildPacks = build.get_types()
 
 		tarPkg = None
-		targetPackages = ["flash","flash9","flash8","neko","js","php","cpp","cs","java","nme","jeash","neash"]
+		targetPackages = ["flash","flash9","flash8","neko","js","php","cpp","cs","java","nme"]
 
 		if build.target is not None :
 			tarPkg = build.target
@@ -1054,7 +1054,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				tarPkg = "flash"
 
 		if build.nmml is not None :
-			tarPkg = "flash"
+			tarPkg = "nme"
+			targetPackages.extend( ["jeash","neash","browser","native"] )
 		
 		#for c in HaxeComplete.stdClasses :
 		#	p = c.split(".")[0]
@@ -1063,6 +1064,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		cl.extend( HaxeComplete.stdClasses )
 		cl.extend( buildClasses )
+		cl = list(set(cl))
 		cl.sort();
 
 		packs = []
@@ -1110,6 +1112,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					comps.append( cm )
 
 		for c in cl :
+			#print(c)
 			spl = c.split(".")
 			if spl[0] == "flash9" or spl[0] == "flash8" :
 				spl[0] = "flash"
@@ -1340,9 +1343,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			return ("" , [], "" )
 
 
-		print(cmd)
+		#print(cmd)
 		res, err = runcmd( cmd, "" )
-		print(err)
+		#print(err)
 		
 		if not autocomplete :
 			self.panel_output( view , " ".join(cmd) )
