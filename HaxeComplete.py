@@ -1051,12 +1051,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if tarPkg == "swf9" :
 				tarPkg = "flash"
 			if tarPkg == "swf" :
-				tarPkg = "flash"
+				tarPkg = "flash8"
 
 		if build.nmml is not None or HaxeLib.get("nme") in build.libs :
 			tarPkg = "nme"
 			targetPackages.extend( ["jeash","neash","browser","native"] )
 		
+		#print( "tarpkg : " + tarPkg );
 		#for c in HaxeComplete.stdClasses :
 		#	p = c.split(".")[0]
 		#	if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
@@ -1073,10 +1074,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print("target : "+build.target)
 		for p in HaxeComplete.stdPackages :
 			#print(p)
-			if p == "flash9" or p == "flash8" :
-				p = "flash"
-		#	if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
-			stdPackages.append(p)
+			#if p == "flash9" or p == "flash8" :
+			#	p = "flash"
+			if tarPkg is None or (p not in targetPackages) or (p == tarPkg) :
+				stdPackages.append(p)
 
 		packs.extend( stdPackages )
 		packs.extend( buildPacks )
@@ -1115,8 +1116,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		for c in cl :
 			#print(c)
 			spl = c.split(".")
-			if spl[0] == "flash9" or spl[0] == "flash8" :
-				spl[0] = "flash"
+			#if spl[0] == "flash9" or spl[0] == "flash8" :
+			#	spl[0] = "flash"
 
 			top = spl[0]
 			#print(spl)
@@ -1139,6 +1140,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				cm = ( display , clname )
 			else :
 				cm = ( display , ".".join(spl) )
+			
 			if cm not in comps and tarPkg is None or (top not in targetPackages) or (top == tarPkg) : #( build.target is None or (top not in HaxeBuild.targets) or (top == build.target) ) :
 				comps.append( cm )
 		
