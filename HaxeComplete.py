@@ -1310,16 +1310,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		else:
 			args.append( ("-D", "st_display" ) )
 			args.append( ("--display", display ) )
-			args.append( ("--no-output" , "") )
+			args.append( ("--no-output") )
 			#args.append( ("-cp" , bundleDir ) )
 			#args.append( ("--macro" , "SourceTools.complete()") )
-			
+
 
 		haxepath = settings.get( 'haxe_path' , 'haxe' )
 		cmd = [haxepath]
 		for a in args :
 			cmd.extend( list(a) )
-		
+
 		#print( cmd )
 		#
 		# TODO: replace runcmd with run_command('exec') when possible (haxelib, maybe build)
