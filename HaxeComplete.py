@@ -874,8 +874,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				currentBuild.classpaths.append( buildPath )
 				currentBuild.args.append( ("-cp" , buildPath ) )
 			
-			if currentBuild.main is not None :
-				self.builds.append( currentBuild )
+			if currentBuild.main is None:
+			    currentBuild.main = '[No Main]'
+                        self.builds.append( currentBuild )
 
 
 
