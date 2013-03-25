@@ -409,7 +409,7 @@
       <array>
         <dict>
           <key>name</key>
-          <string>support.regex.haxe.2</string>
+          <string>string.regex.haxe.2</string>
           <key>match</key>
           <string>~/((?:\\/|[^/])+)/</string>
         </dict>
