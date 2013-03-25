@@ -579,7 +579,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			print "Server is on!"
 			self.serverMode = int(ver.group(1)) >= 209
 
-		self.serverMode = True
+		#self.serverMode = True
 		#self.start_server()
 
 	def __del__(self) :
