@@ -64,7 +64,7 @@ paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
 isType = re.compile("^[A-Z][a-zA-Z0-9_]*$")
 comments = re.compile("(//[^\n\r]*?[\n\r]|/\*(.*?)\*/)", re.MULTILINE | re.DOTALL )
 
-haxeVersion = re.compile("haxe_([0-9]{3})",re.M)
+haxeVersion = re.compile("(Haxe|haXe) Compiler ([0-9]\.[0-9])",re.M)
 bundleFile = __file__
 bundlePath = os.path.abspath(bundleFile)
 bundleDir = os.path.dirname(bundlePath)
@@ -560,7 +560,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print("init haxecomplete")
 		HaxeComplete.inst = self
 
-		out, err = runcmd( ["haxe", "-main", "Nothing", "--no-output"] )
+		out, err = runcmd( ["haxe", "-main", "Nothing", "-v", "--no-output"] )
+
+		_, versionOut = runcmd(["haxe", "-v"])
 
 		m = classpathLine.match(out)
 		if m is not None :
@@ -573,14 +575,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		 		HaxeComplete.stdClasses.extend( classes )
 		 		HaxeComplete.stdPackages.extend( packs )
 
-		ver = re.search( haxeVersion , out )
+		ver = re.search(haxeVersion , versionOut)
 
 		if ver is not None :
-			print "Server is on!"
-			self.serverMode = int(ver.group(1)) >= 209
-
-		#self.serverMode = True
-		#self.start_server()
+			self.serverMode = float(ver.group(2)) * 100 >= 209
 
 	def __del__(self) :
 		self.stop_server()
