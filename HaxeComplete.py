@@ -32,7 +32,7 @@ except (AttributeError):
 	STARTUP_INFO = None
 
 def runcmd( args, input=None ):
-	print(args)
+	#print(args)
 	try:
 		p = Popen([a.encode(sys.getfilesystemencoding()) for a in args], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
 		if isinstance(input, unicode):
@@ -140,7 +140,7 @@ inst = None
 class HaxeBuild :
 
 	#auto = None
-	targets = ["js","cpp","swf8","swf","swf9","neko","php","java","cs"]
+	targets = ["js","cpp","swf","neko","php","java","cs"]
 	nme_targets = [("Flash","flash -debug","test"),("HTML5","html5 -debug","test"),("C++","cpp -debug","test"),("Linux","linux -debug","test"), ("Linux 64","linux -64 -debug","test"),("iOS - iPhone Simulator","ios -simulator -debug","test"),("iOS - iPad Simulator","ios -simulator -ipad -debug","test"),("iOS - Update XCode Project","ios -debug","update"),( "Android","android -debug","test"),("WebOS", "webos -debug","test"),("Neko","neko -debug","test"),("Neko 64","neko -64 -debug","test"),("BlackBerry","blackberry -debug","test"), ("Flash Debug","flash -debug","test"),("HTML5 Debug","html5 -debug","test"),("C++ Debug","cpp -debug","test"),("Linux 64 Debug","linux -64 -debug","test "),("Linux  Debug","linux -debug","test "),("iOS - iPhone Simulator Debug","ios -simulator -debug","test"),("iOS - iPad Simulator Debug","ios -simulator -ipad -debug","test"),("iOS - Update XCode Project Debug","ios -debug","update"),( "Android Debug","android -debug","test"),("WebOS Debug", "webos -debug","test"),("Neko Debug","neko -64","test"),("Neko 64 Debug","neko -64 -debug","test"),("BlackBerry Debug","blackberry -debug","test")]
 	nme_target = ("Flash","flash","test")
 
@@ -556,6 +556,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	serverProc = None
 	serverPort = 6000
 
+	compilerVersion = 2
+
 	def __init__(self):
 		#print("init haxecomplete")
 		HaxeComplete.inst = self
@@ -578,6 +580,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		ver = re.search(haxeVersion , versionOut)
 
 		if ver is not None :
+			self.compilerVersion = float(ver.group(2))
+			
+			if self.compilerVersion >= 3 :
+				HaxeBuild.targets.append("swf8")
+			else :
+				HaxeBuild.targets.append("swf9")
+
 			self.serverMode = float(ver.group(2)) * 100 >= 209
 
 	def __del__(self) :
@@ -716,7 +725,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		ch = src[caret-1]
 		#print(ch)
 		if ch not in ".(:, " :
-			#print("here")
 			view.run_command("haxe_display_completion")
 		#else :
 		#	view.run_command("haxe_insert_completion")
@@ -850,8 +858,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 						break
 
+				#print(HaxeBuild.targets)
 				for flag in HaxeBuild.targets :
 					if l.startswith( "-" + flag + " " ) :
+					
 						spl = l.split(" ")
 						#outp = os.path.join( folder , " ".join(spl[1:]) )
 						outp = " ".join(spl[1:])
@@ -1047,12 +1057,23 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		tarPkg = None
 		targetPackages = ["flash","flash9","flash8","neko","js","php","cpp","cs","java","nme"]
 
+		compilerVersion = HaxeComplete.inst.compilerVersion
+
 		if build.target is not None :
 			tarPkg = build.target
-			if tarPkg == "swf" :
+			# haxe 2
+			if tarPkg == "swf9" :
 				tarPkg = "flash"
+
+			# haxe 3
 			if tarPkg == "swf8" :
 				tarPkg = "flash8"
+				
+			if tarPkg == "swf" :
+				if compilerVersion >= 3 :
+					tarPkg = "flash"
+				else :
+					tarPkg = "flash8"
 
 		if build.nmml is not None or HaxeLib.get("nme") in build.libs :
 			tarPkg = "nme"
