@@ -39,7 +39,7 @@
             }
         ]
     },
-    {
+   /*{
         "keys": ["ctrl+shift+l"],
         "command": "haxe_install_lib",
         "context":
@@ -50,7 +50,7 @@
                 "operand": "source.haxe.2,source.hxml,source.nmml"
             }
         ]
-    },
+    },*/
     {
         "keys": [" "],
         "command": "run_macro_file",
