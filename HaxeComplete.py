@@ -1498,7 +1498,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					if pars == 0 :
 						types.append( " -> ".join( currentType ) )
 						currentType = []
-				print(types)
+				
 				ret = types.pop()
 				msg = "";
 
