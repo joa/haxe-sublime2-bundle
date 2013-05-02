@@ -507,6 +507,61 @@
               <key>name</key>
               <string>constant.character.escape.haxe.2</string>
             </dict>
+            <dict>
+              <key>match</key>
+              <string>\$\$</string>
+              <key>name</key>
+              <string>constant.character.escape.haxe.2</string>
+            </dict>
+            <dict>
+              <key>captures</key>
+              <dict>
+                <key>1</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+                <key>3</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+                <key>4</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+              </dict>
+              <key>comment</key>
+              <string>String interpolation : "${test.ole}"</string>
+              <key>match</key>
+              <string>(\$)(\{)(.*)(\})</string>
+            </dict>
+            <dict>
+              <key>captures</key>
+              <dict>
+                <key>1</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+              </dict>
+              <key>comment</key>
+              <string>String interpolation : "$test"</string>
+              <key>match</key>
+              <string>(\$)([\w]*)</string>
+            </dict>
+            
           </array>
         </dict>
       </array>
