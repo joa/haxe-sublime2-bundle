@@ -12,6 +12,7 @@ import codecs
 import glob
 import hashlib
 import shutil
+import functools
 
 from xml.etree import ElementTree
 from xml.etree.ElementTree import XMLTreeBuilder
@@ -43,7 +44,7 @@ def runcmd( args, input=None ):
 		err = u'Error while running %s: %s' % (args[0], e)
 		return ("", err.decode('utf-8'))
 
-compilerOutput = re.compile("^([^:]+):([0-9]+): characters? ([0-9]+)-?([0-9]+)? : (.*)", re.M)
+compilerOutput = re.compile("^([^:]+):([0-9]+): (characters?|lines?) ([0-9]+)-?([0-9]+)? : (.*)", re.M)
 compactFunc = re.compile("\(.*\)")
 compactProp = re.compile(":.*\.([a-z_0-9]+)", re.I)
 spaceChars = re.compile("\s")
@@ -68,7 +69,8 @@ haxeVersion = re.compile("(Haxe|haXe) Compiler ([0-9]\.[0-9])",re.M)
 bundleFile = __file__
 bundlePath = os.path.abspath(bundleFile)
 bundleDir = os.path.dirname(bundlePath)
-haxeFileRegex = "^([^:]*):([0-9]+): characters? ([0-9]+)-?[0-9]* :(.*)$"
+#haxeFileRegex = "^([^:]*):([0-9]+): characters? ([0-9]+)-?[0-9]* :(.*)$"
+haxeFileRegex = "^([^:]*\.hx):([0-9]+):.*$"
 controlStruct = re.compile( "\s*(if|switch|for|while)\($" );
 
 class HaxeLib :
@@ -405,14 +407,39 @@ class HaxeSelectBuild( sublime_plugin.TextCommand ):
 
 
 class HaxeHint( sublime_plugin.TextCommand ):
-	def run( self , edit ) :
-		#print("haxe hint")
-
+	def run( self , edit , input = "" ) :
 		complete = HaxeComplete.inst
 		view = self.view
 
-		sel = view.sel()
-		for r in sel :
+		if input == "(":
+			sel = view.sel()
+			emptySel = True
+			for r in sel :
+				if not r.empty() :
+					emptySel = False
+					break
+
+			autoMatch = view.settings().get("auto_match_enabled",False)
+
+			if autoMatch :
+				if emptySel :
+					view.run_command( "insert_snippet" , {
+						"contents" : "($0)"
+					})
+				else :
+					view.run_command( "insert_snippet" , {
+						"contents" : "(${0:$SELECTION})"
+					})
+			else :
+				view.run_command("insert" , {
+					"characters" : "("
+				})
+		else :
+			view.run_command("insert" , {
+				"characters" : input
+			})
+
+		for r in view.sel() :
 			comps = complete.get_haxe_completions( self.view , r.end() )
 			#print(status);
 			#view.set_status("haxe-status", status)
@@ -649,21 +676,30 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 	def highlight_errors( self , view ) :
 		fn = view.file_name()
-		regions = []
+		line_regions = []
+		char_regions = []
 
 		for e in self.errors :
 			if fn.endswith(e["file"]) :
+				metric = e["metric"]
 				l = e["line"]
 				left = e["from"]
 				right = e["to"]
-				a = view.text_point(l,left)
-				b = view.text_point(l,right)
 
-				regions.append( sublime.Region(a,b))
+				if metric.startswith("character") :
+					a = view.text_point(l,left)
+					b = view.text_point(l,right)
+					char_regions.append( sublime.Region(a,b))
+				else :
+					a = view.text_point(left,0)
+					b = view.text_point(right,0)
+					line_regions.append( sublime.Region(a,b))
 
 				view.set_status("haxe-status" , "Error: " + e["message"] )
 
-		view.add_regions("haxe-error" , regions , "invalid" , "dot" )
+		view.add_regions("haxe-error-lines" , line_regions , "invalid" , "light_x_bright" , sublime.DRAW_OUTLINED )
+		view.add_regions("haxe-error" , char_regions , "invalid" , "light_x_bright" )
+
 
 	def on_load( self, view ) :
 
@@ -718,7 +754,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		if caret == 0 :
 			return None
 
-		if view.score_selector(caret,"source.haxe") == 0 or view.score_selector(caret,"string") > 0 or view.score_selector(caret,"comment") :
+		if view.score_selector(caret,"source.haxe") == 0 or view.score_selector(caret,"string,comment,keyword.control.directive.conditional.haxe.2") > 0 :
 			return None
 
 		src = view.substr(sublime.Region(0, view.size()))
@@ -1524,19 +1560,28 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		for infos in compilerOutput.findall(str) :
 			infos = list(infos)
+			print(infos)
 			f = infos.pop(0)
 			l = int( infos.pop(0) )-1
+
+			metric = infos.pop(0)
+			
 			left = int( infos.pop(0) )
 			right = infos.pop(0)
 			if right != "" :
 				right = int( right )
 			else :
 				right = left+1
+			
 			m = infos.pop(0)
+
+			if metric.startswith("line") :
+				left -= 1
 
 			errors.append({
 				"file" : f,
 				"line" : l,
+				"metric" : metric,
 				"from" : left,
 				"to" : right,
 				"message" : m
@@ -1553,13 +1598,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		#print("complete")
 		pos = locations[0]
 		scopes = view.scope_name(pos).split()
+		
 		offset = pos - len(prefix)
 		comps = []
 		if offset == 0 :
 			return comps
 
 		for s in scopes :
-			if s.split(".")[0] in ["string","comment"] :
+			if s == "keyword.control.directive.conditional.haxe.2" or s.split(".")[0] in ["string","comment"] :
 				return comps
 
 		if 'source.hxml' in scopes:
@@ -1753,7 +1799,7 @@ class HaxeExecCommand(stexec.ExecCommand):
 
         self.proc = None
         if not self.quiet:
-            print "Running " + " ".join(cmd).encode('utf-8')
+            self.append_data( None, "Running " + " ".join(cmd).encode('utf-8') + "\n" )
             sublime.status_message("Building")
 
         show_panel_on_build = sublime.load_settings("Preferences.sublime-settings").get("show_panel_on_build", True)
@@ -1792,6 +1838,13 @@ class HaxeExecCommand(stexec.ExecCommand):
 
     def is_visible():
     	return false
+
+    def on_data(self, proc, data):
+        sublime.set_timeout(functools.partial(self.append_data, proc, data), 0)
+
+    def on_finished(self, proc):
+        sublime.set_timeout(functools.partial(self.finish, proc), 1)
+
 
 
 class HaxelibExecCommand(stexec.ExecCommand):
