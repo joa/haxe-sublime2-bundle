@@ -1487,7 +1487,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				pars = 0;
 				currentType = [];
 				
-				print(hint)
 				for t in spl :
 					currentType.append( t )
 					if "(" in t or "{" in t :
@@ -1498,7 +1497,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 					if pars == 0 :
 						types.append( " -> ".join( currentType ) )
 						currentType = []
-				print(types)
+				
 				ret = types.pop()
 				msg = "";
 
