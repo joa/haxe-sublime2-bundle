@@ -464,8 +464,24 @@ class HaxeHint( sublime_plugin.TextCommand ):
 			})
 
 		for r in view.sel() :
-			comps = complete.get_haxe_completions( self.view , r.end() )
-			#print(status);
+			comps,hints = complete.get_haxe_completions( self.view , r.end() )
+			
+			if view.settings().get("haxe_smart_snippets",False) :
+				snippet = ""
+				i = 1
+				for h in reversed(hints) :
+					var = str(i)+":" + h;
+					if snippet == "":
+						snippet = var
+					else:
+						snippet = snippet + ", ${" + var + "}"
+					i = i+1
+
+				#print( hints )
+				view.run_command( "insert_snippet" , {
+					"contents" : "${"+snippet+"}"
+				})
+				
 			#view.set_status("haxe-status", status)
 			#sublime.status_message(status)
 			#if( len(comps) > 0 ) :
@@ -1448,6 +1464,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		#print(err)
 		hints = []
+		msg = ""
 		tree = None
 
 		try :
@@ -1459,6 +1476,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			print("invalid xml")
 
 		if tree is not None :
+
 			for i in tree.getiterator("type") :
 				hint = i.text.strip()
 				types = hint.split(" -> ")
@@ -1466,21 +1484,21 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				msg = "";
 
 				if commas >= len(types) :
-					if commas == 0 :
+					if commas == 0 or hint == "Dynamic" :
 						msg = hint + ": No autocompletion available"
 						#view.window().run_command("hide_auto_complete")
 						#comps.append((")",""))
-					else:
+					else :
 						msg =  "Too many arguments."
 				else :
-					msg = ", ".join(types[commas:])
-
-				if msg :
-					#msg =  " ( " + " , ".join( types ) + " ) : " + ret + "      " + msg
-					hints.append( msg )
-
-			if len(hints) > 0 :
-				status = " | ".join(hints)
+					hints = types[commas:]
+					if hints == ["Void"] :
+						hints = []
+						msg = "Void"
+					else :
+						msg = ", ".join(hints)
+				
+			status = msg
 
 			li = tree.find("list")
 			if li is not None :
@@ -1527,6 +1545,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 					comps.append( ( hint, insert ) )
 
+		#print(status)
 		if len(hints) == 0 and len(comps) == 0:
 			err = err.replace( temp , fn )
 			err = re.sub( u"\(display(.*)\)" ,"",err)
@@ -1534,50 +1553,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			lines = err.split("\n")
 			l = lines[0].strip()
 
-			if len(l) > 0 :
-				if l == "<list>" :
+			if len(l) > 0 and status == "":
+				if l == "<list>" or l == "<type>":
 					status = "No autocompletion available"
 				elif not re.match( haxeFileRegex , l ):
 					status = l
 				else :
 					status = ""
 
-			#regions = []
-
-			# for infos in compilerOutput.findall(err) :
-			# 	infos = list(infos)
-			# 	f = infos.pop(0)
-			# 	l = int( infos.pop(0) )-1
-			# 	left = int( infos.pop(0) )
-			# 	right = infos.pop(0)
-			# 	if right != "" :
-			# 		right = int( right )
-			# 	else :
-			# 		right = left+1
-			# 	m = infos.pop(0)
-
-			# 	self.errors.append({
-			# 		"file" : f,
-			# 		"line" : l,
-			# 		"from" : left,
-			# 		"to" : right,
-			# 		"message" : m
-			# 	})
-
-			# 	if( f == fn ):
-			# 		status = m
-
-			# 	if not autocomplete :
-			# 		w = view.window()
-			# 		if not w is None :
-			# 			w.open_file(f+":"+str(l)+":"+str(right) , sublime.ENCODED_POSITION  )
-			# 	#if not autocomplete
-
 			self.errors = self.extract_errors( err )
-			#self.highlight_errors( view )
+			
 
-		#print(status)
-		return ( err, comps, status )
+		return ( err, comps, status , hints )
 
 	def extract_errors( self , str ):
 		errors = []
@@ -1639,7 +1626,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			if view.file_name().endswith(".hxsl") :
 				comps = self.get_hxsl_completions( view , offset )
 			else :
-				comps = self.get_haxe_completions( view , offset )
+				comps,hints = self.get_haxe_completions( view , offset )
 
 		return comps
 
@@ -1650,6 +1637,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		src_dir = os.path.dirname(fn)
 		tdir = os.path.dirname(fn)
 		temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
+
+		hints = []
 
 		#find actual autocompletable char.
 		toplevelComplete = False
@@ -1715,7 +1704,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			comps.append((".","."))
 
 		if toplevelComplete and (inControlStruct or completeChar not in "(,") :
-			return comps
+			return comps,hints
 
 		if not os.path.exists( tdir ):
 			os.mkdir( tdir )
@@ -1731,14 +1720,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		inp = (fn,offset,commas,src[0:offset-1])
 		if self.currentCompletion["inp"] is None or inp != self.currentCompletion["inp"] :
-			ret , haxeComps , status = self.run_haxe( view , fn + "@" + str(offset) , commas )
+			ret , haxeComps , status , hints = self.run_haxe( view , fn + "@" + str(offset) , commas )
 
 			if completeChar not in "(," :
 				comps = haxeComps
 
-			self.currentCompletion["outp"] = (ret,comps,status)
+			self.currentCompletion["outp"] = (ret,comps,status,hints)
 		else :
-			ret, comps, status = self.currentCompletion["outp"]
+			ret, comps, status , hints = self.currentCompletion["outp"]
 
 		self.currentCompletion["inp"] = inp
 
@@ -1758,7 +1747,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		#sublime.status_message("")
 
-		return comps
+		return comps,hints
 
 	def get_hxsl_completions( self , view , offset ) :
 		comps = []
