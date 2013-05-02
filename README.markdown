@@ -57,7 +57,6 @@ Restart Sublime Text 2.
  - Press **Ctrl+Shift+B** to either automatically generate an hxml file if none exist, edit the build file if only one build exists or select among multiple builds (--next)
  - Press **Ctrl+Enter** to run the current/selected build
  - Press **Ctrl+I** on a qualified class name to shorten it and generate the import statement. Safe to use if the class is already imported.
- - Press **Ctrl+Shift+L** to install a library via haxelib
  - Press **Ctrl+Shift+H** and then : 
       - **Ctrl+Shift+C** to create a new class,
       - **Ctrl+Shift+I** to create a new interface,
