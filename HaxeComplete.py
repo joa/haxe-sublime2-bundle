@@ -1571,7 +1571,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 		for infos in compilerOutput.findall(str) :
 			infos = list(infos)
-			print(infos)
+			#print(infos)
 			f = infos.pop(0)
 			l = int( infos.pop(0) )-1
 
