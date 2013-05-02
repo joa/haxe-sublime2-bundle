@@ -1840,7 +1840,7 @@ class HaxeExecCommand(stexec.ExecCommand):
 
         self.proc = None
         if not self.quiet:
-            self.append_data( None, "Running " + " ".join(cmd).encode('utf-8') + "\n" )
+            print( "Running " + " ".join(cmd).encode('utf-8') )
             sublime.status_message("Building")
 
         show_panel_on_build = sublime.load_settings("Preferences.sublime-settings").get("show_panel_on_build", True)
