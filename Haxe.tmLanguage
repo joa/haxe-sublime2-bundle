@@ -347,11 +347,11 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>(#if\s+([\!\w]+|(\([^\)]*\))))</string>
+          <string>(#if\s+([\!\w]+|(\([^\)]*\)))\s*)</string>
         </dict>
         <dict>
           <key>match</key>
-          <string>(#end|#else|#elseif)\b</string>
+          <string>(#\w+\s*)</string>
           <key>name</key>
           <string>keyword.control.directive.conditional.haxe.2</string>
         </dict>
@@ -421,7 +421,7 @@
       <array>
         <dict>
           <key>match</key>
-          <string>\b(public|private|static|dynamic|inline|extern|typedef|override)\b</string>
+          <string>\b(public|private|static|dynamic|inline|macro|extern|typedef|override)\b</string>
           <key>name</key>
           <string>storage.modifier.haxe.2</string>
         </dict>
