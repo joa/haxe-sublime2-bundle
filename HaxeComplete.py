@@ -143,8 +143,32 @@ class HaxeBuild :
 
 	#auto = None
 	targets = ["js","cpp","swf","neko","php","java","cs"]
-	nme_targets = [("Flash","flash -debug","test"),("HTML5","html5 -debug","test"),("C++","cpp -debug","test"),("Linux","linux -debug","test"), ("Linux 64","linux -64 -debug","test"),("iOS - iPhone Simulator","ios -simulator -debug","test"),("iOS - iPad Simulator","ios -simulator -ipad -debug","test"),("iOS - Update XCode Project","ios -debug","update"),( "Android","android -debug","test"),("WebOS", "webos -debug","test"),("Neko","neko -debug","test"),("Neko 64","neko -64 -debug","test"),("BlackBerry","blackberry -debug","test"), ("Flash Debug","flash -debug","test"),("HTML5 Debug","html5 -debug","test"),("C++ Debug","cpp -debug","test"),("Linux 64 Debug","linux -64 -debug","test "),("Linux  Debug","linux -debug","test "),("iOS - iPhone Simulator Debug","ios -simulator -debug","test"),("iOS - iPad Simulator Debug","ios -simulator -ipad -debug","test"),("iOS - Update XCode Project Debug","ios -debug","update"),( "Android Debug","android -debug","test"),("WebOS Debug", "webos -debug","test"),("Neko Debug","neko -64","test"),("Neko 64 Debug","neko -64 -debug","test"),("BlackBerry Debug","blackberry -debug","test")]
-	nme_target = ("Flash","flash","test")
+	nme_targets = [
+		("Flash - test","flash -debug","test"),
+		("Flash - build only","flash -debug","build"),
+		("HTML5 - test","html5 -debug","test"),
+		("HTML5 - build only","html5 -debug","build"),
+		("C++ - test","cpp -debug","test"),
+		("C++ - build only","cpp -debug","build"),
+		("Linux - test","linux -debug","test"), 
+		("Linux - build only","linux -debug","build"), 
+		("Linux 64 - test","linux -64 -debug","test"),
+		("Linux 64 - build only","linux -64 -debug","build"),
+		("iOS - test in iPhone simulator","ios -simulator -debug","test"),
+		("iOS - test in iPad simulator","ios -simulator -ipad -debug","test"),
+		("iOS - update XCode project","ios -debug","update"),
+		("Android - test","android -debug","test"),
+		("Android - build only","android -debug","build"),
+		("WebOS - test", "webos -debug","test"),
+		("WebOS - build only", "webos -debug","build"),
+		("Neko - test","neko -debug","test"),
+		("Neko - build only","neko -debug","build"),
+		("Neko 64 - test","neko -64 -debug","test"),
+		("Neko 64 - build only","neko -64 -debug","build"),
+		("BlackBerry - test","blackberry -debug","test"),
+		("BlackBerry - build only","blackberry -debug","build")
+	]
+	nme_target = ("Flash - test","flash -debug","test")
 
 	def __init__(self) :
 
