@@ -469,12 +469,14 @@ class HaxeHint( sublime_plugin.TextCommand ):
 			if view.settings().get("haxe_smart_snippets",False) :
 				snippet = ""
 				i = 1
-				for h in reversed(hints) :
-					var = str(i)+":" + h;
+				for h in hints :
+					var = str(i)+": " + h + " ";
+					var = var.replace("{","\{")
+					var = var.replace("}","\}")
 					if snippet == "":
 						snippet = var
 					else:
-						snippet = snippet + ", ${" + var + "}"
+						snippet = snippet + ",${" + var + "}"
 					i = i+1
 
 				#print( hints )
@@ -1479,7 +1481,24 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			for i in tree.getiterator("type") :
 				hint = i.text.strip()
-				types = hint.split(" -> ")
+				spl = hint.split(" -> ")
+			
+				types = [];
+				pars = 0;
+				currentType = [];
+				
+				print(hint)
+				for t in spl :
+					currentType.append( t )
+					if "(" in t or "{" in t :
+						pars += 1
+					if ")" in t or "}" in t :
+						pars -= 1
+
+					if pars == 0 :
+						types.append( " -> ".join( currentType ) )
+						currentType = []
+				print(types)
 				ret = types.pop()
 				msg = "";
 
@@ -1492,6 +1511,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						msg =  "Too many arguments."
 				else :
 					hints = types[commas:]
+					#print(hints)
 					if hints == ["Void"] :
 						hints = []
 						msg = "Void"
@@ -1639,6 +1659,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
 
 		hints = []
+		show_hints = True
 
 		#find actual autocompletable char.
 		toplevelComplete = False
@@ -1662,6 +1683,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 				for i in range( prevComa , 0 , -1 ) :
 					c = src[i]
+					
 					if c == ")" :
 						closedPars += 1
 					elif c == "(" :
@@ -1671,16 +1693,21 @@ class HaxeComplete( sublime_plugin.EventListener ):
 						else :
 							closedPars -= 1
 					elif c == "," :
-						if closedPars == 0 :
+						if closedPars == 0 and closedBrackets == 0 :
 							commas += 1
 					elif c == "{" : # TODO : check for { ... , ... , ... } to have the right comma count
-						commas = 0
 						closedBrackets -= 1
+						if closedBrackets < 0 :
+							commas = 0
+						
 					elif c == "}" :
 						closedBrackets += 1
 
+				#print("commas : " + str(commas))
 				#print("closedBrackets : " + str(closedBrackets))
-
+				#print("closedPars : " + str(closedPars))
+				if closedBrackets < 0 : 
+					show_hints = False
 			else :
 
 				completeOffset = max( prevDot + 1, prevPar + 1 , prevColon + 1 )
@@ -1746,6 +1773,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 			os.remove( fn )
 
 		#sublime.status_message("")
+		if not show_hints :
+			hints = []
 
 		return comps,hints
 
