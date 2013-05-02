@@ -68,6 +68,7 @@ Restart Sublime Text 2.
  - `haxe_path` : Full path to the Haxe compiler, if not already in your PATH ("/usr/bin/haxe" or "C:\Program Files\Haxe\haxe.exe")
  - `haxe_library_path` : Full path to the standard lib, overriding HAXE_LIBRARY_PATH
  - `haxe_build_server_mode` (`true` by default) : Uses [compilation server](http://haxe.org/manual/completion#compilation-cache-server) for building. The server is always used for completion, and may be restarted if needed through the command palette.
+ - `haxe_smart_snippets` (`false` by default) : Injects smart snippets based on compiler hints after `(` and `,`
 
 ### Targeting NME
 
