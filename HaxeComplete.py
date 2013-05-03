@@ -742,32 +742,23 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		view.add_regions("haxe-error-lines" , line_regions , "invalid" , "light_x_bright" , sublime.DRAW_OUTLINED )
 		view.add_regions("haxe-error" , char_regions , "invalid" , "light_x_bright" )
 
+	def on_post_save( self , view ) :
+		if view.score_selector(0,'source.hxml') > 0:
+			self.clear_build(view)
 
+	def on_activated( self , view ) :
+		return self.on_open_file( view )
+	
 	def on_load( self, view ) :
+		return self.on_open_file( view )
 
+	def on_open_file( self , view ) :
 		if view.score_selector(0,'source.haxe.2') > 0 :
 			HaxeCreateType.on_activated( view )
 		elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
 			return
 
 		self.generate_build( view )
-		self.highlight_errors( view )
-
-
-	def on_post_save( self , view ) :
-		if view.score_selector(0,'source.hxml') > 0:
-			self.clear_build(view)
-
-	def on_activated( self , view ) :
-		if view.score_selector(0,'source.haxe.2') > 0 :
-			HaxeCreateType.on_activated( view )
-		elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
-			return
-
-		self.get_build(view)
-		self.extract_build_args( view )
-
-		self.generate_build(view)
 		self.highlight_errors( view )
 
 	def on_pre_save( self , view ) :
