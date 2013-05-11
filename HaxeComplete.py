@@ -740,7 +740,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 				view.set_status("haxe-status" , "Error: " + e["message"] )
 
 		view.add_regions("haxe-error-lines" , line_regions , "invalid" , "light_x_bright" , sublime.DRAW_OUTLINED )
-		view.add_regions("haxe-error" , char_regions , "invalid" , "light_x_bright" )
+		view.add_regions("haxe-error" , char_regions , "invalid" , "light_x_bright" , sublime.DRAW_OUTLINED )
 
 	def on_post_save( self , view ) :
 		if view.score_selector(0,'source.hxml') > 0:

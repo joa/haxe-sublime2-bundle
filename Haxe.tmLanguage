@@ -404,6 +404,19 @@
           <string>support.class.haxe</string>
         </dict>
         <dict>
+          <key>match</key>
+          <string>((\$)([a-zA-Z.]*))</string>
+          <key>captures</key>
+          <dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>keyword.operator.interpolation.haxe.2</string>
+            </dict>
+          </dict>
+          
+        </dict>
+        <dict>
           <key>captures</key>
           <dict>
             <key>2</key>
@@ -450,7 +463,7 @@
             <key>2</key>
             <dict>
               <key>name</key>
-              <string>storage.modifier.macro.haxe.2</string>
+              <string>keyword.operator.macro.haxe.2</string>
             </dict>
             <key>3</key>
             <dict>
@@ -468,7 +481,7 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>\b(package)\s+([a-z\.]*)\b</string>
+          <string>\b(package)\s*([a-z\.]*)\b</string>
           <key>captures</key>
           <dict>
             <key>1</key>
