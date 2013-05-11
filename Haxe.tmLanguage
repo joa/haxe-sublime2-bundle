@@ -405,7 +405,7 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>(\$)([ie])\(</string>
+          <string>(\$)([iea])\(</string>
           <key>captures</key>
           <dict>
             <key>1</key>
