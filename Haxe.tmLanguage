@@ -405,6 +405,24 @@
         </dict>
         <dict>
           <key>match</key>
+          <string>(\$)([ie])\(</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>keyword.operator.interpolation.haxe.2</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>support.reification.haxe.2</string>
+            </dict>
+          </dict>
+          
+        </dict>
+        <dict>
+          <key>match</key>
           <string>((\$)([a-zA-Z.]*))</string>
           <key>captures</key>
           <dict>
