@@ -481,12 +481,12 @@
             <key>2</key>
             <dict>
               <key>name</key>
-              <string>support.macro.haxe.2</string>
+              <string>storage.modifier.macro.haxe.2</string>
             </dict>
             <key>3</key>
             <dict>
               <key>name</key>
-              <string>support.macro.haxe.2</string>
+              <string>storage.modifier.macro.haxe.2</string>
             </dict>
           </dict>
           
@@ -504,7 +504,7 @@
             <key>3</key>
             <dict>
               <key>name</key>
-              <string>storage.modifier.macro.haxe.2</string>
+              <string>support.macro.haxe.2</string>
             </dict>
           </dict>
           
