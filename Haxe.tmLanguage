@@ -393,9 +393,32 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>\b(Array|ArrayAccess|Bool|Class|Date|DateTools|Dynamic|EReg|Enum|Float|Hash|Int|IntHash|IntIter|Iterable|Iterator|Lambda|List|Math|Null|Reflect|Std|String|StringBuf|StringTools|Type|UInt|ValueType|Void|Xml|XmlType|TBool|TInt|TFloat|TFunction|TObject|TEnum|TClass|TNull|TUnknown|Float2|Float3|Float4|Matrix|M44|M33|M43|M34|Texture|CubeTexture|Color)\b</string>
+          <string>\b_\b</string>
+          <key>name</key>
+          <string>support.variable.magic.haxe.2</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>\b(Array|ArrayAccess|Bool|Class|Date|DateTools|Dynamic|EReg|Enum|Float|Hash|Int|IntHash|IntIter|Iterable|Iterator|Lambda|List|Math|Null|Reflect|Std|String|StringBuf|StringTools|Type|UInt|ValueType|Void|Xml|XmlType|TBool|TInt|TFloat|TFunction|TObject|TEnum|TClass|TNull|TUnknown|Float2|Float3|Float4|Matrix|M44|M33|M43|M34|Texture|CubeTexture|Color|Map)\b</string>
           <key>name</key>
           <string>support.class.haxe</string>
+        </dict>
+        <dict>
+          <key>captures</key>
+          <dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>entity.name.type.package.haxe.2</string>
+            </dict>
+            <key>4</key>
+            <dict>
+              <key>name</key>
+              <string>entity.name.type.class.haxe.2</string>
+            </dict>
+          </dict>
+          <key>match</key>
+          <string>(\b(([a-z]+\.)*)([A-Z]\w*))</string>
         </dict>
         <dict>
           <key>include</key>
@@ -421,15 +444,44 @@
       <array>
         <dict>
           <key>match</key>
+          <string>((@:?)([a-zA-Z]*))</string>
+          <key>captures</key>
+          <dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>storage.modifier.macro.haxe.2</string>
+            </dict>
+            <key>3</key>
+            <dict>
+              <key>name</key>
+              <string>storage.modifier.macro.haxe.2</string>
+            </dict>
+          </dict>
+          
+        </dict>
+        <dict>
+          <key>match</key>
           <string>\b(public|private|static|dynamic|inline|macro|extern|typedef|override)\b</string>
           <key>name</key>
           <string>storage.modifier.haxe.2</string>
         </dict>
         <dict>
           <key>match</key>
-          <string>\bpackage\b</string>
-          <key>name</key>
-          <string>storage.type.package.haxe.2</string>
+          <string>\b(package)\s+([a-z\.]*)\b</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>storage.type.package.haxe.2</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>entity.name.type.package.haxe.2</string>
+            </dict>
+          </dict>
         </dict>
         <dict>
           <key>match</key>
