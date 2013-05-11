@@ -411,7 +411,7 @@
             <key>1</key>
             <dict>
               <key>name</key>
-              <string>keyword.operator.interpolation.haxe.2</string>
+              <string>support.reification.haxe.2</string>
             </dict>
             <key>2</key>
             <dict>
@@ -429,7 +429,7 @@
             <key>2</key>
             <dict>
               <key>name</key>
-              <string>keyword.operator.interpolation.haxe.2</string>
+              <string>support.reification.haxe.2</string>
             </dict>
           </dict>
           
@@ -475,13 +475,31 @@
       <array>
         <dict>
           <key>match</key>
+          <string>((@:)(require|final|hack|native|coreApi|fakeEnum|macro|build|keep|keepSub|overload|extern|optional|feature|noCompletion|noUsing|allow|access|generic|publicFields|expose|defineFeature|runtime|initPackage|bind|bitmap|file|font|sound|ns|protected|getter|setter|meta|debug|noDebug|headerCode|headerClassCode|cppFileCode|functionCode|functionTailCode|buildXml|cppNamespaceCode|headerNamespaceCode|noStack|depend|include|internal|volatile|transient|functionBody|classContents|remove))</string>
+          <key>captures</key>
+          <dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>support.macro.haxe.2</string>
+            </dict>
+            <key>3</key>
+            <dict>
+              <key>name</key>
+              <string>support.macro.haxe.2</string>
+            </dict>
+          </dict>
+          
+        </dict>
+        <dict>
+          <key>match</key>
           <string>((@:?)([a-zA-Z]*))</string>
           <key>captures</key>
           <dict>
             <key>2</key>
             <dict>
               <key>name</key>
-              <string>keyword.operator.macro.haxe.2</string>
+              <string>support.macro.haxe.2</string>
             </dict>
             <key>3</key>
             <dict>
