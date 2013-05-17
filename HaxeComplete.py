@@ -212,6 +212,9 @@ class HaxeBuild :
 		#print( outp )
 		return outp.strip()
 
+	def is_temp( self ) :
+		return not os.path.exists( self.hxml )
+
 	def get_types( self ) :
 		if self.classes is None or self.packs is None :
 			classes = []
@@ -1059,7 +1062,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def run_build( self , view ) :
-
+		
+		if self.currentBuild is None or self.currentBuild.is_temp() :
+			self.currentBuild = None
+			self.extract_build_args( view )
+		
 		err, comps, status = self.run_haxe( view )
 		view.set_status( "haxe-status" , status )
 
