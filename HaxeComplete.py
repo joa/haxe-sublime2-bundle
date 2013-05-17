@@ -205,12 +205,12 @@ class HaxeBuild :
 		outp = outp.replace( d , "")
 		outp = outp.replace( "-cp "+os.path.dirname( self.hxml )+"\n", "")
 
-		outp = outp.replace("--no-output " , "")
+		outp = outp.replace("--no-output" , "")
 		outp = outp.replace("-v" , "")
 
 		#outp = outp.replace("dummy" , self.main.lower() )
 
-		#print( outp )
+		print( outp )
 		return outp.strip()
 
 	def is_temp( self ) :
