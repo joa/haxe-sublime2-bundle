@@ -1304,7 +1304,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
                         src_dir = spl[0]
 
             cl = os.path.basename(fn)
-            #cl = cl.encode('ascii','ignore')
+            
+            #if int(sublime.version() < 3000) :
+            #    cl = cl.encode('ascii','ignore')
+            
             cl = cl[0:cl.rfind(".")]
 
             main = pack[0:]
@@ -1865,7 +1868,11 @@ class HaxeExecCommand(ExecCommand):
 
         self.proc = None
         if not self.quiet:
-            print( "Running " + " ".join(cmd) )
+            if int(sublime.version()) > 3000 :
+                print( "Running " + " ".join(cmd) )
+            else :
+                print( "Running " + " ".join(cmd).encode('utf-8') )
+
             sublime.status_message("Building")
 
         show_panel_on_build = sublime.load_settings("Preferences.sublime-settings").get("show_panel_on_build", True)
