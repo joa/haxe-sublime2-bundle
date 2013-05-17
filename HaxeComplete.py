@@ -759,13 +759,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 	def on_open_file( self , view ) :
 		if view.is_loading() : 
 			return;
+		
 		if view.score_selector(0,'source.haxe.2') > 0 :
 			HaxeCreateType.on_activated( view )
 		elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
 			return
 
-		self.get_build( view )
 		self.extract_build_args( view )
+		self.get_build( view )
 		self.generate_build( view )
 		self.highlight_errors( view )
 
@@ -1067,7 +1068,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def run_build( self , view ) :
-		
+
 		err, comps, status = self.run_haxe( view )
 		view.set_status( "haxe-status" , status )
 
@@ -1309,6 +1310,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 			#build.hxml = os.path.join( src_dir , "build.hxml")
 			self.currentBuild = build
+
+		view.set_status( "haxe-build" , self.currentBuild.to_string() )
 
 		return self.currentBuild
 
