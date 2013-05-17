@@ -14,17 +14,30 @@ import hashlib
 import shutil
 import functools
 
-#from xml.etree import ElementTree
-#from xml.etree.ElementTree import XMLTreeBuilder
 from xml.etree import ElementTree
-#from elementtree import SimpleXMLTreeBuilder # part of your codebase
-#ElementTree.XMLTreeBuilder = SimpleXMLTreeBuilder.TreeBuilder
+from xml.etree.ElementTree import XMLTreeBuilder
 
+try :
+    from elementtree import SimpleXMLTreeBuilder # part of your codebase
+    ElementTree.XMLTreeBuilder = SimpleXMLTreeBuilder.TreeBuilder
+except ImportError as e:
+    pass # ST3
+    
 from subprocess import Popen, PIPE
 from datetime import datetime
 
-from Default.exec import ExecCommand,AsyncProcess
-unicode = str
+try :
+    stexec = __import__("exec")
+    ExecCommand = stexec.ExecCommand
+    AsyncProcess = stexec.AsyncProcess 
+except ImportError as e :
+    import Default
+    stexec = getattr( Default , "exec" )
+    ExecCommand = stexec.ExecCommand
+    AsyncProcess = stexec.AsyncProcess
+    unicode = str #dirty...
+   
+#from stexec import ExecCommand,AsyncProcess
 
 try:
   STARTUP_INFO = subprocess.STARTUPINFO()
@@ -211,7 +224,7 @@ class HaxeBuild :
 
         #outp = outp.replace("dummy" , self.main.lower() )
 
-        print( outp )
+        #print( outp )
         return outp.strip()
 
     def is_temp( self ) :
@@ -1454,7 +1467,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             return ("" , [], "" )
 
 
-        print(cmd)
+        #print(cmd)
         res, err = runcmd( cmd, "" )
 
         if not autocomplete :
@@ -1475,7 +1488,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
         hints = []
         msg = ""
         tree = None
-        x = "<root>"+err+"</root>";
+
+        if int(sublime.version()) >= 3000 :
+            x = "<root>"+err+"</root>"
+        else :
+            x = "<root>"+err.encode("utf-8")+"</root>"
+        #print(x)
 
         try :
             tree = ElementTree.XML(x);
@@ -1871,7 +1889,10 @@ class HaxeExecCommand(ExecCommand):
 
         try:
             # Forward kwargs to AsyncProcess
-            self.proc = AsyncProcess(cmd, None, merged_env, self, **kwargs)
+            if int(sublime.version()) >= 3000 :
+                self.proc = AsyncProcess(cmd, None, merged_env, self, **kwargs)
+            else :
+                self.proc = AsyncProcess(cmd, merged_env, self, **kwargs)
         except err_type as e:
             self.append_data(None, str(e) + "\n")
             self.append_data(None, "[cmd:  " + str(cmd) + "]\n")
