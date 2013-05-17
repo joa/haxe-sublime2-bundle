@@ -764,6 +764,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
 		elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
 			return
 
+		self.get_build( view )
+		self.extract_build_args( view )
 		self.generate_build( view )
 		self.highlight_errors( view )
 
@@ -1065,10 +1067,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
 	def run_build( self , view ) :
-		
-		if self.currentBuild is None or self.currentBuild.is_temp() :
-			self.currentBuild = None
-			self.extract_build_args( view )
 		
 		err, comps, status = self.run_haxe( view )
 		view.set_status( "haxe-status" , status )
