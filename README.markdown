@@ -44,9 +44,9 @@ Using [git bash](http://code.google.com/p/msysgit/)
 
 Restart Sublime Text.
 
-### Sublime Text 3
+## Sublime Text 3
 
-See [how to install Package Control on Sublime Text 3](http://wbond.net/sublime_packages/package_control/installation#ST3).
+See [How to install Package Control on Sublime Text 3](http://wbond.net/sublime_packages/package_control/installation#ST3).
 For manual installation, the folders should be `sublime-text-3` (Linux) or `Sublime\ Text\ 3` (Windows, Mac OSX).
 
 # Usage
