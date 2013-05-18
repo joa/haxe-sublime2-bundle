@@ -785,7 +785,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         self.highlight_errors( view )
 
     def on_pre_save( self , view ) :
-        if view.score_selector(0,'source.haxe.2') > 0 :
+        if view.score_selector(0,'source.haxe.2') == 0 :
             return []
 
         fn = view.file_name()
