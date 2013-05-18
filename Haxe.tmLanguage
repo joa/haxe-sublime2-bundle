@@ -418,8 +418,7 @@
               <key>name</key>
               <string>support.reification.haxe.2</string>
             </dict>
-          </dict>
-          
+          </dict>        
         </dict>
         <dict>
           <key>match</key>
@@ -431,8 +430,7 @@
               <key>name</key>
               <string>support.reification.haxe.2</string>
             </dict>
-          </dict>
-          
+          </dict>    
         </dict>
         <dict>
           <key>captures</key>
@@ -450,6 +448,12 @@
           </dict>
           <key>match</key>
           <string>(\b(([a-z]+\.)*)([A-Z]\w*))</string>
+        </dict>
+        <dict>
+          <key>name</key>
+          <string>keyword.other.haxe.2</string>
+          <key>match</key>
+          <string>\b(function)\b</string>
         </dict>
         <dict>
           <key>include</key>
@@ -517,7 +521,7 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>\b(package)\s*([a-z\.]*)\b</string>
+          <string>\b(package)\s+([a-z\.]*)\b</string>
           <key>captures</key>
           <dict>
             <key>1</key>
