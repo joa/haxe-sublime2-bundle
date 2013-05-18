@@ -1,10 +1,10 @@
 # Introduction
-An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2)
+An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2) and [Sublime Text 3](http://www.sublimetext.com/3)
 
 # Features
 
- - **Syntax highlighting** for Haxe sources, hxml build files and HSS
- - **Haxe compiler completion**, code hints and error highlighting
+ - **Syntax highlighting** for Haxe2 and Haxe3 sources as well as hxml build files
+ - **Haxe compiler completion**, code hints and error highlighting / navigation
  - **Package and classes discovery/completion** supporting hxml classpath (-cp) and haxelib libraries (-lib)
  - **NME completion, target selection and compilation**
  - **Multiple build/hxml management** and automatic generation of hxml files
@@ -28,33 +28,37 @@ If you want to develop on a forked repo, you can clone it into the *Packages* fo
 ### Mac OSX
 
     cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages
-    git clone https://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
+    git clone https://github.com/<fork author>/haxe-sublime-bundle.git Haxe
 
 ### Linux
 
     cd ~/.config/sublime-text-2/Packages
-    git clone https://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
+    git clone https://github.com/<fork author>/haxe-sublime-bundle.git Haxe
 
 ### Windows
 
-Using git bash http://code.google.com/p/msysgit/
+Using [git bash](http://code.google.com/p/msysgit/)
 
     cd /c/Users/<username>/AppData/Roaming/Sublime\ Text\ 2/Packages
-    git clone https://github.com/<fork author>/haxe-sublime2-bundle.git Haxe
+    git clone https://github.com/<fork author>/haxe-sublime-bundle.git Haxe
 
-Restart Sublime Text 2.
+Restart Sublime Text.
+
+### Sublime Text 3
+
+See [how to install Package Control on Sublime Text 3](http://wbond.net/sublime_packages/package_control/installation#ST3).
+For manual installation, the folders should be `sublime-text-3` (Linux) or `Sublime\ Text\ 3` (Windows, Mac OSX).
 
 # Usage
 
- - Open your project's directory (where the .hxml or .nmml resides) in Sublime Text, the build file should be detected automatically,
+ - Open your project directory (where the .hxml or .nmml resides) in Sublime Text, the build file should be detected automatically,
  - Create new types through the sidebar's context menu
  - Edit your classes (check the cool snippets, like 'prop'-Tab)
- - Completion is triggered either automatically by dot and colon keys, or manually by Ctrl+Space.
- - Open parenthesis and comma keys display Haxe type hints in the status bar
+ - Open parenthesis and comma keys display Haxe type hints in the status bar and inserts smart snippets
 
 ### Shortcuts
 
- - Press **Ctrl+Shift+B** to either automatically generate an hxml file if none exist, edit the build file if only one build exists or select among multiple builds (--next)
+ - Press **Ctrl+Shift+B** to either select among multiple builds, automatically generate an hxml file if none exist, or edit the build file if only one build exists
  - Press **Ctrl+Enter** to run the current/selected build
  - Press **Ctrl+I** on a qualified class name to shorten it and generate the import statement. Safe to use if the class is already imported.
  - Press **Ctrl+Shift+H** and then : 
@@ -77,6 +81,12 @@ Restart Sublime Text 2.
  - press **Ctrl+Shift+B** to select a NME target
  - press **Ctrl+Enter** to build and run (regular Sublime Text build system won't work)
 
+### Troubleshooting
+
+ - You'll need a working installation of Haxe (`haxe` and `haxelib`): start by trying to compile your project directly through a terminal.
+ - Open the Sublime Text Console (in View menu) to see what's going on.
+ - Don't hesitate to [open an issue](https://github.com/clemos/haxe-sublime-bundle/issues) in case anything goes wrong.
+ 
 ### Tips & tricks
 
 As this bundle displays code hinting for method calls in the “status bar”, 
