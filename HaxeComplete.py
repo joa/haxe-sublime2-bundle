@@ -49,7 +49,10 @@ except (AttributeError):
 def runcmd( args, input=None ):
     #print(args)
     try:
-        p = Popen([a.encode(sys.getfilesystemencoding()) for a in args], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
+        if int(sublime.version()) >= 3000 :
+            p = Popen(args, stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
+        else:
+            p = Popen([a.encode(sys.getfilesystemencoding()) for a in args], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
         if isinstance(input, unicode):
             input = input.encode('utf-8')
         out, err = p.communicate(input=input)
