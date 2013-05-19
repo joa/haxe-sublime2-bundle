@@ -53,13 +53,16 @@ def runcmd( args, input=None ):
             p = Popen(args, stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
         else:
             p = Popen([a.encode(sys.getfilesystemencoding()) for a in args], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
-        if isinstance(input, unicode):
+        if isinstance(input, unicode) :
             input = input.encode('utf-8')
         out, err = p.communicate(input=input)
         return (out.decode('utf-8') if out else '', err.decode('utf-8') if err else '')
     except (OSError, ValueError) as e:
         err = u'Error while running %s: %s' % (args[0], e)
-        return ("", err.decode('utf-8'))
+        if int(sublime.version()) >= 3000 :
+            return ("",err)
+        else:
+            return ("", err.decode('utf-8'))
 
 compilerOutput = re.compile("^([^:]+):([0-9]+): (characters?|lines?) ([0-9]+)-?([0-9]+)? : (.*)", re.M)
 compactFunc = re.compile("\(.*\)")
