@@ -898,6 +898,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def find_hxml( self, folder ) :
         hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
+        
         for build in hxmls:
 
             currentBuild = HaxeBuild()
@@ -979,9 +980,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 currentBuild.classpaths.append( buildPath )
                 currentBuild.args.append( ("-cp" , buildPath ) )
 
+
             if currentBuild.main is None:
                 currentBuild.main = '[No Main]'
-                self.builds.append( currentBuild )
+                
+            self.builds.append( currentBuild )
 
 
 
@@ -1506,8 +1509,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         try :
             tree = ElementTree.XML(x);
 
-        except Exception as e :
-            print(e)
+        except Exception as e :            
             print("invalid xml")
 
         if tree is not None :
@@ -1869,14 +1871,17 @@ class HaxeExecCommand(ExecCommand):
         self.window.get_output_panel("exec")
 
         if encoding is None :
-            encoding = sys.getfilesystemencoding()
+            if int(sublime.version()) >= 3000 :
+                encoding = sys.getfilesystemencoding()
+            else:
+                encoding = "utf-8"
 
         self.encoding = encoding
         self.quiet = quiet
 
         self.proc = None
         if not self.quiet:
-            if int(sublime.version()) > 3000 :
+            if int(sublime.version()) >= 3000 :
                 print( "Running " + " ".join(cmd) )
             else :
                 print( "Running " + " ".join(cmd).encode('utf-8') )
@@ -1918,7 +1923,8 @@ class HaxeExecCommand(ExecCommand):
             if int(sublime.version()) >= 3000 :
                 self.proc = AsyncProcess(cmd, None, merged_env, self, **kwargs)
             else :
-                self.proc = AsyncProcess(cmd, merged_env, self, **kwargs)
+
+                self.proc = AsyncProcess([c.encode(sys.getfilesystemencoding()) for c in cmd], merged_env, self, **kwargs)
         except err_type as e:
             self.append_data(None, str(e) + "\n")
             self.append_data(None, "[cmd:  " + str(cmd) + "]\n")
