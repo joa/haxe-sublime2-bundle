@@ -274,7 +274,7 @@ class HaxeInstallLib( sublime_plugin.WindowCommand ):
             else :
                 menu.append( [ l , 'Install' ] )
 
-        menu.append( ["Upgrade libraries"] )
+        menu.append( ["All libraries","Upgrade"] )
 
         self.window.show_quick_panel(menu,self.install)
 
@@ -1839,8 +1839,8 @@ class HaxeExecCommand(ExecCommand):
         hc.errors = hc.extract_errors( outp )
         hc.highlight_errors( self.window.active_view() )
 
-    def run(self, cmd = [], file_regex = "", line_regex = "", working_dir = "",
-            encoding = "utf-8", env = {}, quiet = False, kill = False,
+    def run(self, cmd = [],  shell_cmd = None, file_regex = "", line_regex = "", working_dir = "",
+            encoding = None, env = {}, quiet = False, kill = False,
             # Catches "path" and "shell"
             **kwargs):
 
@@ -1868,6 +1868,9 @@ class HaxeExecCommand(ExecCommand):
         # settings, so that it'll be picked up as a result buffer
         self.window.get_output_panel("exec")
 
+        if encoding is None :
+            encoding = sys.getfilesystemencoding()
+
         self.encoding = encoding
         self.quiet = quiet
 
@@ -1894,6 +1897,17 @@ class HaxeExecCommand(ExecCommand):
         # so that emitted working dir relative path names make sense
         if working_dir != "":
             os.chdir(working_dir)
+
+        self.debug_text = ""
+        if shell_cmd:
+            self.debug_text += "[shell_cmd: " + shell_cmd + "]\n"
+        else:
+            self.debug_text += "[cmd: " + str(cmd) + "]\n"
+        self.debug_text += "[dir: " + str(os.getcwd()) + "]\n"
+        if "PATH" in merged_env:
+            self.debug_text += "[path: " + str(merged_env["PATH"]) + "]"
+        else:
+            self.debug_text += "[path: " + str(os.environ["PATH"]) + "]"
 
         err_type = OSError
         if os.name == "nt":
