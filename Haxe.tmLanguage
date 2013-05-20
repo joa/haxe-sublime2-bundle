@@ -521,7 +521,7 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>\b(package)\s+([a-z\.]*)\b</string>
+          <string>\b(package)(\s+[a-z\._]*);</string>
           <key>captures</key>
           <dict>
             <key>1</key>
