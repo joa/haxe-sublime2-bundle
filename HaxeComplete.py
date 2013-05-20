@@ -545,7 +545,6 @@ class HaxeCreateType( sublime_plugin.WindowCommand ):
             paths.append(fn)
 
         for path in paths :
-
             if os.path.isfile( path ) :
                 path = os.path.dirname( path )
 
@@ -579,6 +578,7 @@ class HaxeCreateType( sublime_plugin.WindowCommand ):
         fn = self.classpath;
         parts = inp.split(".")
         pack = []
+        cl = "${2:ClassName}"
 
         while( len(parts) > 0 ):
             p = parts.pop(0)
@@ -600,7 +600,7 @@ class HaxeCreateType( sublime_plugin.WindowCommand ):
         src = "\npackage " + ".".join(pack) + ";\n\n"+t+" "+cl+" "
         if t == "typedef" :
             src += "= "
-        src += "{\n\n\t\n\n}"
+        src += "\n{\n\n\t$1\n\n}"
         HaxeCreateType.currentSrc = src
 
         v = sublime.active_window().open_file( fn )
@@ -608,13 +608,9 @@ class HaxeCreateType( sublime_plugin.WindowCommand ):
     @staticmethod
     def on_activated( view ) :
         if view.file_name() == HaxeCreateType.currentFile and view.size() == 0 :
-            e = view.begin_edit()
-            view.insert(e,0,HaxeCreateType.currentSrc)
-            view.end_edit(e)
-            sel = view.sel()
-            sel.clear()
-            pt = view.text_point(5,1)
-            sel.add( sublime.Region(pt,pt) )
+            view.run_command( "insert_snippet" , {
+                "contents" : HaxeCreateType.currentSrc
+            })
 
 
     def on_change( self , inp ) :
@@ -833,10 +829,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
         fn = view.file_name()
 
         if self.currentBuild is not None and fn == self.currentBuild.hxml and view.size() == 0 :
-            e = view.begin_edit()
-            hxmlSrc = self.currentBuild.make_hxml()
-            view.insert(e,0,hxmlSrc)
-            view.end_edit(e)
+            view.run_command("insert_snippet",{
+                "contents" : self.currentBuild.make_hxml()
+            })
 
 
     def select_build( self , view ) :
