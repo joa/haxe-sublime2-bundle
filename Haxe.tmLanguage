@@ -645,7 +645,7 @@
               <key>comment</key>
               <string>String interpolation : "${test.ole}"</string>
               <key>match</key>
-              <string>(\$)(\{)(.*)(\})</string>
+              <string>(\$)(\{)([^}]*)(\})</string>
             </dict>
             <dict>
               <key>captures</key>
