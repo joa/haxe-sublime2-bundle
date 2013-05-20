@@ -1345,7 +1345,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
             #build.hxml = os.path.join( src_dir , "build.hxml")
             self.currentBuild = build
 
-        view.set_status( "haxe-build" , self.currentBuild.to_string() )
+        if self.currentBuild is not None :
+            view.set_status( "haxe-build" , self.currentBuild.to_string() )
 
         return self.currentBuild
 
