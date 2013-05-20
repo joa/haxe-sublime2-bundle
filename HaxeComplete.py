@@ -1666,7 +1666,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         #print("complete")
         pos = locations[0]
         scopes = view.scope_name(pos).split()
-        
+        #print(scopes)
         offset = pos - len(prefix)
         comps = []
         if offset == 0 :
