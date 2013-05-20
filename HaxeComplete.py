@@ -534,14 +534,17 @@ class HaxeCreateType( sublime_plugin.WindowCommand ):
         HaxeCreateType.currentType = t
         view = sublime.active_window().active_view()
         scopes = view.scope_name(view.sel()[0].end()).split()
-
+        fn = view.file_name()
+            
         pack = [];
+
+        if fn is None :
+            return
 
         if len(builds) == 0 :
             HaxeComplete.inst.extract_build_args(view)
 
         if len(paths) == 0 :
-            fn = view.file_name()
             paths.append(fn)
 
         for path in paths :
@@ -741,6 +744,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
         line_regions = []
         char_regions = []
 
+        if fn is None :
+            return
+
         for e in self.errors :
             if fn.endswith(e["file"]) :
                 metric = e["metric"]
@@ -791,9 +797,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
             return []
 
         fn = view.file_name()
-        path = os.path.dirname( fn )
-        if not os.path.isdir( path ) :
-            os.makedirs( path )
+
+        if fn is not None :
+            path = os.path.dirname( fn )
+            if not os.path.isdir( path ) :
+                os.makedirs( path )
 
     def __on_modified( self , view ):
         win = sublime.active_window()
@@ -828,7 +836,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         fn = view.file_name()
 
-        if self.currentBuild is not None and fn == self.currentBuild.hxml and view.size() == 0 :
+        if fn is not None and self.currentBuild is not None and fn == self.currentBuild.hxml and view.size() == 0 :
             view.run_command("insert_snippet",{
                 "contents" : self.currentBuild.make_hxml()
             })
@@ -991,11 +999,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
         self.builds = []
 
         fn = view.file_name()
-
         settings = view.settings()
-
-        folder = os.path.dirname(fn)
         win = view.window()
+        folder = None
+
+        if fn is not None :
+            folder = os.path.dirname(fn)
 
         if win is not None :
             folders = win.folders()
@@ -1006,9 +1015,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     if f + "/" in fn :
                         folder = f
 
-        # settings.set("haxe-complete-folder", folder)
-        self.find_hxml(folder)
-        self.find_nmml(folder)
+        if folder is not None :
+            # settings.set("haxe-complete-folder", folder)
+            self.find_hxml(folder)
+            self.find_nmml(folder)
 
         if len(self.builds) == 1:
             if forcePanel :
@@ -1283,9 +1293,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def get_build( self , view ) :
 
-        if self.currentBuild is None and view.score_selector(0,"source.haxe.2") > 0 :
+        fn = view.file_name()
+            
+        if fn is not None and self.currentBuild is None and view.score_selector(0,"source.haxe.2") > 0 :
 
-            fn = view.file_name()
             src_dir = os.path.dirname( fn )
             src = view.substr(sublime.Region(0, view.size()))
 
@@ -1409,6 +1420,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
             return self.run_nme(view, build)
 
         fn = view.file_name()
+
+        if fn is None :
+            return
+
         src = view.substr(sublime.Region(0, view.size()))
         src_dir = os.path.dirname(fn)
         tdir = os.path.dirname(fn)
@@ -1686,6 +1701,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         src = view.substr(sublime.Region(0, view.size()))
         fn = view.file_name()
+
+        if fn is None :
+            return
+
         src_dir = os.path.dirname(fn)
         tdir = os.path.dirname(fn)
         temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
