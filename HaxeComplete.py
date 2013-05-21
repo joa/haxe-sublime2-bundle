@@ -1456,6 +1456,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             args.append( ("-D", "st_display" ) )
             args.append( ("--display", display ) )
             args.append( ("--no-output",) )
+            args.append( ("-"+build.target , build.output ) )
             #args.append( ("-cp" , bundleDir ) )
             #args.append( ("--macro" , "SourceTools.complete()") )
 
