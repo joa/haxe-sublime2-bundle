@@ -896,7 +896,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             outp = os.path.join( folder , outp )
             currentBuild.target = "cpp"
             currentBuild.args.append( ("--remap", "flash:nme") )
-            currentBuild.args.append( ("-cpp", outp) )
+            #currentBuild.args.append( ("-cpp", outp) )
             currentBuild.output = outp
 
             if currentBuild.main is not None :
@@ -1493,7 +1493,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             return ("" , [], "" )
 
 
-        #print(cmd)
+        #print(" ".join(cmd))
         res, err = runcmd( cmd, "" )
 
         if not autocomplete :
