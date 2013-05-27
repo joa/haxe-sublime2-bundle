@@ -91,7 +91,7 @@ bundlePath = os.path.abspath(bundleFile)
 bundleDir = os.path.dirname(bundlePath)
 #haxeFileRegex = "^([^:]*):([0-9]+): characters? ([0-9]+)-?[0-9]* :(.*)$"
 haxeFileRegex = "^([^:]*\.hx):([0-9]+):.*$"
-controlStruct = re.compile( "\s*(if|switch|for|while)\($" );
+controlStruct = re.compile( "\s*(if|switch|for|while)\s*\($" );
 
 class HaxeLib :
 
