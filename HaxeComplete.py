@@ -1488,6 +1488,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
         #print(" ".join(cmd))
+        #print(cmd)  
         res, err = runcmd( cmd, "" )
 
         if not autocomplete :
@@ -1735,10 +1736,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         if fn is None :
             return
-
-        #src_dir = os.path.dirname(fn)
-        #tdir = os.path.dirname(fn)
-        #temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
 
         hints = []
         show_hints = True
