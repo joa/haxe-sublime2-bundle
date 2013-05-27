@@ -1394,11 +1394,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
                 self.serverPort+=1
                 cmd = [haxepath , "--wait" , str(self.serverPort) ]
+                print("Starting Haxe server on port "+str(self.serverPort))
+                
                 #self.serverProc = Popen(cmd, env=env , startupinfo=STARTUP_INFO)
                 self.serverProc = Popen(cmd, env = merged_env, startupinfo=STARTUP_INFO)
                 self.serverProc.poll()
+
             except(OSError, ValueError) as e:
-                err = u'Error starting server %s: %s' % (" ".join(cmd), e)
+                err = u'Error starting Haxe server %s: %s' % (" ".join(cmd), e)
                 sublime.error_message(err)
 
     def stop_server( self ) :
