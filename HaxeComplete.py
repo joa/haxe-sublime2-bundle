@@ -78,8 +78,8 @@ libFlag = re.compile("-lib\s+(.*?)")
 skippable = re.compile("^[a-zA-Z0-9_\s]*$")
 inAnonymous = re.compile("[{,]\s*([a-zA-Z0-9_\"\']+)\s*:\s*$" , re.M | re.U )
 extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main|path)=\"([a-z0-9_./-]+)\"", re.I)
-variables = re.compile("^(?!@:noCompletion).*var\s+([^:;\s]*)", re.I)
-functions = re.compile("^(?!@:noCompletion).*function\s+([^;\.\(\)\s]*)", re.I)
+variables = re.compile("var\s+([^:;\s]*)", re.I)
+functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
 functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
 paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
 isType = re.compile("^[A-Z][a-zA-Z0-9_]*$")
@@ -1412,7 +1412,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         del self.serverProc
 
 
-    def run_haxe( self, view , display = None , commas = 0 ) :
+    def run_haxe( self, view , display = None ) :
 
         self.start_server( view )
 
@@ -1421,7 +1421,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         autocomplete = display is not None
 
-        if autocomplete is False and build is not None and build.nmml is not None:
+        if not autocomplete and build is not None and build.nmml is not None:
             return self.run_nme(view, build)
 
         fn = view.file_name()
@@ -1447,8 +1447,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
             args.append( ("-"+build.target , build.output ) )
             #args.append( ("--times" , "-v" ) )
         else:
+            if display["mode"] is not None :
+                args.append( ("-D","display-mode=" + display["mode"] ) )
+
             args.append( ("-D", "st_display" ) )
-            args.append( ("--display", display ) )
+            args.append( ("--display", display["filename"] + "@" + str( display["offset"] ) ) )
             args.append( ("--no-output",) )
             args.append( ("-"+build.target , build.output ) )
             #args.append( ("-cp" , bundleDir ) )
@@ -1510,6 +1513,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         msg = ""
         tree = None
 
+        commas = 0
+        if display is not None and display["commas"] is not None :
+            commas = display["commas"]
+
         if int(sublime.version()) >= 3000 :
             x = "<root>"+err+"</root>"
         else :
@@ -1523,7 +1530,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
             print("invalid xml")
 
         if tree is not None :
-
             for i in tree.getiterator("type") :
                 hint = i.text.strip()
                 spl = hint.split(" -> ")
@@ -1816,7 +1822,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         if self.currentCompletion["inp"] is None or inp != self.currentCompletion["inp"] :
 
             temp = self.save_temp_file( view )
-            ret , haxeComps , status , hints = self.run_haxe( view , fn + "@" + str(offset) , commas )
+            ret , haxeComps , status , hints = self.run_haxe( view , { "filename" : fn , "offset" : offset , "commas" : commas , "mode" : None } )
             self.clear_temp_file( view , temp )
 
             if completeChar not in "(," :
