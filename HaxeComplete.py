@@ -1294,6 +1294,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
     def get_build( self , view ) :
 
         fn = view.file_name()
+        win = view.window()
+
+        if win is None or fn is None :
+            return
             
         if fn is not None and self.currentBuild is None and view.score_selector(0,"source.haxe.2") > 0 :
 
@@ -1304,7 +1308,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             #build.target = "js"
 
             folder = os.path.dirname(fn)
-            folders = view.window().folders()
+            folders = win.folders()
             for f in folders:
                 if f in fn :
                     folder = f
