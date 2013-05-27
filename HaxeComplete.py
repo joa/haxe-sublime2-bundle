@@ -1429,21 +1429,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
         if fn is None :
             return
 
-        src = view.substr(sublime.Region(0, view.size()))
-        src_dir = os.path.dirname(fn)
-        tdir = os.path.dirname(fn)
-        temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
-
         comps = []
-
         self.errors = []
-
         args = []
 
         cwd = os.path.dirname( build.hxml )
-
-        #buildArgs = view.window().settings
-
 
         args.extend( build.args )
         buildServerMode = settings.get('haxe_build_server_mode', True)
@@ -1618,9 +1608,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
                     comps.append( ( hint, insert ) )
 
-        #print(status)
         if len(hints) == 0 and len(comps) == 0:
-            err = err.replace( temp , fn )
             err = re.sub( u"\(display(.*)\)" ,"",err)
 
             lines = err.split("\n")
@@ -1703,17 +1691,54 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         return comps
 
+
+    def save_temp_file( self , view ) :
+
+        fn = view.file_name()
+
+        tdir = os.path.dirname(fn)
+        temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
+
+        src = view.substr(sublime.Region(0, view.size()))
+
+        if not os.path.exists( tdir ):
+            os.mkdir( tdir )
+
+        if os.path.exists( fn ):
+            # copy saved file to temp for future restoring
+            shutil.copy2( fn , temp )
+
+        # write current source to file
+        f = codecs.open( fn , "wb" , "utf-8" , "ignore" )
+        f.write( src )
+        f.close()
+
+        return temp
+
+    def clear_temp_file( self , view , temp ) : 
+
+        fn = view.file_name()
+
+        if os.path.exists( temp ) :
+            shutil.copy2( temp , fn )
+            os.remove( temp )
+        else:
+            # fn didn't exist in the first place, so we remove it
+            os.remove( fn )
+
+
     def get_haxe_completions( self , view , offset ):
 
         src = view.substr(sublime.Region(0, view.size()))
         fn = view.file_name()
+        src_dir = os.path.dirname(fn)
 
         if fn is None :
             return
 
-        src_dir = os.path.dirname(fn)
-        tdir = os.path.dirname(fn)
-        temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
+        #src_dir = os.path.dirname(fn)
+        #tdir = os.path.dirname(fn)
+        #temp = os.path.join( tdir , os.path.basename( fn ) + ".tmp" )
 
         hints = []
         show_hints = True
@@ -1790,21 +1815,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
         if toplevelComplete and (inControlStruct or completeChar not in "(,") :
             return comps,hints
 
-        if not os.path.exists( tdir ):
-            os.mkdir( tdir )
-
-        if os.path.exists( fn ):
-            # copy saved file to temp for future restoring
-            shutil.copy2( fn , temp )
-
-        # write current source to file
-        f = codecs.open( fn , "wb" , "utf-8" , "ignore" )
-        f.write( src )
-        f.close()
-
         inp = (fn,offset,commas,src[0:offset-1])
         if self.currentCompletion["inp"] is None or inp != self.currentCompletion["inp"] :
+
+            temp = self.save_temp_file( view )
             ret , haxeComps , status , hints = self.run_haxe( view , fn + "@" + str(offset) , commas )
+            self.clear_temp_file( view , temp )
 
             if completeChar not in "(," :
                 comps = haxeComps
@@ -1820,14 +1836,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
         #print(status)
 
         view.set_status( "haxe-status", status )
-
-        #os.remove(temp)
-        if os.path.exists( temp ) :
-            shutil.copy2( temp , fn )
-            os.remove( temp )
-        else:
-            # fn didn't exist in the first place, so we remove it
-            os.remove( fn )
 
         #sublime.status_message("")
         if not show_hints :
