@@ -204,11 +204,14 @@ class HaxeBuild :
         self.libs = []
         self.classes = None
         self.packages = None
+        self.openfl = False
 
     def to_string(self) :
         out = os.path.basename(self.output)
-        if self.nmml is not None:
-            return "{out} ({target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
+        if self.openfl :
+            return "{out} (openfl / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
+        elif self.nmml is not None:
+            return "{out} (NME / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
         else:
             return "{main} ({target}:{out})".format(self=self, out=out, main=self.main, target=self.target);
         #return "{self.main} {self.target}:{out}".format(self=self, out=out);
@@ -855,13 +858,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def find_nmml( self, folder ) :
         nmmls = glob.glob( os.path.join( folder , "*.nmml" ) )
+        nmmls += glob.glob( os.path.join( folder , "*.xml" ) )
 
         for build in nmmls:
             currentBuild = HaxeBuild()
             currentBuild.hxml = build
             currentBuild.nmml = build
+            currentBuild.openfl = build.endswith("xml")
             buildPath = os.path.dirname(build)
-
+            
             # TODO delegate compiler options extractions to NME 3.2:
             # runcmd("nme diplay project.nmml nme_target")
 
@@ -896,8 +901,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
                         currentBuild.args.append( ("-cp" , os.path.join( buildPath , path ) ) )
 
             outp = os.path.join( folder , outp )
-            currentBuild.target = "cpp"
-            currentBuild.args.append( ("--remap", "flash:nme") )
+
+            if currentBuild.openfl :
+                if self.compilerVersion >= 3 :
+                    currentBuild.target = "swf"
+                else :
+                    currentBuild.target = "swf9"
+                    
+            else :
+                currentBuild.target = "cpp"
+                currentBuild.args.append( ("--remap", "flash:nme") )
             #currentBuild.args.append( ("-cpp", outp) )
             currentBuild.output = outp
 
@@ -1188,7 +1201,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 else :
                     tarPkg = "flash8"
 
-        if build.nmml is not None or HaxeLib.get("nme") in build.libs :
+        if not build.openfl and build.nmml is not None or HaxeLib.get("nme") in build.libs :
             tarPkg = "nme"
             targetPackages.extend( ["jeash","neash","browser","native"] )
 
@@ -1359,7 +1372,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def run_nme( self, view, build ) :
 
-        cmd = [ "haxelib", "run", "nme", HaxeBuild.nme_target[2], os.path.basename(build.nmml) ]
+        if build.openfl :
+            cmd = ["openfl"]
+        else :
+            cmd = ["haxelib","run","nme"]
+
+        cmd += [ HaxeBuild.nme_target[2], os.path.basename(build.nmml) ]
         target = HaxeBuild.nme_target[1].split(" ")
         cmd.extend(target)
         cmd.append("-debug")
@@ -1426,7 +1444,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         autocomplete = display is not None
 
-        if not autocomplete and build is not None and build.nmml is not None:
+        if not autocomplete and build is not None and build.nmml is not None :
             return self.run_nme(view, build)
 
         fn = view.file_name()
