@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 #sys.path.append("/usr/lib/python2.6/")
 #sys.path.append("/usr/lib/python2.6/lib-dynload")
@@ -1524,12 +1526,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
             x = "<root>"+err+"</root>"
         else :
             x = "<root>"+err.encode("utf-8")+"</root>"
-        #print(x)
+        
+        x = x.decode('utf-8').encode("ASCII",'ignore')
 
         try :
             tree = ElementTree.XML(x);
 
-        except Exception as e :            
+        except Exception as e :  
+            print(e)          
             print("invalid xml")
 
         if tree is not None :
