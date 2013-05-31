@@ -3,12 +3,12 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2) and [Sublime T
 
 # Features
 
- - **Syntax highlighting** for Haxe2 and Haxe3 sources as well as hxml build files
- - **Haxe compiler completion**, code hints and error highlighting / navigation
- - **Package and classes discovery/completion** supporting hxml classpath (-cp) and haxelib libraries (-lib)
- - **NME completion, target selection and compilation**
- - **Multiple build/hxml management** and automatic generation of hxml files
- - **Haxelib integration** (install / remove libs) with -lib autocompletion
+ - **Syntax highlighting** for Haxe2 and Haxe3 sources and hxml build files
+ - **Haxe compiler auto-completion**, code hints, smart snippets and error highlighting / navigation
+ - **[NME](http://www.nme.io/) and [openfl](http://www.joshuagranick.com/blog/2013/05/30/introducing-openfl/) support** with completion, target selection and compilation
+ - **Package and classes discovery/suggestion** including classpath (-cp) and haxelib libraries (-lib)
+ - **Multiple build management** and automatic generation of hxml files
+ - **Haxelib integration** (install / remove / upgrade libs) with -lib autocompletion
  - Code snippets, auto-import, Sublime build system integration
  - **[HScript](http://code.google.com/p/hscript/)**, **[Erazor](https://github.com/ciscoheat/erazor)** and **[HSS](http://ncannasse.fr/projects/hss)** support
  
