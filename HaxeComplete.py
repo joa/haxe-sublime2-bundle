@@ -188,7 +188,9 @@ class HaxeBuild :
         ("Neko 64 - test","neko -64 -debug","test"),
         ("Neko 64 - build only","neko -64 -debug","build"),
         ("BlackBerry - test","blackberry -debug","test"),
-        ("BlackBerry - build only","blackberry -debug","build")
+        ("BlackBerry - build only","blackberry -debug","build"),
+        ("Emscripten - test", "emscripten -debug","test"),
+        ("Emscripten - build only", "emscripten -debug","build"),
     ]
     nme_target = ("Flash - test","flash -debug","test")
 
@@ -907,7 +909,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     currentBuild.target = "swf"
                 else :
                     currentBuild.target = "swf9"
-                    
+
             else :
                 currentBuild.target = "cpp"
                 currentBuild.args.append( ("--remap", "flash:nme") )
@@ -1107,6 +1109,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def select_nme_target( self, i, view ):
         target = HaxeBuild.nme_targets[i]
+        
         if self.currentBuild.nmml is not None:
             HaxeBuild.nme_target = target
             view.set_status( "haxe-build" , self.currentBuild.to_string() )
@@ -1380,8 +1383,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         cmd += [ HaxeBuild.nme_target[2], os.path.basename(build.nmml) ]
         target = HaxeBuild.nme_target[1].split(" ")
         cmd.extend(target)
-        cmd.append("-debug")
-
+        
         view.window().run_command("exec", {
             "cmd": cmd,
             "working_dir": os.path.dirname(build.nmml),
