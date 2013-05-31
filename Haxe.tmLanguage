@@ -347,7 +347,7 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>(#if\s+([\!\w]+|(\([^\)]*\)))\s*)</string>
+          <string>(#if\s+([\!\w-]+|(\([^\)]*\)))\s*)</string>
         </dict>
         <dict>
           <key>match</key>
