@@ -1525,9 +1525,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         if int(sublime.version()) >= 3000 :
             x = "<root>"+err+"</root>"
         else :
-            x = "<root>"+err.encode("utf-8")+"</root>"
-        
-        x = x.decode('utf-8').encode("ASCII",'ignore')
+            x = "<root>"+err.encode("ASCII",'ignore')+"</root>"
 
         try :
             tree = ElementTree.XML(x);
