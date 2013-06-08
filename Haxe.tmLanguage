@@ -479,7 +479,7 @@
       <array>
         <dict>
           <key>match</key>
-          <string>((@:)(require|final|hack|native|coreApi|fakeEnum|macro|build|keep|keepSub|overload|extern|optional|feature|noCompletion|noUsing|allow|access|generic|publicFields|expose|defineFeature|runtime|initPackage|bind|bitmap|file|font|sound|ns|protected|getter|setter|meta|debug|noDebug|headerCode|headerClassCode|cppFileCode|functionCode|functionTailCode|buildXml|cppNamespaceCode|headerNamespaceCode|noStack|depend|include|internal|volatile|transient|functionBody|classContents|remove))</string>
+          <string>((@:)(require|final|hack|native|coreApi|fakeEnum|macro|build|keep|keepSub|overload|extern|optional|feature|noCompletion|noUsing|allow|access|generic|publicFields|expose|defineFeature|runtime|initPackage|bind|bitmap|file|font|sound|ns|protected|getter|setter|meta|debug|noDebug|headerCode|headerClassCode|cppFileCode|functionCode|functionTailCode|buildXml|cppNamespaceCode|headerNamespaceCode|noStack|depend|include|internal|volatile|transient|functionBody|classContents|remove)\b)</string>
           <key>captures</key>
           <dict>
             <key>2</key>
@@ -497,7 +497,7 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>((@:?)([a-zA-Z]*))</string>
+          <string>((@:?)([a-zA-Z_]*))</string>
           <key>captures</key>
           <dict>
             <key>2</key>
