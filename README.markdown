@@ -5,7 +5,7 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2) and [Sublime T
 
  - **Syntax highlighting** for Haxe2 and Haxe3 sources and hxml build files
  - **Haxe compiler auto-completion**, code hints, smart snippets and error highlighting / navigation
- - **[NME](http://www.nme.io/) and [openfl](http://www.joshuagranick.com/blog/2013/05/30/introducing-openfl/) support** with completion, target selection and compilation
+ - **[NME](http://www.nme.io/) and [openfl](https://github.com/openfl/openfl) support** with completion, target selection and compilation
  - **Package and classes discovery/suggestion** including classpath (-cp) and haxelib libraries (-lib)
  - **Multiple build management** and automatic generation of hxml files
  - **Haxelib integration** (install / remove / upgrade libs) with -lib autocompletion
@@ -74,9 +74,11 @@ For manual installation, the folders should be `sublime-text-3` (Linux) or `Subl
  - `haxe_build_server_mode` (`true` by default) : Uses [compilation server](http://haxe.org/manual/completion#compilation-cache-server) for building. The server is always used for completion, and may be restarted if needed through the command palette.
  - `haxe_smart_snippets` (`true` by default) : Inserts smart snippets based on compiler hints after `(` and `,`
 
-### Targeting NME
+### Targeting NME/openfl
 
-[Haxe NME](http://www.haxenme.org/) is based on a specific .nmml file (the .hxml is generated) which is supported by this bundle.
+[Haxe NME](http://www.haxenme.org/) is based on a specific `.nmml` file (the `.hxml` is generated) which is supported by this bundle.
+
+To target [openfl](https://github.com/openfl/openfl), use `.xml` instead, like `project.xml`.
 
  - press **Ctrl+Shift+B** to select a NME target
  - press **Ctrl+Enter** to build and run (regular Sublime Text build system won't work)
