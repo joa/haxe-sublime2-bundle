@@ -1,6 +1,5 @@
 <snippet>
-    <content><![CDATA[enum ${1:enum_name} 
-{
+    <content><![CDATA[enum ${1:enum_name}$TM_CSLB{
 	
 }]]></content>
     <tabTrigger>enum</tabTrigger>

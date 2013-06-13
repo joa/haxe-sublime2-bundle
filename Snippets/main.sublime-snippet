@@ -1,13 +1,10 @@
 <snippet>
-    <content><![CDATA[class ${1:class_name} 
-{
-	function new()
-	{
+    <content><![CDATA[class ${1:class_name}$TM_CSLB{
+	function new()$TM_CSLB{
 		${0}
 	}
 
-	static public function main()
-	{
+	static public function main()$TM_CSLB{
 		var app = new ${1:class_name}();
 	}
 }]]></content>
