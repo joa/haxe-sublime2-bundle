@@ -1,6 +1,5 @@
 <snippet>
-    <content><![CDATA[class ${1:class_name} 
-{
+    <content><![CDATA[class ${1:class_name}$TM_CSLB{
 	function new()
 	{
 		

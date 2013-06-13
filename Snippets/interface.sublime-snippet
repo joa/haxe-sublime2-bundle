@@ -1,6 +1,5 @@
 <snippet>
-    <content><![CDATA[interface ${1:interface_name} 
-{
+    <content><![CDATA[interface ${1:interface_name}$TM_CSLB{
 	
 }]]></content>
     <tabTrigger>interface</tabTrigger>
