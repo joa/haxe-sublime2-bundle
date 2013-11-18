@@ -161,6 +161,9 @@ class HaxeLib :
 HaxeLib.scan()
 
 inst = None
+
+documentationStore = {}
+
 class HaxeBuild :
 
     #auto = None
@@ -495,8 +498,12 @@ class HaxeHint( sublime_plugin.TextCommand ):
             })
 
         for r in view.sel() :
-            comps,hints = complete.get_haxe_completions( self.view , r.end() )
-            
+            comps, hints = complete.get_haxe_completions( self.view , r.end() )
+
+            fn_name = complete.get_current_fn_name(self.view, r.end())
+
+            print(documentationStore[fn_name])
+
             if view.settings().get("haxe_smart_snippets",False) :
                 snippet = ""
                 i = 1
@@ -1437,7 +1444,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         del self.serverProc
 
 
-    def run_haxe( self, view , display = None ) :
+    def run_haxe( self, view , display = None) :
 
         self.start_server( view )
 
@@ -1595,12 +1602,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 
             status = msg
 
+            # This will attempt to get the full name of what we're trying to complete.
+            # E.g. we type in self.blarg.herp(), this will get "self.blarg".
+            fn_name = self.get_current_fn_name(view, view.sel()[0].end())
+
             li = tree.find("list")
             if li is not None :
                 for i in li.getiterator("i"):
                     name = i.get("n")
                     sig = i.find("t").text
-                    doc = i.find("d").text #nothing to do
+                    doc = i.find("d").text 
+
+                    documentationStore[fn_name + "." + name] = doc
                     insert = name
                     hint = name
 
@@ -1758,6 +1771,20 @@ class HaxeComplete( sublime_plugin.EventListener ):
             # fn didn't exist in the first place, so we remove it
             os.remove( fn )
 
+    def get_current_fn_name(self, view, offset):
+        nonfunction_chars = "\t -=+{}[];':\"?/><,!@#$%^&*()"
+        source = view.substr(sublime.Region(0, view.size()))
+        source = source[:offset-1]
+
+        closest_nonfunction_char_idx = -1
+
+        for ch in nonfunction_chars:
+            idx = source.rfind(ch)
+            if idx > closest_nonfunction_char_idx:
+                closest_nonfunction_char_idx = idx
+
+        fn_name = source[closest_nonfunction_char_idx + 1:]
+        return fn_name
 
     def get_haxe_completions( self , view , offset ):
 
@@ -1847,7 +1874,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         if self.currentCompletion["inp"] is None or inp != self.currentCompletion["inp"] :
 
             temp = self.save_temp_file( view )
-            ret , haxeComps , status , hints = self.run_haxe( view , { "filename" : fn , "offset" : offset , "commas" : commas , "mode" : None } )
+            ret , haxeComps , status , hints = self.run_haxe( view , { "filename" : fn , "offset" : offset , "commas" : commas , "mode" : None })
             self.clear_temp_file( view , temp )
 
             if completeChar not in "(," :
