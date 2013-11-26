@@ -1614,12 +1614,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     sig = i.find("t").text
                     doc = i.find("d").text 
 
-                    if doc is None: doc = "No documentation found."
-                    documentationStore[fn_name + "." + name] = doc
+                    #if doc is None: doc = "No documentation found."
                     insert = name
                     hint = name
+                    doc_data = { 'hint' : name , 'doc' : doc }
+                    documentationStore[fn_name + "." + name] = doc_data
 
                     if sig is not None :
+
                         types = sig.split(" -> ")
                         ret = types.pop()
 
@@ -1631,18 +1633,23 @@ class HaxeComplete( sublime_plugin.EventListener ):
                                 #cm += ")"
                                 hint = name + "()\t"+ ret
                                 insert = cm
+                                doc_data['hint'] = hint
                             else:
                                 hint = name + "( " + " , ".join( types ) + " )\t" + ret
+                                doc_data['hint'] = hint # update before compacting
+
                                 if len(hint) > 40: # compact arguments
                                     hint = compactFunc.sub("(...)", hint);
                                 insert = cm
                         else :
                             hint = name + "\t" + ret
+                            doc_data['hint'] = hint
                     else :
                         if re.match("^[A-Z]",name ) :
                             hint = name + "\tclass"
                         else :
                             hint = name + "\tpackage"
+                        doc_data['hint'] = hint
 
                     #if doc is not None :
                     #   hint += "\t" + doc
@@ -1961,12 +1968,31 @@ class HaxeShowDocumentation( sublime_plugin.TextCommand ):
     def show_documentation(self, fn_name, edit):
         window = sublime.active_window()
 
-        documentation_text = fn_name + ":\n" # TODO it would be nice to show the calltips here!
-
         if fn_name not in documentationStore: 
             return
 
-        documentation_lines = documentationStore[fn_name].split("\n")
+        doc_data = documentationStore[fn_name]
+
+        hint = doc_data['hint'].split("\t")
+
+        if( hint[1] == 'class' ) :
+            hint_text = hint[1] + " " + hint[0]
+        elif( hint[1] == 'package' ) :
+            hint_text = hint[1] + " " + hint[0] + ";"
+        else:
+            hint_text = " : ".join( hint )
+
+        documentation_text = "\n" + hint_text + "\n\n" # TODO it would be nice to show the calltips here!
+
+        documentation_lines = []
+
+        if doc_data['doc'] is not None :
+            documentation_lines = doc_data['doc'].split("\n")
+        else :
+            documentation_lines = ["","No documentation.",""]
+       
+        documentation_text += "/**\n";
+
         for line in documentation_lines:
             # Strip leading whitespace.
             line = line.strip()
@@ -1977,30 +2003,14 @@ class HaxeShowDocumentation( sublime_plugin.TextCommand ):
 
             documentation_text += line + "\n"
 
-        # Find any windows open on the second row and immediately consider them to be the documentation window (whether or not that is actually true)
-        potential_documentation_views = [view for view in sublime.active_window().views() if window.get_view_index(view)[0] == 1]
-        doc_view = None
+        documentation_text += "**/\n";
 
+        doc_view = window.get_output_panel('haxe-doc');
+        doc_view.set_syntax_file('Packages/Haxe/Haxe.tmLanguage')
+        doc_view.settings().set('word_wrap', True)
+        doc_view.insert(edit, doc_view.size(), documentation_text + "\n")
+        window.run_command("show_panel", {"panel": "output.haxe-doc"})
 
-        if len(potential_documentation_views) == 0:
-            # If we can't find one, then make one. 
-
-            previous_active = window.active_view()
-
-            window.set_layout({ "cols": [0.0, 0.5, 1.0], "rows": [0.0, 0.7, 1.0], "cells": [[0, 0, 2, 1], [0, 1, 2, 2]]})
-            doc_view = window.new_file()
-            doc_view.set_scratch(True)
-            doc_view.set_name("Documentation")
-            window.set_view_index(doc_view, 1, 0)
-
-            if not previous_active is None:
-                window.focus_view(previous_active)
-        else:
-            doc_view = potential_documentation_views[0]
-
-        doc_view.set_read_only(False)
-        doc_view.replace(edit, sublime.Region(0, doc_view.size()), documentation_text)
-        doc_view.set_read_only(True)
 
 
 class HaxeExecCommand(ExecCommand):
