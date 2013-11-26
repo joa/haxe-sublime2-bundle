@@ -502,8 +502,6 @@ class HaxeHint( sublime_plugin.TextCommand ):
 
             fn_name = complete.get_current_fn_name(self.view, r.end())
 
-            print(documentationStore[fn_name])
-
             if view.settings().get("haxe_smart_snippets",False) :
                 snippet = ""
                 i = 1
@@ -656,6 +654,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
     #stdClasses = ["Void","Float","Int","UInt","Null","Bool","Dynamic","Iterator","Iterable","ArrayAccess"]
     stdClasses = []
     stdCompletes = []
+
+    visibleCompletionList = [] # This will contain the list of visible completions, if there is one. 
 
     panel = None
     serverMode = False
@@ -1307,6 +1307,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             if cm not in comps :
                 comps.append(cm)
 
+
         return comps
 
     def clear_build( self , view ) :
@@ -1613,6 +1614,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     sig = i.find("t").text
                     doc = i.find("d").text 
 
+                    if doc is None: doc = "No documentation found."
                     documentationStore[fn_name + "." + name] = doc
                     insert = name
                     hint = name
@@ -1786,6 +1788,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         fn_name = source[closest_nonfunction_char_idx + 1:]
         return fn_name
 
+
+    def on_selection_modified_async(self, view):
+        sublime.active_window().run_command('haxe_show_documentation')
+
     def get_haxe_completions( self , view , offset ):
 
         src = view.substr(sublime.Region(0, view.size()))
@@ -1896,6 +1902,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         if not show_hints :
             hints = []
 
+        self.visibleCompletionList = comps
         return comps,hints
 
     def get_hxsl_completions( self , view , offset ) :
@@ -1917,6 +1924,83 @@ class HaxeComplete( sublime_plugin.EventListener ):
         f = tempfile.NamedTemporaryFile( delete=False )
         f.write( src )
         return f
+
+
+class HaxeShowDocumentation( sublime_plugin.TextCommand ):
+    def run( self , edit ) :
+        view = self.view
+        complete = HaxeComplete.inst
+        sel = view.sel()[0]
+
+        # [('ID\tInt', 'ID'), ('_acceleration\tflixel.util.FlxPoint', '_acceleration'), ('_angleChanged\tBool', '_angleChanged'),
+        current_function = complete.get_current_fn_name(view, sel.end() + 1)
+        function_qualifications = current_function[:current_function.rfind(".")] + "." # If we have something like foo.bar.baz, this will return just foo.bar.
+        current_function = current_function[current_function.rfind(".") + 1:] # And this will return baz.
+
+        # Find what the autocompletion box is likely autocompleting to.
+
+        possible_function_names = [x[0].split("\t")[0] for x in complete.visibleCompletionList]
+        possible_function_names = [(x[:x.find("(")] if x.find("(") != -1 else x) for x in possible_function_names]
+
+        matching_function_names = []
+
+        for x in range(0, len(current_function)):
+            smaller_name = current_function[:-x] if x != 0 else current_function # first try quux, then quu, then qu, then q. the if/else is a weird special case of slice notation.
+
+            matching_function_names = [fn for fn in possible_function_names if fn.startswith(smaller_name)]
+
+            if len(matching_function_names) > 0: break
+
+        if len(matching_function_names) == 0: return
+
+        best_match = matching_function_names[0]
+
+        self.show_documentation(function_qualifications + best_match, edit)
+
+    # Actually display the documentation in the documentation window.
+    def show_documentation(self, fn_name, edit):
+        window = sublime.active_window()
+
+        documentation_text = fn_name + ":\n" # TODO it would be nice to show the calltips here!
+
+        if fn_name not in documentationStore: 
+            return
+
+        documentation_lines = documentationStore[fn_name].split("\n")
+        for line in documentation_lines:
+            # Strip leading whitespace.
+            line = line.strip()
+
+            # Strip out any leading astericks.
+            if len(line) > 0 and line[0] == "*": 
+                line = line[2:]
+
+            documentation_text += line + "\n"
+
+        # Find any windows open on the second row and immediately consider them to be the documentation window (whether or not that is actually true)
+        potential_documentation_views = [view for view in sublime.active_window().views() if window.get_view_index(view)[0] == 1]
+        doc_view = None
+
+
+        if len(potential_documentation_views) == 0:
+            # If we can't find one, then make one. 
+
+            previous_active = window.active_view()
+
+            window.set_layout({ "cols": [0.0, 0.5, 1.0], "rows": [0.0, 0.7, 1.0], "cells": [[0, 0, 2, 1], [0, 1, 2, 2]]})
+            doc_view = window.new_file()
+            doc_view.set_scratch(True)
+            doc_view.set_name("Documentation")
+            window.set_view_index(doc_view, 1, 0)
+
+            if not previous_active is None:
+                window.focus_view(previous_active)
+        else:
+            doc_view = potential_documentation_views[0]
+
+        doc_view.set_read_only(False)
+        doc_view.replace(edit, sublime.Region(0, doc_view.size()), documentation_text)
+        doc_view.set_read_only(True)
 
 
 class HaxeExecCommand(ExecCommand):
