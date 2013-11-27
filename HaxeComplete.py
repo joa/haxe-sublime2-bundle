@@ -1804,11 +1804,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         # when the user is typing into a  search box. In that case, although
         # this function is called, the selection in the active view will
         # remain unchanged.
-        current_selection = sublime.active_window().active_view().sel() 
+        current_selection = sublime.active_window().active_view().sel()[0]
         if current_selection == self.old_selection: return
 
-        self.old_selection = current_selection
-        for s in sublime.active_window().active_view().sel(): print(s)
+        self.old_selection = sublime.Region(current_selection.a, current_selection.b)
         sublime.active_window().run_command('haxe_show_documentation')
 
     def get_haxe_completions( self , view , offset ):
