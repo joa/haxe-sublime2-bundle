@@ -1799,6 +1799,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
     old_selection = None
 
     def on_modified_async(self, view):
+        if sublime.active_window().active_view().score_selector(0,'source.haxe.2') <= 0 : return
+
         # We don't want to bother updating the documentation if the selection
         # hasn't changed. Special note: This also accomodates for the case
         # when the user is typing into a  search box. In that case, although
@@ -1993,7 +1995,7 @@ class HaxeShowDocumentation( sublime_plugin.TextCommand ):
         else:
             hint_text = " : ".join( hint )
 
-        documentation_text = "\n" + hint_text + "\n\n" # TODO it would be nice to show the calltips here!
+        documentation_text = "\n" + hint_text + "\n\n"
 
         documentation_lines = []
 
