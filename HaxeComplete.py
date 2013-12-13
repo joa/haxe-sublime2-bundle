@@ -15,7 +15,17 @@ import glob
 import hashlib
 import shutil
 import functools
-import textwrap
+
+from .HaxeHelper import runcmd, show_quick_panel
+from .HaxeProjects import HaxeProjects
+
+try:
+    # Python 3
+    from .features import *
+
+except (ValueError):
+    # Python 2
+    from features import *
 
 from xml.etree import ElementTree
 from xml.etree.ElementTree import XMLTreeBuilder
@@ -26,9 +36,6 @@ try :
 except ImportError as e:
     pass # ST3
     
-from subprocess import Popen, PIPE
-from datetime import datetime
-
 try :
     stexec = __import__("exec")
     ExecCommand = stexec.ExecCommand
@@ -39,33 +46,8 @@ except ImportError as e :
     ExecCommand = stexec.ExecCommand
     AsyncProcess = stexec.AsyncProcess
     unicode = str #dirty...
-   
+
 #from stexec import ExecCommand,AsyncProcess
-
-try:
-  STARTUP_INFO = subprocess.STARTUPINFO()
-  STARTUP_INFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-  STARTUP_INFO.wShowWindow = subprocess.SW_HIDE
-except (AttributeError):
-    STARTUP_INFO = None
-
-def runcmd( args, input=None ):
-    #print(args)
-    try:
-        if int(sublime.version()) >= 3000 :
-            p = Popen(args, stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
-        else:
-            p = Popen([a.encode(sys.getfilesystemencoding()) for a in args], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
-        if isinstance(input, unicode) :
-            input = input.encode('utf-8')
-        out, err = p.communicate(input=input)
-        return (out.decode('utf-8') if out else '', err.decode('utf-8') if err else '')
-    except (OSError, ValueError) as e:
-        err = u'Error while running %s: %s' % (args[0], e)
-        if int(sublime.version()) >= 3000 :
-            return ("",err)
-        else:
-            return ("", err.decode('utf-8'))
 
 compilerOutput = re.compile("^([^:]+):([0-9]+): (characters?|lines?) ([0-9]+)-?([0-9]+)? : (.*)", re.M)
 compactFunc = re.compile("\(.*\)")
@@ -156,7 +138,6 @@ class HaxeLib :
                 lib = HaxeLib( name , dev is not None , version )
 
                 HaxeLib.available[ name ] = lib
-
 
 
 HaxeLib.scan()
@@ -273,196 +254,6 @@ class HaxeBuild :
             self.packs = packs;
 
         return self.classes, self.packs
-
-
-class HaxelibListInstalled( sublime_plugin.WindowCommand ):
-    def run(self, paths = [] , t = "list"):
-        
-        self.action = t
-        out,err = runcmd(["haxelib" , "list"]);
-
-        libs = out.splitlines()
-        
-        self.libs = []        
-        menu = []
-        for _lib in libs :
-            libname,libcurrent,libversions = self.haxelib_parse_libversions(_lib)
-            menu.append([ libname + "   " + libcurrent , libversions ])
-            self.libs.append(libname)
-
-        self.window.show_quick_panel( menu, self.on_select )
-
-    def show_quick_panel(self, options, done):
-        sublime.set_timeout(lambda: self.window.show_quick_panel(options, done), 10)
-
-    def on_select(self, index) :
-        if(index < 0):
-            return;
-
-        if(self.action == "remove"):
-            self.do_remove(self.libs[index])
-        elif(self.action == "update"):
-            self.do_update(self.libs[index])
-
-    def do_remove(self,library):
-    
-        sublime.status_message("Please wait, removing haxelib " + library);
-        out,err = runcmd(["haxelib" , "remove", library]);
-        sublime.status_message(str(out))
-        self.show_quick_panel(out.splitlines(), None)
-
-    def do_update(self,library):
-    
-        sublime.status_message("Please wait, updating haxelib " + library);
-        out,err = runcmd(["haxelib" , "update", library]);
-        sublime.status_message(str(out))        
-        self.show_quick_panel(out.splitlines(), None)
-
-    def haxelib_parse_libversions( self, libinfo ):
-        # the info comes in along these lines format: 3.0.2 [3.0.4]
-        # so first : is the lib name, the ones inside of [ ] is active and 
-        # the rest are installed but not active.
-        first_colon = libinfo.find(':');
-        libname = ''
-        versions = 'unknown'
-        active_version = 'unknown'
-
-        #parse the lib name and versions separately
-        if(first_colon != -1) :
-            libname = libinfo[0:first_colon]
-            versions = libinfo[first_colon+1:].split()
-
-        # now parse the versions into active and inactive list
-        for _version in versions:
-            if(_version.find("[") != -1):
-                active_version = _version
-
-        #remove the active from the list
-        if active_version in versions: versions.remove(active_version)
-
-        #parse for better output
-        versions_str = (", ".join(str(x) for x in versions)).replace('dev:','')
-        active_version_str = str(active_version).replace('dev:','')
-        active_str = str(active_version).strip('[]')
-
-        #nicer output if none others
-        if(versions_str == ""):
-            versions_str = "none"
-
-        #parse the dev flag
-        if(active_str.find("dev:") != -1):
-            active_str = "dev"
-
-        return libname, active_version_str, "active: " +active_str +"   installed: " + versions_str
-
-
-class HaxelibInstallLib( sublime_plugin.WindowCommand ):
-    def run(self):
-        self.window.show_input_panel("Enter lib name to install", "", self.on_input, None, None )
-
-    def on_input(self, value):
-        if(value != ""):
-            sublime.status_message("Please wait, installing haxelib " + value);
-            out,err = runcmd(["haxelib" , "install", value]);
-            outlines = out.splitlines()
-            self.window.show_quick_panel(outlines, None, sublime.MONOSPACE_FONT)
-        else:
-            self.window.show_quick_panel( [["Invalid library name","Hit return to try again, escape to cancel"]], self.on_invalid )
-
-    def on_invalid(self,index):
-        if(index < 0):
-            return
-
-        sublime.run_command("haxelib_install_lib");
-
-#todo : This is now interactive so upgrade is harder this way.
-#We could fetch the list of installed, manually run haxelib update over each
-#or rather maybe we can show a list of AVAILABLE updates rather than upgrade all
-#with the option to pick them from the quick panel
-#{ "caption": "Haxelib: Upgrade all", "command": "haxelib_upgrade_libs" },    
-class HaxelibUpgradeLibs( sublime_plugin.WindowCommand ):
-    def run(self):
-        out,err = runcmd(["haxelib" , "upgrade"]);
-
-        self.window.show_quick_panel(out.splitlines(), None)
-
-class HaxelibListLibs( sublime_plugin.WindowCommand ):
-    def run(self):
-        out,err = runcmd(["haxelib" , "search"], " \n \n \n");
-        lines = out.splitlines()
-        
-        #remove the initial prompt
-        lines[0] = lines[0].replace("Search word : ","")
-
-        #sort alphabetically
-        lines.sort(key=str.lower)
-
-        #store for later
-        self.libs = lines
-
-        #show list
-        self.window.show_quick_panel(lines,self.on_lib_select)
-
-    def show_quick_panel(self, options, done):
-        sublime.set_timeout(lambda: self.window.show_quick_panel(options, done), 10)
-
-    def on_lib_select(self, index):
-        if(index < 1):
-            return
-
-        name = self.libs[index]
-        self.selected = name
-
-        menu = []
-        menu.append( ["Info", "haxelib info " + name] ) 
-        menu.append( ["Install", "haxelib install " + name] )
-
-        self.show_quick_panel(menu,self.on_action_selected)
-
-    def on_action_selected(self, index):
-        if(index < 0):
-            return
-
-        #info
-        if index == 0:
-            self.do_action("info",self.selected)
-        #install
-        elif index == 1:
-            self.do_action("install",self.selected)
-
-    def do_action(self,action,library):
-        out,err = runcmd(["haxelib" , action, self.selected]);
-        lines = out.splitlines()
-
-        # the description can be rather long,
-        # so we just split it up some
-        if action == "info":
-            desc = lines[2]
-            del lines[2]            
-
-            max_length = 60
-            descsplit = textwrap.wrap(desc,max_length) 
-
-            #now replace the Desc: into it's own line
-            descsplit[0] = descsplit[0].replace('Desc: ','')
-            descsplit.append('')
-            descsplit.reverse()
-
-            #reinsert
-            for d in descsplit:
-                lines.insert(2,"\t\t"+d)
-
-            #and the desc header
-            lines.insert(2, 'Desc: ')
-
-        for index, line in enumerate(lines):
-            length = len(line)
-            if(length > max_length):
-                split_lines = textwrap.wrap(line,max_length)
-                lines[index] = split_lines[0] + ' ...'
-        
-        self.show_quick_panel(lines,None)
-
 
 
 class HaxeGenerateImport( sublime_plugin.TextCommand ):
@@ -955,6 +746,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
         elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
             return
 
+        # HaxeProjects.determine_type()
+
         self.extract_build_args( view )
         self.get_build( view )
         self.generate_build( view )
@@ -1192,7 +985,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 for f in folders:
                     if f + "/" in fn :
                         folder = f
-
+        
         if folder is not None :
             # settings.set("haxe-complete-folder", folder)
             self.find_hxml(folder)
