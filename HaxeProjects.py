@@ -22,18 +22,23 @@ plugin_path = os.path.dirname(os.path.realpath(__file__))
 
 class HaxeSelectProject(sublime_plugin.WindowCommand) :
 	def run( self ) :
-		theproject.project_file_list = theproject.find_possible_project_file()
-		print("possible projects include:")
-		print(theproject.project_file_list)
-		show_quick_panel( sublime.active_window(), theproject.project_file_list, theproject.on_selected_project )
+		project = HaxeProjects.active_project()
+		if not project is None : 
+			project.run_selected_build_target()
+			project.project_file_list = project.find_possible_project_file()
+			show_quick_panel( sublime.active_window(), project.project_file_list, project.on_selected_project )
 
 class HaxeRunProjectBuild(sublime_plugin.WindowCommand) :
 	def run( self ) :
-		theproject.run_selected_build_target()
+		project = HaxeProjects.active_project()
+		if not project is None : 
+			project.run_selected_build_target()
 
 class HaxeChooseBuildTarget(sublime_plugin.WindowCommand) :
 	def run( self ) :
-		theproject.get_build_targets(True)
+		project = HaxeProjects.active_project()
+		if not project is None : 
+			project.get_build_targets(True)		
 
 
 #
@@ -62,37 +67,121 @@ class HaxeChooseBuildTarget(sublime_plugin.WindowCommand) :
 #	    > ready for user to select a build type, or optionally automatically show a select build list
 #
 
+active_projects = {}
+
 class HaxeProjects() :
 
 	def __init__( self ):		
-		print("haxe:projects")
+		print(">>> New haxe project reporting in")
 		self.build_info_cache = None
 		self.haxelib_cache = None
 		self.selected_project = None
 		self.selected_build = None
 		self.project = None
+		self.settings = None
 
 #
-# Called from the plugin main class to determine the project type, if any
+# Called from anywhere to get the window project instance, if any
 #
 	@staticmethod
-	def determine_type():
+	def active_project():
+
+		project = None
+		#first we have to see if there is a loaded project up in this window
+		print("> check for existing project session on window")
+		sublime_proj = sublime.active_window().project_data()
 		
+
+		#if there is, we can fetch it from the cache of active projects
+		if "project" in sublime_proj:
+			project_file = sublime_proj["project"]
+			print("> found project in window, running with " + project_file)
+			print(active_projects)
+			if not project_file in active_projects:
+				print("> project not found, reloading data")
+				project = HaxeProjects._create_project_instance(project_file)				
+			else:
+				print("> project found ok")
+				project = active_projects[project_file]
+
+		#otherwise we need a new project instance
+		else:
+			print("> no active project found in the window")
+			project = HaxeProjects._create_project_instance()
+
+		sublime_proj["project"] = project.selected_project
+		sublime.active_window().set_project_data( sublime_proj )
+
+		return project
+#
+# Called from this class to create project instances
+#
+	@staticmethod
+	def _create_project_instance(project_file=None):
+
+		theproject = HaxeProjects()
+
 		#try and find project files in the folder
-		theproject.find_possible_project_file()
+		if project_file is None:
+			print("> find possible project files")
+			theproject.find_possible_project_file()
+		else:
+			print("> using existing project file " + project_file)
+			theproject.selected_project = project_file
 
 		#if there is an automatically selected one,
 		#we can progress to attempting to guess and parse it
+		print("> Did we find a single project to use?")
 		if(theproject.selected_project != None):
-			if(theproject.project == None):
+			print("> YES, found, " + theproject.selected_project )
+			active_projects[theproject.selected_project] = theproject		
+			print("> continuing to load project" )	
+			project = theproject.attempt_load_project_file()
+			guess = theproject.best_guess()
+			print("> project : " + str(project))
+			print("> guess : " + guess)
+			return theproject	
+		else:
+			print("> NO, no discernable project, here")
+			del theproject
+
+		return
+		
+
+	@staticmethod
+	def determine_type():
+				
+		project = HaxeProjects.active_project()
+
+		if project != None:			
+			print("> further project data loading...")			
+			project.post_project_select()
+		else:
+			print("> no automatically loadable project found. use the command palette.")
+
+		return
+
+		
+
+		#if there is an automatically selected one,
+		#we can progress to attempting to guess and parse it
+		print("> check for silver bullet, project found?")
+		if(theproject.selected_project != None):
+			if not "project" in sublime_proj:
+				print("> YES, found, no active project, attempting to load!")
 				project = theproject.attempt_load_project_file()
 				guess = theproject.best_guess()
-
+				print("> project : " + str(project))
+				print("> guess : " + guess)
 				if project != None:
 					if(guess != ''):
+						print("> project selected ok, performing post select step")
 						#now we can try and get the list of libraries and such 
 						theproject.post_project_select()
-
+					else:
+						print("> guess was blank, assuming it's straight haxe")
+			else:
+				print(">Project loaded. Doing nothing for now.")
 		else:
 
 			print("No suitable project files")
@@ -112,8 +201,9 @@ class HaxeProjects() :
 			if not ext is None:
 				if self.project['type'] == ext:
 					guess = project_type.get("name")
-					self.project['settings'] = project_type
+					self.settings = project_type
 
+		self.guess = guess
 		return guess
 
 #
@@ -128,9 +218,14 @@ class HaxeProjects() :
 # Called if this is a openfl/nme/lime based project, and should go for additional info
 #
 	def post_project_select(self):
-		self.get_build_info()		
-		self.get_build_targets()
-		print(self.project)
+		if self.guess != '':
+			print("> post project selection, valid build project")
+			print("> get build info")
+			self.get_build_info()
+			print("> get build targets")
+			self.get_build_targets()
+		else:
+			print("> handling different project typeee")
 
 #
 # Search the open folders for any possible files to use as a project
@@ -211,8 +306,8 @@ class HaxeProjects() :
 		if(self.selected_build == None):
 			self.get_build_targets()
 
-		build_command = self.project["settings"].get("run")
-		build_targets = self.project["settings"].get('build_targets')
+		build_command = self.settings.get("run")
+		build_targets = self.settings.get('build_targets')
 		build_args = build_targets[self.selected_build]
 
 		for arg in build_args:			
@@ -238,13 +333,15 @@ class HaxeProjects() :
 		if(self.selected_build != None and force != True):
 			return 
 
-		targets_list = self.project["settings"].get('build_targets')
+		targets_list = self.settings.get('build_targets')
 		target_display_list = []
 		for target in targets_list:
 			target_display_list.append(target)
 
 		target_display_list.sort(key=str.lower)
 		self.target_display_list = target_display_list
+
+		print("> No build target selected, showing target menu")
 
 		show_quick_panel(sublime.active_window(),target_display_list,self.on_build_target_selected)
 
@@ -254,8 +351,9 @@ class HaxeProjects() :
 
 		self.selected_build = self.target_display_list[index];
 		self.project["build"] = self.selected_build
-		targets_list = self.project["settings"].get('build_targets')
+		targets_list = self.settings.get('build_targets')
 		build_command = targets_list[self.selected_build]
+		print("> Build target selected - " + self.selected_build)
 
 
 #
@@ -266,11 +364,11 @@ class HaxeProjects() :
 		if(self.build_info_cache != None and force == None):
 			return self.build_info_cache
 
-		get_build_info_cmd = self.project['settings'].get('run');
+		get_build_info_cmd = self.settings.get('run');
 		
 		if(get_build_info_cmd == None):
-			print("Haxe: Project: Project config for " + project['settings'].get('name') + " has no \"run\" option.")
-			sublime.status_message("Project config for " + project['settings'].get('name') + " has no \"run\" option.")
+			print("Haxe: Project: Project config for " + settings.get('name') + " has no \"run\" option.")
+			sublime.status_message("Project config for " + settings.get('name') + " has no \"run\" option.")
 			return
 
 		get_build_info_cmd.append("display")
@@ -342,8 +440,5 @@ class HaxeProjects() :
 
 		return project_xml
 
-
-
-theproject = HaxeProjects()
 
 

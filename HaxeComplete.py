@@ -746,7 +746,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
             return
 
-        # HaxeProjects.determine_type()
+        HaxeProjects.determine_type()
 
         self.extract_build_args( view )
         self.get_build( view )
