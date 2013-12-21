@@ -29,37 +29,5 @@
             "args" : { "paths": [] , "t" : "typedef" }
         }
     ]  
-}, 
-{  
-    "id": "haxe-select-project-file",  
-    "caption" : "Use Project as",
-    "children":  
-    [  
-        { 
-        	"id" : "haxe-select-openfl", 
-        	"caption" : "OpenFL (*.xml)",
-        	"command" : "haxe_select_project",
-        	"args" : { "paths": [] , "t" : "class" }
-        },
-        { 
-            "id" : "haxe-select-lime", 
-            "caption" : "Lime (*.lime.xml)",
-            "command" : "haxe_select_project",
-            "args" : { "paths": [] , "t" : "interface" }
-        },
-        { 
-            "id" : "haxe-select-luxe", 
-            "caption" : "Luxe (*.luxe.xml)",
-            "command" : "haxe_select_project",
-            "args" : { "paths": [] , "t" : "interface" }
-        },
-        { 
-            "id" : "haxe-select-haxe", 
-            "caption" : "Haxe (*.hxml)",
-            "command" : "haxe_select_project",
-            "args" : { "paths": [] , "t" : "enum" }
-        }
-        
-    ]  
-}  
+}
 ]  

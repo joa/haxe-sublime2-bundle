@@ -11,6 +11,11 @@ import shlex
 import re
 
 
+
+def HaxeComplete_inst():    
+    from .HaxeComplete import HaxeComplete
+    return HaxeComplete.inst
+
 spaceChars = re.compile("\s")
 wordChars = re.compile("[a-z0-9._]", re.I)
 importLine = re.compile("^([ \t]*)import\s+([a-z0-9._]+);", re.I | re.M)

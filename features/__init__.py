@@ -5,7 +5,6 @@ from .haxe_restart_server import HaxeRestartServer
 from .haxe_create_type import HaxeCreateType
 from .haxe_generate_import import HaxeGenerateImport
 
-
 print("Haxe : Reloading haxe module")
 
 __all__ = [

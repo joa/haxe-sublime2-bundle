@@ -1,7 +1,8 @@
 import sublime_plugin
 import sublime
+import os
 
-from ..HaxeComplete import inst
+from ..HaxeHelper import HaxeComplete_inst, isType
 
 class HaxeCreateType( sublime_plugin.WindowCommand ):
 
@@ -11,7 +12,7 @@ class HaxeCreateType( sublime_plugin.WindowCommand ):
     currentType = None
 
     def run( self , paths = [] , t = "class" ) :
-        builds = HaxeComplete.inst.builds
+        builds = HaxeComplete_inst().builds
         HaxeCreateType.currentType = t
         view = sublime.active_window().active_view()
         scopes = view.scope_name(view.sel()[0].end()).split()
@@ -23,7 +24,7 @@ class HaxeCreateType( sublime_plugin.WindowCommand ):
             return
 
         if len(builds) == 0 :
-            HaxeComplete.inst.extract_build_args(view)
+            HaxeComplete_inst().extract_build_args(view)
 
         if len(paths) == 0 :
             paths.append(fn)

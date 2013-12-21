@@ -1,5 +1,5 @@
 [
     {
-        "command": "haxe_run_project_build"
+        "command": "haxe_run_build"
     }
 ]

@@ -30,16 +30,14 @@ from .HaxeHelper import libFlag, skippable, inAnonymous, extractTag
 from .HaxeHelper import variables, functions, functionParams, paramDefault
 from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
 
-# Import support for projects
-
-from .HaxeProjects import HaxeProjects
-
 # Import the features module, including the haxelib and key commands etc
 
 try: # Python 3    
     from .features import *
+    from .features.haxelib import *
 except (ValueError): # Python 2    
     from features import *
+    from features.haxelib import *
 
 # For running background tasks
 
@@ -393,7 +391,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
     compilerVersion = 2
 
     def __init__(self):
-        #print("init haxecomplete")
+        # print("init haxecomplete")
         HaxeComplete.inst = self
 
         out, err = runcmd( ["haxe", "-main", "Nothing", "-v", "--no-output"] )
@@ -524,7 +522,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         if view.is_loading() : 
             return;
         
-        if view.score_selector(0,'source.haxe.2') > 0 :
+        if view.score_selector(0,'source.haxe.2') > 0 :            
             HaxeCreateType.on_activated( view )
         elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
             return
