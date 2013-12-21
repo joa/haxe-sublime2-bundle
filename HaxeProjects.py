@@ -5,13 +5,9 @@ import time
 
 import xml.etree.ElementTree as etree
 
-from .HaxeHelper import runcmd,show_quick_panel
-
-extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main|path|package|title)=\"([a-z0-9_./-]+)\"", re.I)
-extractTagName = re.compile("<([a-z0-9_-]+).*\s", re.I)
-haxeFileRegex = "^([^:]*\.hx):([0-9]+):.*$"
-
-plugin_path = os.path.dirname(os.path.realpath(__file__))
+from .HaxeHelper import runcmd, show_quick_panel
+from .HaxeHelper import extractTag, extractTagName, haxeFileRegex
+from .HaxeComplete import plugin_path
 
 #
 #	Haxe: Select project command
@@ -32,6 +28,7 @@ class HaxeRunProjectBuild(sublime_plugin.WindowCommand) :
 	def run( self ) :
 		project = HaxeProjects.active_project()
 		if not project is None : 
+			self.window.run_command("save_all")
 			project.run_selected_build_target()
 
 class HaxeChooseBuildTarget(sublime_plugin.WindowCommand) :
@@ -282,6 +279,7 @@ class HaxeProjects() :
 # Load possible configurations from the ProjectSettings
 #
 	def load_project_settings(self):		
+		print("haxe : Looking for settings files in " + plugin_path + "/ProjectSettings")
 		#work out the project file path from the plugin location, so it isn't harcoded
 		project_settings_path = os.path.join(plugin_path,"ProjectSettings")
 		#fetch the list of files from the folder

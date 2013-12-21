@@ -1,7 +1,7 @@
 [
     {
         "keys": ["ctrl+shift+b"],
-        "command": "haxe_select_build",
+        "command": "haxe_choose_build_target",
         "context":
         [
             {
@@ -13,11 +13,7 @@
     },
     {
         "keys": ["ctrl+enter"],
-        "command": "run_macro_file",
-        "args":
-        {
-            "file": "Packages/Haxe/Macros/SaveAllAndBuild.sublime-macro"
-        },
+        "command": "haxe_run_project_build",
         "context":
         [
             {

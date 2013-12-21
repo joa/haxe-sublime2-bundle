@@ -1,5 +1,5 @@
 [
     {
-        "command": "haxe_select_build"
+        "command": "haxe_choose_build_target"
     }
 ]
