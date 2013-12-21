@@ -66,6 +66,7 @@ For manual installation, the folders should be `sublime-text-3` (Linux) or `Subl
       - **Ctrl+Shift+I** to create a new interface,
       - **Ctrl+Shift+E** to create a new enum,
       - **Ctrl+Shift+T** to create a new typedef
+ - Press **Ctrl+Shift+F1** to show documentation on cursor (when previously autocompleted) 
 
 ### Settings
 

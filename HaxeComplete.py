@@ -1796,22 +1796,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
         return fn_name
 
 
-    old_selection = None
-
-    def on_modified_async(self, view):
-        if sublime.active_window().active_view().score_selector(0,'source.haxe.2') <= 0 : return
-
-        # We don't want to bother updating the documentation if the selection
-        # hasn't changed. Special note: This also accomodates for the case
-        # when the user is typing into a  search box. In that case, although
-        # this function is called, the selection in the active view will
-        # remain unchanged.
-        current_selection = sublime.active_window().active_view().sel()[0]
-        if current_selection == self.old_selection: return
-
-        self.old_selection = sublime.Region(current_selection.a, current_selection.b)
-        sublime.active_window().run_command('haxe_show_documentation')
-
     def get_haxe_completions( self , view , offset ):
 
         src = view.substr(sublime.Region(0, view.size()))
@@ -1948,6 +1932,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 class HaxeShowDocumentation( sublime_plugin.TextCommand ):
     def run( self , edit ) :
+        
         view = self.view
         complete = HaxeComplete.inst
         sel = view.sel()[0]

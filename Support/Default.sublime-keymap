@@ -124,5 +124,10 @@
         "keys": ["ctrl+shift+h","ctrl+shift+e"],
         "command": "haxe_create_type",
         "args" : {"t" : "enum"}
+    },
+    {
+        "keys": ["ctrl+shift+f1"],
+        "command" : "haxe_show_documentation",
+        "args" : {}
     }
 ]
