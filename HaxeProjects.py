@@ -185,7 +185,7 @@ class HaxeProjects() :
 		else:
 
 			print("No suitable project files")
-			sublie.status_message("No suitable haxe project files found")
+			sublime.status_message("No suitable haxe project files found")
 
 #
 # Search the open folders for any possible files to use as a project
