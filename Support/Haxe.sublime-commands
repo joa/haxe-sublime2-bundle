@@ -4,13 +4,9 @@
     { "caption": "Haxe: New Enum", "command": "haxe_create_type" , "args" : { "t" : "enum"} },
     { "caption": "Haxe: New Typedef", "command": "haxe_create_type" , "args" : { "t" : "typedef"} },
     { "caption": "Haxe: Restart Server", "command": "haxe_restart_server" },
-    { "caption": "Haxe: Choose Project File", "command": "haxe_select_project" },
-    { "caption": "Haxe: Run project build", "command": "haxe_run_project_build" },
-    { "caption": "Haxe: Choose Build Target", "command": "haxe_choose_build_target" },
 	{ "caption": "Haxelib: List Installed", "command": "haxelib_list_installed", "args" : { "t" : "list"} },    
 	{ "caption": "Haxelib: Install library", "command": "haxelib_install_lib" },
 	{ "caption": "Haxelib: Remove library", "command": "haxelib_list_installed", "args" : { "t" : "remove"}  },    
 	{ "caption": "Haxelib: Update library", "command": "haxelib_list_installed", "args" : { "t" : "update"} },    	
-	{ "caption": "Haxelib: List all", "command": "haxelib_list_libs" },  
-	{ "caption": "Haxelib: Test Command", "command": "haxelib_test_list" }    
+	{ "caption": "Haxelib: List all", "command": "haxelib_list_libs" }    
 ]
