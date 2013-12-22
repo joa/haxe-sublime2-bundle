@@ -210,11 +210,14 @@ class HaxeBuild :
         self.classes = None
         self.packages = None
         self.openfl = False
+        self.lime = False
 
     def to_string(self) :
         out = os.path.basename(self.output)
         if self.openfl :
             return "{out} (openfl / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
+        elif self.lime :
+            return "{out} (lime / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
         elif self.nmml is not None:
             return "{out} (NME / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
         else:
@@ -868,12 +871,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
     def find_nmml( self, folder ) :
         nmmls = glob.glob( os.path.join( folder , "*.nmml" ) )
         nmmls += glob.glob( os.path.join( folder , "*.xml" ) )
+        nmmls += glob.glob( os.path.join( folder , "*.lime" ) );
 
         for build in nmmls:
             currentBuild = HaxeBuild()
             currentBuild.hxml = build
             currentBuild.nmml = build
             currentBuild.openfl = build.endswith("xml")
+            currentBuild.lime = build.endswith("lime")
             buildPath = os.path.dirname(build)
             
             # TODO delegate compiler options extractions to NME 3.2:
@@ -911,7 +916,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             outp = os.path.join( folder , outp )
 
-            if currentBuild.openfl :
+            if currentBuild.openfl or currentBuild.lime :
                 if self.compilerVersion >= 3 :
                     currentBuild.target = "swf"
                 else :
@@ -1211,7 +1216,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 else :
                     tarPkg = "flash8"
 
-        if not build.openfl and build.nmml is not None or HaxeLib.get("nme") in build.libs :
+        if not build.openfl and not build.lime and build.nmml is not None or HaxeLib.get("nme") in build.libs :
             tarPkg = "nme"
             targetPackages.extend( ["jeash","neash","browser","native"] )
 
@@ -1383,7 +1388,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def run_nme( self, view, build ) :
 
-        if build.openfl :
+        if build.openfl or build.lime :
             cmd = ["haxelib","run","lime"]
         else :
             cmd = ["haxelib","run","nme"]
