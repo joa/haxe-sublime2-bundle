@@ -871,7 +871,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
     def find_nmml( self, folder ) :
         nmmls = glob.glob( os.path.join( folder , "*.nmml" ) )
         nmmls += glob.glob( os.path.join( folder , "*.xml" ) )
-        nmmls += glob.glob( os.path.join( folder , "*.lime" ) );
+        nmmls += glob.glob( os.path.join( folder , "*.lime" ) )
 
         for build in nmmls:
             currentBuild = HaxeBuild()
