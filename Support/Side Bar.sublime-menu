@@ -5,10 +5,10 @@
     "children":  
     [  
         { 
-        	"id" : "haxe-create-class", 
-        	"caption" : "Class",
-        	"command" : "haxe_create_type",
-        	"args" : { "paths": [] , "t" : "class" }
+            "id" : "haxe-create-class", 
+            "caption" : "Class",
+            "command" : "haxe_create_type",
+            "args" : { "paths": [] , "t" : "class" }
         },
         { 
             "id" : "haxe-create-interface", 
@@ -29,5 +29,5 @@
             "args" : { "paths": [] , "t" : "typedef" }
         }
     ]  
-}  
+}
 ]  

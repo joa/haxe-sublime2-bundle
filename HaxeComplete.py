@@ -16,6 +16,41 @@ import hashlib
 import shutil
 import functools
 
+# Information about where the plugin is running from
+plugin_file = __file__
+plugin_filepath = os.path.realpath(plugin_file)
+plugin_path = os.path.dirname(plugin_filepath)
+
+# Import the helper functions and regex helpers
+
+from .HaxeHelper import runcmd, show_quick_panel
+from .HaxeHelper import spaceChars, wordChars, importLine, packageLine, compilerOutput
+from .HaxeHelper import compactFunc, compactProp, libLine, classpathLine, typeDecl 
+from .HaxeHelper import libFlag, skippable, inAnonymous, extractTag
+from .HaxeHelper import variables, functions, functionParams, paramDefault
+from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
+
+# Import the features module, including the haxelib and key commands etc
+
+try: # Python 3    
+    from .features import *
+    from .features.haxelib import *
+except (ValueError): # Python 2    
+    from features import *
+    from features.haxelib import *
+
+# For running background tasks
+
+from subprocess import Popen, PIPE
+try:
+  STARTUP_INFO = subprocess.STARTUPINFO()
+  STARTUP_INFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+  STARTUP_INFO.wShowWindow = subprocess.SW_HIDE
+except (AttributeError):
+    STARTUP_INFO = None
+    
+# For parsing xml
+
 from xml.etree import ElementTree
 from xml.etree.ElementTree import XMLTreeBuilder
 
@@ -25,9 +60,6 @@ try :
 except ImportError as e:
     pass # ST3
     
-from subprocess import Popen, PIPE
-from datetime import datetime
-
 try :
     stexec = __import__("exec")
     ExecCommand = stexec.ExecCommand
@@ -38,62 +70,7 @@ except ImportError as e :
     ExecCommand = stexec.ExecCommand
     AsyncProcess = stexec.AsyncProcess
     unicode = str #dirty...
-   
-#from stexec import ExecCommand,AsyncProcess
 
-try:
-  STARTUP_INFO = subprocess.STARTUPINFO()
-  STARTUP_INFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-  STARTUP_INFO.wShowWindow = subprocess.SW_HIDE
-except (AttributeError):
-    STARTUP_INFO = None
-
-def runcmd( args, input=None ):
-    #print(args)
-    try:
-        if int(sublime.version()) >= 3000 :
-            p = Popen(args, stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
-        else:
-            p = Popen([a.encode(sys.getfilesystemencoding()) for a in args], stdout=PIPE, stderr=PIPE, stdin=PIPE, startupinfo=STARTUP_INFO)
-        if isinstance(input, unicode) :
-            input = input.encode('utf-8')
-        out, err = p.communicate(input=input)
-        return (out.decode('utf-8') if out else '', err.decode('utf-8') if err else '')
-    except (OSError, ValueError) as e:
-        err = u'Error while running %s: %s' % (args[0], e)
-        if int(sublime.version()) >= 3000 :
-            return ("",err)
-        else:
-            return ("", err.decode('utf-8'))
-
-compilerOutput = re.compile("^([^:]+):([0-9]+): (characters?|lines?) ([0-9]+)-?([0-9]+)? : (.*)", re.M)
-compactFunc = re.compile("\(.*\)")
-compactProp = re.compile(":.*\.([a-z_0-9]+)", re.I)
-spaceChars = re.compile("\s")
-wordChars = re.compile("[a-z0-9._]", re.I)
-importLine = re.compile("^([ \t]*)import\s+([a-z0-9._]+);", re.I | re.M)
-packageLine = re.compile("package\s*([a-z0-9.]*);", re.I)
-libLine = re.compile("([^:]*):[^\[]*\[(dev\:)?(.*)\]")
-classpathLine = re.compile("Classpath : (.*)")
-typeDecl = re.compile("(class|typedef|enum|typedef)\s+([A-Z][a-zA-Z0-9_]*)\s*(<[a-zA-Z0-9_,]+>)?" , re.M )
-libFlag = re.compile("-lib\s+(.*?)")
-skippable = re.compile("^[a-zA-Z0-9_\s]*$")
-inAnonymous = re.compile("[{,]\s*([a-zA-Z0-9_\"\']+)\s*:\s*$" , re.M | re.U )
-extractTag = re.compile("<([a-z0-9_-]+).*\s(name|main|path)=\"([a-z0-9_./-]+)\"", re.I)
-variables = re.compile("var\s+([^:;\s]*)", re.I)
-functions = re.compile("function\s+([^;\.\(\)\s]*)", re.I)
-functionParams = re.compile("function\s+[a-zA-Z0-9_]+\s*\(([^\)]*)", re.M)
-paramDefault = re.compile("(=\s*\"*[^\"]*\")", re.M)
-isType = re.compile("^[A-Z][a-zA-Z0-9_]*$")
-comments = re.compile("(//[^\n\r]*?[\n\r]|/\*(.*?)\*/)", re.MULTILINE | re.DOTALL )
-
-haxeVersion = re.compile("(Haxe|haXe) Compiler ([0-9]\.[0-9])",re.M)
-bundleFile = __file__
-bundlePath = os.path.abspath(bundleFile)
-bundleDir = os.path.dirname(bundlePath)
-#haxeFileRegex = "^([^:]*):([0-9]+): characters? ([0-9]+)-?[0-9]* :(.*)$"
-haxeFileRegex = "^([^:]*\.hx):([0-9]+):.*$"
-controlStruct = re.compile( "\s*(if|switch|for|while)\s*\($" );
 
 class HaxeLib :
 
@@ -155,7 +132,6 @@ class HaxeLib :
                 lib = HaxeLib( name , dev is not None , version )
 
                 HaxeLib.available[ name ] = lib
-
 
 
 HaxeLib.scan()
@@ -277,146 +253,6 @@ class HaxeBuild :
         return self.classes, self.packs
 
 
-class HaxeInstallLib( sublime_plugin.WindowCommand ):
-    def run(self):
-        out,err = runcmd(["haxelib" , "search" , " "]);
-        libs = out.splitlines()
-        self.libs = libs[0:-1]
-
-        menu = []
-        for l in self.libs :
-            if l in HaxeLib.available :
-                menu.append( [ l + " [" + HaxeLib.available[l].version + "]" , "Remove" ] )
-            else :
-                menu.append( [ l , 'Install' ] )
-
-        menu.append( ["All libraries","Upgrade"] )
-
-        self.window.show_quick_panel(menu,self.install)
-
-    def install( self, i ):
-        if i < 0 :
-            return
-
-        if i == len(self.libs) :
-            cmd = ["haxelib" , "upgrade" ]
-        else :
-            lib = self.libs[i]
-            if lib in HaxeLib.available :
-                cmd = ["haxelib" , "remove" , lib ]
-            else :
-                cmd = ["haxelib" , "install" , lib ]
-
-
-        self.window.run_command("haxelib_exec", {
-            "cmd": cmd,
-            #"working_dir": os.path.dirname()
-        })
-
-
-class HaxeGenerateImport( sublime_plugin.TextCommand ):
-
-    start = None
-    size = None
-    cname = None
-
-    def get_end( self, src, offset ) :
-        end = len(src)
-        while offset < end:
-            c = src[offset]
-            offset += 1
-            if not wordChars.match(c): break
-        return offset - 1
-
-    def get_start( self, src, offset ) :
-        foundWord = 0
-        offset -= 1
-        while offset > 0:
-            c = src[offset]
-            offset -= 1
-            if foundWord == 0:
-                if spaceChars.match(c): continue
-                foundWord = 1
-            if not wordChars.match(c): break
-
-        return offset + 2
-
-    def is_membername( self, token ) :
-        return token[0] >= "Z" or token == token.upper()
-
-    def is_module( self , token ) :
-        return re.search("[\.^][A-Z]+", token);
-
-    def get_classname( self, view, src ) :
-        loc = view.sel()[0]
-        end = max(loc.a, loc.b)
-        self.size = loc.size()
-        if self.size == 0:
-            end = self.get_end(src, end)
-            self.start = self.get_start(src, end)
-            self.size = end - self.start
-        else:
-            self.start = end - self.size
-
-        self.cname = view.substr(sublime.Region(self.start, end)).rpartition(".")
-        #print(self.cname)
-        while (not self.cname[0] == "" and self.is_membername(self.cname[2])):
-            self.size -= 1 + len(self.cname[2])
-            self.cname = self.cname[0].rpartition(".")
-
-    def compact_classname( self, edit, view ) :
-        view.replace(edit, sublime.Region(self.start, self.start+self.size), self.cname[2])
-        view.sel().clear()
-        loc = self.start + len(self.cname[2])
-        view.sel().add(sublime.Region(loc, loc))
-
-    def get_indent( self, src, index ) :
-
-        if src[index] == "\n": return index + 1
-        return index
-
-    def insert_import( self, edit, view, src) :
-        cname = "".join(self.cname)
-        clow = cname.lower()
-        last = None
-
-        for imp in importLine.finditer(src):
-            if clow < imp.group(2).lower():
-                ins = "{0}import {1};\n".format(imp.group(1), cname)
-                view.insert(edit, self.get_indent(src, imp.start(0)), ins)
-                return
-            last = imp
-
-        if not last is None:
-            ins = ";\n{0}import {1}".format(last.group(1), cname)
-            view.insert(edit, last.end(2), ins)
-        else:
-            pkg = packageLine.search(src)
-            if not pkg is None:
-                ins = "\n\nimport {0};".format(cname)
-                view.insert(edit, pkg.end(0), ins)
-            else:
-                ins = "import {0};\n\n".format(cname)
-                view.insert(edit, 0, ins)
-
-    def run( self , edit ) :
-        complete = HaxeComplete.inst
-        view = self.view
-        src = view.substr(sublime.Region(0, view.size()))
-        self.get_classname(view, src)
-
-        if self.cname[1] == "":
-            sublime.status_message("Nothing to import")
-            return
-
-        self.compact_classname(edit, view)
-
-        if re.search("import\s+{0};".format("".join(self.cname)), src):
-            sublime.status_message("Already imported")
-            return
-
-        self.insert_import(edit, view, src)
-
 
 class HaxeDisplayCompletion( sublime_plugin.TextCommand ):
 
@@ -430,7 +266,6 @@ class HaxeDisplayCompletion( sublime_plugin.TextCommand ):
             "disable_auto_insert" : True,
             "next_completion_if_showing" : False
         } )
-
 
 
 class HaxeInsertCompletion( sublime_plugin.TextCommand ):
@@ -529,115 +364,6 @@ class HaxeHint( sublime_plugin.TextCommand ):
             #   view.run_command('auto_complete', {'disable_auto_insert': True})
 
 
-class HaxeRestartServer( sublime_plugin.WindowCommand ):
-
-    def run( self ) :
-        view = sublime.active_window().active_view()
-        HaxeComplete.inst.stop_server()
-        HaxeComplete.inst.start_server( view )
-
-
-class HaxeCreateType( sublime_plugin.WindowCommand ):
-
-    classpath = None
-    currentFile = None
-    currentSrc = None
-    currentType = None
-
-    def run( self , paths = [] , t = "class" ) :
-        builds = HaxeComplete.inst.builds
-        HaxeCreateType.currentType = t
-        view = sublime.active_window().active_view()
-        scopes = view.scope_name(view.sel()[0].end()).split()
-        fn = view.file_name()
-            
-        pack = [];
-
-        if fn is None :
-            return
-
-        if len(builds) == 0 :
-            HaxeComplete.inst.extract_build_args(view)
-
-        if len(paths) == 0 :
-            paths.append(fn)
-
-        for path in paths :
-            if os.path.isfile( path ) :
-                path = os.path.dirname( path )
-
-            if HaxeCreateType.classpath is None :
-                HaxeCreateType.classpath = path
-
-            for b in builds :
-                for cp in b.classpaths :
-                    if path.startswith( cp ) :
-                        HaxeCreateType.classpath = path[0:len(cp)]
-                        for p in path[len(cp):].split(os.sep) :
-                            if "." in p :
-                                break
-                            elif p :
-                                pack.append(p)
-
-        if HaxeCreateType.classpath is None :
-            if len(builds) > 0 :
-                HaxeCreateType.classpath = builds[0].classpaths[0]
-
-        # so default text ends with .
-        if len(pack) > 0 :
-            pack.append("")
-
-        win = sublime.active_window()
-        sublime.status_message( "Current classpath : " + HaxeCreateType.classpath )
-        win.show_input_panel("Enter "+t+" name : " , ".".join(pack) , self.on_done , self.on_change , self.on_cancel )
-
-    def on_done( self , inp ) :
-
-        fn = self.classpath;
-        parts = inp.split(".")
-        pack = []
-        cl = "${2:ClassName}"
-
-        while( len(parts) > 0 ):
-            p = parts.pop(0)
-
-            fn = os.path.join( fn , p )
-            if isType.match( p ) :
-                cl = p
-                break;
-            else :
-                pack.append(p)
-
-        if len(parts) > 0 :
-            cl = parts[0]
-
-        fn += ".hx"
-
-        HaxeCreateType.currentFile = fn
-        t = HaxeCreateType.currentType
-        src = "\npackage " + ".".join(pack) + ";\n\n"+t+" "+cl+" "
-        if t == "typedef" :
-            src += "= "
-        src += "\n{\n\n\t$1\n\n}"
-        HaxeCreateType.currentSrc = src
-
-        v = sublime.active_window().open_file( fn )
-
-    @staticmethod
-    def on_activated( view ) :
-        if view.file_name() == HaxeCreateType.currentFile and view.size() == 0 :
-            view.run_command( "insert_snippet" , {
-                "contents" : HaxeCreateType.currentSrc
-            })
-
-
-    def on_change( self , inp ) :
-        sublime.status_message( "Current classpath : " + HaxeCreateType.classpath )
-        #print( inp )
-
-    def on_cancel( self ) :
-        None
-
 class HaxeComplete( sublime_plugin.EventListener ):
 
     #folder = ""
@@ -668,7 +394,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
     compilerVersion = 2
 
     def __init__(self):
-        #print("init haxecomplete")
+        # print("init haxecomplete")
         HaxeComplete.inst = self
 
         out, err = runcmd( ["haxe", "-main", "Nothing", "-v", "--no-output"] )
@@ -799,10 +525,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
         if view.is_loading() : 
             return;
         
-        if view.score_selector(0,'source.haxe.2') > 0 :
+        if view.score_selector(0,'source.haxe.2') > 0 :            
             HaxeCreateType.on_activated( view )
         elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
             return
+
+        # HaxeProjects.determine_type()
 
         self.extract_build_args( view )
         self.get_build( view )
@@ -1043,7 +771,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 for f in folders:
                     if f + "/" in fn :
                         folder = f
-
+        
         if folder is not None :
             # settings.set("haxe-complete-folder", folder)
             self.find_hxml(folder)
@@ -1492,7 +1220,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             args.append( ("--display", display["filename"] + "@" + str( display["offset"] ) ) )
             args.append( ("--no-output",) )
             args.append( ("-"+build.target , build.output ) )
-            #args.append( ("-cp" , bundleDir ) )
+            #args.append( ("-cp" , plugin_path ) )
             #args.append( ("--macro" , "SourceTools.complete()") )
 
 
