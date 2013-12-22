@@ -1116,7 +1116,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def run_nme( self, view, build ) :
 
-        if build.openfl or build.lime :
+        if build.openfl :
+            cmd = ["haxelib","run","openfl"]
+        elif build.lime :
             cmd = ["haxelib","run","lime"]
         else :
             cmd = ["haxelib","run","nme"]
