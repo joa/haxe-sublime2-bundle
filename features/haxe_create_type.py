@@ -2,7 +2,11 @@ import sublime_plugin
 import sublime
 import os
 
-from ..HaxeHelper import HaxeComplete_inst, isType
+try: # Python 3
+    from ..HaxeHelper import HaxeComplete_inst, isType
+except (ValueError): # Python 2
+    from HaxeHelper import HaxeComplete_inst, isType
+
 
 class HaxeCreateType( sublime_plugin.WindowCommand ):
 

@@ -2,7 +2,10 @@ import sublime
 import sublime_plugin
 import textwrap
 
-from ...HaxeHelper import runcmd, show_quick_panel
+try: # Python 3
+    from ...HaxeHelper import runcmd, show_quick_panel
+except (ValueError): # Python 2
+    from HaxeHelper import runcmd, show_quick_panel
 
 print("HAXE : haxelib search ")
 
@@ -15,7 +18,7 @@ class HaxelibListLibs( sublime_plugin.WindowCommand ):
         lines[0] = lines[0].replace("Search word : ","")
 
         #sort alphabetically
-        lines.sort(key=str.lower)
+        lines = sorted( lines, cmp=lambda x,y: cmp(x.lower(), y.lower()) )
 
         #store for later
         self.libs = lines

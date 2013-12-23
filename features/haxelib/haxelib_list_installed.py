@@ -1,8 +1,11 @@
 import sublime
 import sublime_plugin
 
-from ...HaxeHelper import runcmd, show_quick_panel
-
+try: # Python 3
+    from ...HaxeHelper import runcmd, show_quick_panel
+except (ValueError): # Python 2
+    from HaxeHelper import runcmd, show_quick_panel
+   
 print("HAXE : haxelib list ")
 
 class HaxelibListInstalled( sublime_plugin.WindowCommand ):

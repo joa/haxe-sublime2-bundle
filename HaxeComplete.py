@@ -21,23 +21,34 @@ plugin_file = __file__
 plugin_filepath = os.path.realpath(plugin_file)
 plugin_path = os.path.dirname(plugin_filepath)
 
-# Import the helper functions and regex helpers
 
-from .HaxeHelper import runcmd, show_quick_panel
-from .HaxeHelper import spaceChars, wordChars, importLine, packageLine, compilerOutput
-from .HaxeHelper import compactFunc, compactProp, libLine, classpathLine, typeDecl 
-from .HaxeHelper import libFlag, skippable, inAnonymous, extractTag
-from .HaxeHelper import variables, functions, functionParams, paramDefault
-from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
-
-# Import the features module, including the haxelib and key commands etc
-
-try: # Python 3    
+try: # Python 3
+ 
+    # Import the features module, including the haxelib and key commands etc
     from .features import *
     from .features.haxelib import *
-except (ValueError): # Python 2    
+
+    # Import the helper functions and regex helpers
+    from .HaxeHelper import runcmd, show_quick_panel
+    from .HaxeHelper import spaceChars, wordChars, importLine, packageLine, compilerOutput
+    from .HaxeHelper import compactFunc, compactProp, libLine, classpathLine, typeDecl 
+    from .HaxeHelper import libFlag, skippable, inAnonymous, extractTag
+    from .HaxeHelper import variables, functions, functionParams, paramDefault
+    from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
+
+except (ValueError): # Python 2
+    
+    # Import the features module, including the haxelib and key commands etc
     from features import *
     from features.haxelib import *
+    
+    # Import the helper functions and regex helpers
+    from HaxeHelper import runcmd, show_quick_panel
+    from HaxeHelper import spaceChars, wordChars, importLine, packageLine, compilerOutput
+    from HaxeHelper import compactFunc, compactProp, libLine, classpathLine, typeDecl 
+    from HaxeHelper import libFlag, skippable, inAnonymous, extractTag
+    from HaxeHelper import variables, functions, functionParams, paramDefault
+    from HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
 
 # For running background tasks
 
