@@ -2,8 +2,10 @@ import sublime
 import sublime_plugin
 import re
 
-
-from ..HaxeHelper import wordChars, importLine, packageLine, spaceChars
+try: # Python 3
+    from ..HaxeHelper import wordChars, importLine, packageLine, spaceChars
+except (ValueError): # Python 2
+    from HaxeHelper import wordChars, importLine, packageLine, spaceChars
 
 
 class HaxeGenerateImport( sublime_plugin.TextCommand ):

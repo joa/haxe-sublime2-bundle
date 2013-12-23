@@ -1,8 +1,11 @@
 import sublime
 import sublime_plugin
 
-from ...HaxeHelper import runcmd
-
+try: # Python 3
+    from ...HaxeHelper import runcmd
+except (ValueError): # Python 2
+    from HaxeHelper import runcmd
+  
 print("HAXE : haxelib upgrade ")
 
 #todo : This is now interactive so upgrade is harder this way.

@@ -80,8 +80,8 @@ def runcmd( args, input=None ):
         else:
             return ("", err.decode('utf-8'))
 
-def show_quick_panel(_window, options, done, flags=0, sel_index=0, on_highlighted=None):
-    sublime.set_timeout(lambda: _window.show_quick_panel(options, done, flags, sel_index, on_highlighted), 10)
+def show_quick_panel(_window, options, done, flags=0, sel_index=0):
+    sublime.set_timeout(lambda: _window.show_quick_panel(options, done, flags, sel_index), 10)
 
 
  

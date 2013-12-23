@@ -1,7 +1,10 @@
 import sublime_plugin
 import sublime
 
-from ..HaxeHelper import HaxeComplete_inst
+try: # Python 3
+    from ..HaxeHelper import HaxeComplete_inst
+except (ValueError): # Python 2
+    from HaxeHelper import HaxeComplete_inst
 
 class HaxeRestartServer( sublime_plugin.WindowCommand ):
 
