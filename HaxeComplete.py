@@ -389,6 +389,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
         "outp" : None
     }
 
+    excludePath = ['.git','_std']
+
     stdPaths = []
     stdPackages = []
     #stdClasses = ["Void","Float","Int","UInt","Null","Bool","Dynamic","Iterator","Iterable","ArrayAccess"]
@@ -445,6 +447,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
         packs = []
         hasClasses = False
 
+        #print(path)
+
         for fullpath in glob.glob( os.path.join(path,"*.hx") ) :
             f = os.path.basename(fullpath)
 
@@ -475,13 +479,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
                         hasClasses = True
 
 
-        if hasClasses or depth == 0 :
+        if hasClasses or depth <= 2 :
 
             for f in os.listdir( path ) :
-
+                
                 cl, ext = os.path.splitext( f )
 
-                if os.path.isdir( os.path.join( path , f ) ) and f not in HaxeComplete.stdPackages :
+                if os.path.isdir( os.path.join( path , f ) ) and f not in self.excludePath :
                     packs.append( f )
                     subclasses,subpacks = self.extract_types( os.path.join( path , f ) , depth + 1 )
                     for cl in subclasses :
