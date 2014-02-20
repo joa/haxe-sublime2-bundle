@@ -389,7 +389,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
         "outp" : None
     }
 
-    excludePath = ['.git','_std']
+    classpathExclude = ['.git','_std']
+    classpathDepth = 2
 
     stdPaths = []
     stdPackages = []
@@ -479,13 +480,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
                         hasClasses = True
 
 
-        if hasClasses or depth <= 2 :
+        if hasClasses or depth <= self.classpathDepth :
 
             for f in os.listdir( path ) :
                 
                 cl, ext = os.path.splitext( f )
 
-                if os.path.isdir( os.path.join( path , f ) ) and f not in self.excludePath :
+                if os.path.isdir( os.path.join( path , f ) ) and f not in self.classpathExclude :
                     packs.append( f )
                     subclasses,subpacks = self.extract_types( os.path.join( path , f ) , depth + 1 )
                     for cl in subclasses :
