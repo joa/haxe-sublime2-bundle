@@ -470,12 +470,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
                 for decl in typeDecl.findall( src ):
                     t = decl[1]
+                    params = decl[2]
 
                     if( packDepth == depth ) : # and t == cl or cl == "StdTypes"
                         if t == cl or cl == "StdTypes":
-                            classes.append( t )
+                            classes.append( t + params )
                         else:
-                            classes.append( cl + "." + t )
+                            classes.append( cl + "." + t + params )
 
                         hasClasses = True
 
@@ -1032,6 +1033,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
             clname = spl.pop()
             pack = ".".join(spl)
             display = clname
+
+            # remove parameters
+            clname = clname.split('<')[0]
 
             #if pack in imported:
             #   pack = ""
