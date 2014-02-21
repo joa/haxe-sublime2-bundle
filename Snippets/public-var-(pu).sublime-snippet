@@ -1,6 +1,0 @@
-<snippet>
-    <content><![CDATA[public var ${1:var_name};]]></content>
-    <tabTrigger>pu</tabTrigger>
-    <scope>source.haxe.2</scope>
-    <description>Public variable (pu)</description>
-</snippet>
