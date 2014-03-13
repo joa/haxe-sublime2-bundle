@@ -8,6 +8,7 @@ import sublime, sublime_plugin
 import subprocess, time
 import tempfile
 import os, signal
+import io
 #import xml.parsers.expat
 import re
 import codecs
@@ -21,9 +22,12 @@ plugin_file = __file__
 plugin_filepath = os.path.realpath(plugin_file)
 plugin_path = os.path.dirname(plugin_filepath)
 
-
 try: # Python 3
  
+    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib3/" )
+    sys.path.append( yaml_path )
+    import yaml
+
     # Import the features module, including the haxelib and key commands etc
     from .features import *
     from .features.haxelib import *
@@ -37,6 +41,10 @@ try: # Python 3
     from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
 
 except (ValueError): # Python 2
+
+    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib/" )
+    sys.path.append( yaml_path )
+    import yaml
     
     # Import the features module, including the haxelib and key commands etc
     from features import *
@@ -192,6 +200,7 @@ class HaxeBuild :
         self.output = "No output"
         self.hxml = None
         self.nmml = None
+        self.yaml = None
         self.classpaths = []
         self.libs = []
         self.classes = None
@@ -676,6 +685,23 @@ class HaxeComplete( sublime_plugin.EventListener ):
             if currentBuild.main is not None :
                 self.builds.append( currentBuild )
 
+    def find_yaml( self, folder ) :
+        yamls = glob.glob( os.path.join( folder , "flambe.yaml") )
+
+        for build in yamls :
+            currentBuild = HaxeBuild()
+            currentBuild.hxml = build
+            currentBuild.yaml = build
+            buildPath = os.path.dirname( build ) 
+
+            yaml_data = yaml.load( io.open( build , 'r' ) )
+            
+            currentBuild.main = yaml_data['main'] 
+            currentBuild.args.append( ("-lib","flambe") )
+            currentBuild.classpaths.append( os.path.join( buildPath , "src" ) )
+
+            self.builds.append( currentBuild )
+
     def find_hxml( self, folder ) :
         hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
         
@@ -793,6 +819,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             # settings.set("haxe-complete-folder", folder)
             self.find_hxml(folder)
             self.find_nmml(folder)
+            self.find_yaml(folder)
 
         if len(self.builds) == 1:
             if forcePanel :
@@ -1154,6 +1181,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
         })
         return ("" , [], "" )
 
+    def run_flambe( self , view , build ):
+        cmd = [ "flambe" , "build" , "html" , "--debug" ]
+        view.window().run_command("exec", {
+            "cmd": cmd,
+            "working_dir": os.path.dirname(build.yaml),
+            "file_regex": haxeFileRegex #"^([^:]*):([0-9]+): characters [0-9]+-([0-9]+) :.*$"
+        })
+        return ("" , [], "" )
+
     def start_server( self , view = None ) :
         #self.stop_server()
         if self.serverMode and self.serverProc is None :
@@ -1210,7 +1246,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         autocomplete = display is not None
 
         if not autocomplete and build is not None and build.nmml is not None :
-            return self.run_nme(view, build)
+            return self.run_nme( view, build )
+
+        if not autocomplete and build is not None and build.yaml is not None :
+            return self.run_flambe( view , build )
 
         fn = view.file_name()
 
