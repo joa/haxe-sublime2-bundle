@@ -192,6 +192,14 @@ class HaxeBuild :
     ]
     nme_target = ("Flash - test","flash -debug","test")
 
+    flambe_targets = [
+        ("Flash - test", "run flash --debug" ),
+        ("Flash - build only", "build flash --debug" ),
+        ("HTML5 - test", "run html --debug" ),
+        ("HTML5 - build only" , "build html --debug")
+    ]
+    flambe_target = ("Flash - run", "run flash --debug")
+
     def __init__(self) :
 
         self.args = []
@@ -216,6 +224,8 @@ class HaxeBuild :
             return "{out} (lime / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
         elif self.nmml is not None:
             return "{out} (NME / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
+        elif self.yaml is not None:
+            return "{out} (Flambe / {target})".format(self=self, out=out, target=HaxeBuild.flambe_target[0]);
         else:
             return "{main} ({target}:{out})".format(self=self, out=out, main=self.main, target=self.target);
         #return "{self.main} {self.target}:{out}".format(self=self, out=out);
@@ -882,6 +892,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         self.selectingBuild = False
 
         if forcePanel and self.currentBuild is not None: # choose NME target
+
             if self.currentBuild.nmml is not None:
                 sublime.status_message("Please select a NME target")
                 nme_targets = []
@@ -890,12 +901,27 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
                 view.window().show_quick_panel(nme_targets, lambda i : self.select_nme_target(i, view))
 
+            elif self.currentBuild.yaml is not None:
+                sublime.status_message("Please select a Flambe target")
+                flambe_targets = []
+                for t in HaxeBuild.flambe_targets :
+                    flambe_targets.append( t[0] )
+
+                view.window().show_quick_panel(flambe_targets, lambda i : self.select_flambe_target(i, view))
+
+
 
     def select_nme_target( self, i, view ):
         target = HaxeBuild.nme_targets[i]
         
         if self.currentBuild.nmml is not None:
             HaxeBuild.nme_target = target
+            view.set_status( "haxe-build" , self.currentBuild.to_string() )
+
+    def select_flambe_target( self , i , view ):
+        target = HaxeBuild.flambe_targets[i]
+        if self.currentBuild.yaml is not None:
+            HaxeBuild.flambe_target = target
             view.set_status( "haxe-build" , self.currentBuild.to_string() )
 
 
@@ -1182,7 +1208,12 @@ class HaxeComplete( sublime_plugin.EventListener ):
         return ("" , [], "" )
 
     def run_flambe( self , view , build ):
-        cmd = [ "flambe" , "build" , "html" , "--debug" ]
+        cmd = [ "flambe" ]
+
+        cmd += HaxeBuild.flambe_target[1].split(" ")
+
+        print(cmd)
+
         view.window().run_command("exec", {
             "cmd": cmd,
             "working_dir": os.path.dirname(build.yaml),
