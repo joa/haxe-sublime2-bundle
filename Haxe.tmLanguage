@@ -195,7 +195,7 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>\b(new)\s+(([a-z]+\.)*[A-Z][\w\.\&lt;\&gt;]*)</string>
+          <string>\b(new)\s+(([a-z]+\.)*[A-Z]\w+(&lt;[\w\.,\s&lt;&gt;]+&gt;)?)</string>
         </dict>
       </array>
     </dict>
@@ -347,7 +347,7 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>(#if\s+([\!\w-]+|(\([^\)]*\)))\s*)</string>
+          <string>(#(if|elseif)\s+([\!\w-]+|(\([^\)]*\)))\s*)</string>
         </dict>
         <dict>
           <key>match</key>
@@ -418,7 +418,7 @@
               <key>name</key>
               <string>support.reification.haxe.2</string>
             </dict>
-          </dict>        
+          </dict>
         </dict>
         <dict>
           <key>match</key>
@@ -430,7 +430,7 @@
               <key>name</key>
               <string>support.reification.haxe.2</string>
             </dict>
-          </dict>    
+          </dict>
         </dict>
         <dict>
           <key>captures</key>
@@ -447,7 +447,7 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>(\b(([a-z]+\.)*)([A-Z]\w*))</string>
+          <string>(\b(([a-z]+\.)*)([A-Z]\w*|\*))</string>
         </dict>
         <dict>
           <key>name</key>
@@ -493,7 +493,7 @@
               <string>storage.modifier.macro.haxe.2</string>
             </dict>
           </dict>
-          
+
         </dict>
         <dict>
           <key>match</key>
@@ -511,7 +511,7 @@
               <string>support.macro.haxe.2</string>
             </dict>
           </dict>
-          
+
         </dict>
         <dict>
           <key>match</key>
@@ -666,7 +666,7 @@
               <key>match</key>
               <string>(\$)([\w]*)</string>
             </dict>
-            
+
           </array>
         </dict>
       </array>
