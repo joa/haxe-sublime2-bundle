@@ -196,7 +196,9 @@ class HaxeBuild :
         ("Flash - test", "run flash --debug" ),
         ("Flash - build only", "build flash --debug" ),
         ("HTML5 - test", "run html --debug" ),
-        ("HTML5 - build only" , "build html --debug")
+        ("HTML5 - build only" , "build html --debug"),
+        ("Android - test" , "run android --debug"),
+        ("Android - build only" , "build android --debug")
     ]
     flambe_target = ("Flash - run", "run flash --debug")
 
@@ -1211,8 +1213,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
         cmd = [ "flambe" ]
 
         cmd += HaxeBuild.flambe_target[1].split(" ")
-
-        print(cmd)
 
         view.window().run_command("exec", {
             "cmd": cmd,
