@@ -41,7 +41,7 @@ comments = re.compile("(//[^\n\r]*?[\n\r]|/\*(.*?)\*/)", re.MULTILINE | re.DOTAL
 
 haxeVersion = re.compile("(Haxe|haXe) Compiler ([0-9]\.[0-9])",re.M)
 #haxeFileRegex = "^([^:]*):([0-9]+): characters? ([0-9]+)-?[0-9]* :(.*)$"
-haxeFileRegex = "^([^:]*\.hx):([0-9]+):.*$"
+haxeFileRegex = "^([^:\n\r]*\.hx):([0-9]+):.*$"
 controlStruct = re.compile( "\s*(if|switch|for|while)\s*\($" );
 
 
