@@ -711,6 +711,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
             currentBuild.main = yaml_data['main'] 
             currentBuild.args.append( ("-lib","flambe") )
 
+            flambe_lib = HaxeLib.get("flambe")
+            currentBuild.libs.append( flambe_lib )
+
             srcDir = os.path.join( buildPath , "src" )
             currentBuild.args.append( ("-cp" , srcDir ) )
             currentBuild.classpaths.append( srcDir )
