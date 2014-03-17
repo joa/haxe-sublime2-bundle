@@ -5,7 +5,7 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2) and [Sublime T
 
  - **Syntax highlighting** for Haxe2 and Haxe3 sources and hxml build files
  - **Haxe compiler auto-completion**, code hints, smart snippets and error highlighting / navigation
- - **[NME](http://www.nme.io/) and [openfl](https://github.com/openfl/openfl) support** with completion, target selection and compilation
+ - **[NME](http://www.nme.io/), [openfl](https://github.com/openfl/openfl) and [Flambe](http://getflambe.com) support** with completion, target selection and compilation
  - **Package and classes discovery/suggestion** including classpath (-cp) and haxelib libraries (-lib)
  - **Multiple build management** and automatic generation of hxml files
  - **Haxelib integration** (install / remove / upgrade libs) with -lib autocompletion
