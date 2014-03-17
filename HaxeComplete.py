@@ -8,6 +8,7 @@ import sublime, sublime_plugin
 import subprocess, time
 import tempfile
 import os, signal
+import io
 #import xml.parsers.expat
 import re
 import codecs
@@ -21,9 +22,12 @@ plugin_file = __file__
 plugin_filepath = os.path.realpath(plugin_file)
 plugin_path = os.path.dirname(plugin_filepath)
 
-
 try: # Python 3
  
+    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib3/" )
+    sys.path.append( yaml_path )
+    import yaml
+
     # Import the features module, including the haxelib and key commands etc
     from .features import *
     from .features.haxelib import *
@@ -37,6 +41,10 @@ try: # Python 3
     from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
 
 except (ValueError): # Python 2
+
+    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib/" )
+    sys.path.append( yaml_path )
+    import yaml
     
     # Import the features module, including the haxelib and key commands etc
     from features import *
@@ -184,6 +192,16 @@ class HaxeBuild :
     ]
     nme_target = ("Flash - test","flash -debug","test")
 
+    flambe_targets = [
+        ("Flash - test", "run flash --debug" ),
+        ("Flash - build only", "build flash --debug" ),
+        ("HTML5 - test", "run html --debug" ),
+        ("HTML5 - build only" , "build html --debug"),
+        ("Android - test" , "run android --debug"),
+        ("Android - build only" , "build android --debug")
+    ]
+    flambe_target = ("Flash - run", "run flash --debug")
+
     def __init__(self) :
 
         self.args = []
@@ -192,6 +210,7 @@ class HaxeBuild :
         self.output = "No output"
         self.hxml = None
         self.nmml = None
+        self.yaml = None
         self.classpaths = []
         self.libs = []
         self.classes = None
@@ -207,6 +226,8 @@ class HaxeBuild :
             return "{out} (lime / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
         elif self.nmml is not None:
             return "{out} (NME / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
+        elif self.yaml is not None:
+            return "{out} (Flambe / {target})".format(self=self, out=out, target=HaxeBuild.flambe_target[0]);
         else:
             return "{main} ({target}:{out})".format(self=self, out=out, main=self.main, target=self.target);
         #return "{self.main} {self.target}:{out}".format(self=self, out=out);
@@ -676,6 +697,29 @@ class HaxeComplete( sublime_plugin.EventListener ):
             if currentBuild.main is not None :
                 self.builds.append( currentBuild )
 
+    def find_yaml( self, folder ) :
+        yamls = glob.glob( os.path.join( folder , "flambe.yaml") )
+
+        for build in yamls :
+            currentBuild = HaxeBuild()
+            currentBuild.hxml = build
+            currentBuild.yaml = build
+            buildPath = os.path.dirname( build ) 
+
+            yaml_data = yaml.load( io.open( build , 'r' ) )
+            
+            currentBuild.main = yaml_data['main'] 
+            currentBuild.args.append( ("-lib","flambe") )
+
+            flambe_lib = HaxeLib.get("flambe")
+            currentBuild.libs.append( flambe_lib )
+
+            srcDir = os.path.join( buildPath , "src" )
+            currentBuild.args.append( ("-cp" , srcDir ) )
+            currentBuild.classpaths.append( srcDir )
+
+            self.builds.append( currentBuild )
+
     def find_hxml( self, folder ) :
         hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
         
@@ -793,6 +837,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             # settings.set("haxe-complete-folder", folder)
             self.find_hxml(folder)
             self.find_nmml(folder)
+            self.find_yaml(folder)
 
         if len(self.builds) == 1:
             if forcePanel :
@@ -855,6 +900,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         self.selectingBuild = False
 
         if forcePanel and self.currentBuild is not None: # choose NME target
+
             if self.currentBuild.nmml is not None:
                 sublime.status_message("Please select a NME target")
                 nme_targets = []
@@ -863,12 +909,27 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
                 view.window().show_quick_panel(nme_targets, lambda i : self.select_nme_target(i, view))
 
+            elif self.currentBuild.yaml is not None:
+                sublime.status_message("Please select a Flambe target")
+                flambe_targets = []
+                for t in HaxeBuild.flambe_targets :
+                    flambe_targets.append( t[0] )
+
+                view.window().show_quick_panel(flambe_targets, lambda i : self.select_flambe_target(i, view))
+
+
 
     def select_nme_target( self, i, view ):
         target = HaxeBuild.nme_targets[i]
         
         if self.currentBuild.nmml is not None:
             HaxeBuild.nme_target = target
+            view.set_status( "haxe-build" , self.currentBuild.to_string() )
+
+    def select_flambe_target( self , i , view ):
+        target = HaxeBuild.flambe_targets[i]
+        if self.currentBuild.yaml is not None:
+            HaxeBuild.flambe_target = target
             view.set_status( "haxe-build" , self.currentBuild.to_string() )
 
 
@@ -1154,6 +1215,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
         })
         return ("" , [], "" )
 
+    def run_flambe( self , view , build ):
+        cmd = [ "flambe" ]
+
+        cmd += HaxeBuild.flambe_target[1].split(" ")
+
+        view.window().run_command("exec", {
+            "cmd": cmd,
+            "working_dir": os.path.dirname(build.yaml),
+            "file_regex": haxeFileRegex #"^([^:]*):([0-9]+): characters [0-9]+-([0-9]+) :.*$"
+        })
+        return ("" , [], "" )
+
     def start_server( self , view = None ) :
         #self.stop_server()
         if self.serverMode and self.serverProc is None :
@@ -1210,7 +1283,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         autocomplete = display is not None
 
         if not autocomplete and build is not None and build.nmml is not None :
-            return self.run_nme(view, build)
+            return self.run_nme( view, build )
+
+        if not autocomplete and build is not None and build.yaml is not None :
+            return self.run_flambe( view , build )
 
         fn = view.file_name()
 
