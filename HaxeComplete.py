@@ -23,10 +23,6 @@ plugin_filepath = os.path.realpath(plugin_file)
 plugin_path = os.path.dirname(plugin_filepath)
 
 try: # Python 3
- 
-    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib3/" )
-    sys.path.append( yaml_path )
-    import yaml
 
     # Import the features module, including the haxelib and key commands etc
     from .features import *
@@ -40,11 +36,12 @@ try: # Python 3
     from .HaxeHelper import variables, functions, functionParams, paramDefault
     from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
 
-except (ValueError): # Python 2
-
-    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib/" )
+    # import YAML parser
+    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib3/" )
     sys.path.append( yaml_path )
     import yaml
+
+except (ValueError): # Python 2
     
     # Import the features module, including the haxelib and key commands etc
     from features import *
@@ -57,6 +54,11 @@ except (ValueError): # Python 2
     from HaxeHelper import libFlag, skippable, inAnonymous, extractTag
     from HaxeHelper import variables, functions, functionParams, paramDefault
     from HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
+
+    # import YAML parser
+    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib/" )
+    sys.path.append( yaml_path )
+    import yaml
 
 # For running background tasks
 
