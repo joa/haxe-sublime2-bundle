@@ -86,7 +86,7 @@
           </dict>
           <key>match</key>
           <string>(?x)
-                                (\b(class|enum|interface)|\b(implements|extends))
+                                (\b(class|enum|interface|abstract)|\b(implements|extends))
                                 \s+(([a-z]+.)*[A-Z]\w*)</string>
         </dict>
       </array>
