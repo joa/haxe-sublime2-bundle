@@ -31,7 +31,7 @@ try: # Python 3
     # Import the helper functions and regex helpers
     from .HaxeHelper import runcmd, show_quick_panel
     from .HaxeHelper import spaceChars, wordChars, importLine, packageLine, compilerOutput
-    from .HaxeHelper import compactFunc, compactProp, libLine, classpathLine, typeDecl 
+    from .HaxeHelper import compactFunc, compactProp, libLine, classpathLine, typeDecl
     from .HaxeHelper import libFlag, skippable, inAnonymous, extractTag
     from .HaxeHelper import variables, functions, functionParams, paramDefault
     from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
@@ -42,15 +42,15 @@ try: # Python 3
     import yaml
 
 except (ValueError): # Python 2
-    
+
     # Import the features module, including the haxelib and key commands etc
     from features import *
     from features.haxelib import *
-    
+
     # Import the helper functions and regex helpers
     from HaxeHelper import runcmd, show_quick_panel
     from HaxeHelper import spaceChars, wordChars, importLine, packageLine, compilerOutput
-    from HaxeHelper import compactFunc, compactProp, libLine, classpathLine, typeDecl 
+    from HaxeHelper import compactFunc, compactProp, libLine, classpathLine, typeDecl
     from HaxeHelper import libFlag, skippable, inAnonymous, extractTag
     from HaxeHelper import variables, functions, functionParams, paramDefault
     from HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
@@ -69,7 +69,7 @@ try:
   STARTUP_INFO.wShowWindow = subprocess.SW_HIDE
 except (AttributeError):
     STARTUP_INFO = None
-    
+
 # For parsing xml
 
 from xml.etree import ElementTree
@@ -80,11 +80,11 @@ try :
     ElementTree.XMLTreeBuilder = SimpleXMLTreeBuilder.TreeBuilder
 except ImportError as e:
     pass # ST3
-    
+
 try :
     stexec = __import__("exec")
     ExecCommand = stexec.ExecCommand
-    AsyncProcess = stexec.AsyncProcess 
+    AsyncProcess = stexec.AsyncProcess
 except ImportError as e :
     import Default
     stexec = getattr( Default , "exec" )
@@ -168,29 +168,38 @@ class HaxeBuild :
     nme_targets = [
         ("Flash - test","flash -debug","test"),
         ("Flash - build only","flash -debug","build"),
+        ("Flash - release","flash","build"),
         ("HTML5 - test","html5 -debug","test"),
         ("HTML5 - build only","html5 -debug","build"),
         ("C++ - test","cpp -debug","test"),
         ("C++ - build only","cpp -debug","build"),
-        ("Linux - test","linux -debug","test"), 
-        ("Linux - build only","linux -debug","build"), 
+        ("C++ - release","cpp","build"),
+        ("Linux - test","linux -debug","test"),
+        ("Linux - build only","linux -debug","build"),
+        ("Linux - release","linux","build"),
         ("Linux 64 - test","linux -64 -debug","test"),
         ("Linux 64 - build only","linux -64 -debug","build"),
+        ("Linux 64 - release","linux -64","build"),
         ("iOS - test in iPhone simulator","ios -simulator -debug","test"),
         ("iOS - test in iPad simulator","ios -simulator -ipad -debug","test"),
         ("iOS - update XCode project","ios -debug","update"),
+        ("iOS - release","ios","build"),
         ("Android - test","android -debug","test"),
         ("Android - build only","android -debug","build"),
+        ("Android - release","android","build"),
         ("WebOS - test", "webos -debug","test"),
         ("WebOS - build only", "webos -debug","build"),
+        ("WebOS - release", "webos","build"),
         ("Neko - test","neko -debug","test"),
         ("Neko - build only","neko -debug","build"),
         ("Neko 64 - test","neko -64 -debug","test"),
         ("Neko 64 - build only","neko -64 -debug","build"),
         ("BlackBerry - test","blackberry -debug","test"),
         ("BlackBerry - build only","blackberry -debug","build"),
+        ("BlackBerry - release","blackberry","build"),
         ("Emscripten - test", "emscripten -debug","test"),
         ("Emscripten - build only", "emscripten -debug","build"),
+        ("Emscripten - release", "emscripten","build"),
     ]
     nme_target = ("Flash - test","flash -debug","test")
 
@@ -391,7 +400,7 @@ class HaxeHint( sublime_plugin.TextCommand ):
                 view.run_command( "insert_snippet" , {
                     "contents" : "${"+snippet+"}"
                 })
-                
+
             #view.set_status("haxe-status", status)
             #sublime.status_message(status)
             #if( len(comps) > 0 ) :
@@ -421,7 +430,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
     stdClasses = []
     stdCompletes = []
 
-    visibleCompletionList = [] # This will contain the list of visible completions, if there is one. 
+    visibleCompletionList = [] # This will contain the list of visible completions, if there is one.
 
     panel = None
     serverMode = False
@@ -453,7 +462,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         if ver is not None :
             self.compilerVersion = float(ver.group(2))
-            
+
             if self.compilerVersion >= 3 :
                 HaxeBuild.targets.append("swf8")
             else :
@@ -507,7 +516,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         if hasClasses or depth <= self.classpathDepth :
 
             for f in os.listdir( path ) :
-                
+
                 cl, ext = os.path.splitext( f )
 
                 if os.path.isdir( os.path.join( path , f ) ) and f not in self.classpathExclude :
@@ -557,15 +566,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def on_activated( self , view ) :
         return self.on_open_file( view )
-    
+
     def on_load( self, view ) :
         return self.on_open_file( view )
 
     def on_open_file( self , view ) :
-        if view.is_loading() : 
+        if view.is_loading() :
             return;
-        
-        if view.score_selector(0,'source.haxe.2') > 0 :            
+
+        if view.score_selector(0,'source.haxe.2') > 0 :
             HaxeCreateType.on_activated( view )
         elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
             return
@@ -648,7 +657,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             currentBuild.openfl = build.endswith("xml")
             currentBuild.lime = build.endswith("lime")
             buildPath = os.path.dirname(build)
-            
+
             # TODO delegate compiler options extractions to NME 3.2:
             # runcmd("nme diplay project.nmml nme_target")
 
@@ -706,11 +715,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
             currentBuild = HaxeBuild()
             currentBuild.hxml = build
             currentBuild.yaml = build
-            buildPath = os.path.dirname( build ) 
+            buildPath = os.path.dirname( build )
 
             yaml_data = yaml.load( io.open( build , 'r' ) )
-            
-            currentBuild.main = yaml_data['main'] 
+
+            currentBuild.main = yaml_data['main']
             currentBuild.args.append( ("-lib","flambe") )
 
             flambe_lib = HaxeLib.get("flambe")
@@ -724,7 +733,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def find_hxml( self, folder ) :
         hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
-        
+
         for build in hxmls:
 
             currentBuild = HaxeBuild()
@@ -783,7 +792,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 #print(HaxeBuild.targets)
                 for flag in HaxeBuild.targets :
                     if l.startswith( "-" + flag + " " ) :
-                    
+
                         spl = l.split(" ")
                         #outp = os.path.join( folder , " ".join(spl[1:]) )
                         outp = " ".join(spl[1:])
@@ -809,7 +818,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             if currentBuild.main is None:
                 currentBuild.main = '[No Main]'
-                
+
             self.builds.append( currentBuild )
 
 
@@ -834,7 +843,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 for f in folders:
                     if f + "/" in fn :
                         folder = f
-        
+
         if folder is not None :
             # settings.set("haxe-complete-folder", folder)
             self.find_hxml(folder)
@@ -923,7 +932,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def select_nme_target( self, i, view ):
         target = HaxeBuild.nme_targets[i]
-        
+
         if self.currentBuild.nmml is not None:
             HaxeBuild.nme_target = target
             view.set_status( "haxe-build" , self.currentBuild.to_string() )
@@ -1017,7 +1026,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             # haxe 3
             if tarPkg == "swf8" :
                 tarPkg = "flash8"
-                
+
             if tarPkg == "swf" :
                 if compilerVersion >= 3 :
                     tarPkg = "flash"
@@ -1140,7 +1149,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         if win is None or fn is None :
             return
-            
+
         if fn is not None and self.currentBuild is None and view.score_selector(0,"source.haxe.2") > 0 :
 
             src_dir = os.path.dirname( fn )
@@ -1167,10 +1176,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
                         src_dir = spl[0]
 
             cl = os.path.basename(fn)
-            
+
             #if int(sublime.version() < 3000) :
             #    cl = cl.encode('ascii','ignore')
-            
+
             cl = cl[0:cl.rfind(".")]
 
             main = pack[0:]
@@ -1209,7 +1218,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         cmd += [ HaxeBuild.nme_target[2], os.path.basename(build.nmml) ]
         target = HaxeBuild.nme_target[1].split(" ")
         cmd.extend(target)
-        
+
         view.window().run_command("exec", {
             "cmd": cmd,
             "working_dir": os.path.dirname(build.nmml),
@@ -1255,7 +1264,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 self.serverPort+=1
                 cmd = [haxepath , "--wait" , str(self.serverPort) ]
                 print("Starting Haxe server on port "+str(self.serverPort))
-                
+
                 #self.serverProc = Popen(cmd, env=env , startupinfo=STARTUP_INFO)
                 self.serverProc = Popen(cmd, env = merged_env, startupinfo=STARTUP_INFO)
                 self.serverProc.poll()
@@ -1357,7 +1366,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
         #print(" ".join(cmd))
-        #print(cmd)  
+        #print(cmd)
         res, err = runcmd( cmd, "" )
 
         if not autocomplete :
@@ -1391,19 +1400,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
         try :
             tree = ElementTree.XML(x);
 
-        except Exception as e :  
-            print(e)          
+        except Exception as e :
+            print(e)
             print("invalid xml")
 
         if tree is not None :
             for i in tree.getiterator("type") :
                 hint = i.text.strip()
                 spl = hint.split(" -> ")
-            
+
                 types = [];
                 pars = 0;
                 currentType = [];
-                
+
                 for t in spl :
                     currentType.append( t )
                     if "(" in t or "{" in t :
@@ -1414,7 +1423,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     if pars == 0 :
                         types.append( " -> ".join( currentType ) )
                         currentType = []
-                
+
                 ret = types.pop()
                 msg = "";
 
@@ -1433,7 +1442,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                         msg = "Void"
                     else :
                         msg = ", ".join(hints)
-                
+
             status = msg
 
             # This will attempt to get the full name of what we're trying to complete.
@@ -1445,7 +1454,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 for i in li.getiterator("i"):
                     name = i.get("n")
                     sig = i.find("t").text
-                    doc = i.find("d").text 
+                    doc = i.find("d").text
 
                     #if doc is None: doc = "No documentation found."
                     insert = name
@@ -1510,7 +1519,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     status = ""
 
             self.errors = self.extract_errors( err )
-            
+
 
         return ( err, comps, status , hints )
 
@@ -1524,14 +1533,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
             l = int( infos.pop(0) )-1
 
             metric = infos.pop(0)
-            
+
             left = int( infos.pop(0) )
             right = infos.pop(0)
             if right != "" :
                 right = int( right )
             else :
                 right = left+1
-            
+
             m = infos.pop(0)
 
             if metric.startswith("line") :
@@ -1602,7 +1611,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         return temp
 
-    def clear_temp_file( self , view , temp ) : 
+    def clear_temp_file( self , view , temp ) :
 
         fn = view.file_name()
 
@@ -1663,7 +1672,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
                 for i in range( prevComa , 0 , -1 ) :
                     c = src[i]
-                    
+
                     if c == ")" :
                         closedPars += 1
                     elif c == "(" :
@@ -1679,14 +1688,14 @@ class HaxeComplete( sublime_plugin.EventListener ):
                         closedBrackets -= 1
                         if closedBrackets < 0 :
                             commas = 0
-                        
+
                     elif c == "}" :
                         closedBrackets += 1
 
                 #print("commas : " + str(commas))
                 #print("closedBrackets : " + str(closedBrackets))
                 #print("closedPars : " + str(closedPars))
-                if closedBrackets < 0 : 
+                if closedBrackets < 0 :
                     show_hints = False
             else :
 
@@ -1765,7 +1774,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 class HaxeShowDocumentation( sublime_plugin.TextCommand ):
     def run( self , edit ) :
-        
+
         view = self.view
         complete = HaxeComplete.inst
         sel = view.sel()[0]
@@ -1799,7 +1808,7 @@ class HaxeShowDocumentation( sublime_plugin.TextCommand ):
     def show_documentation(self, fn_name, edit):
         window = sublime.active_window()
 
-        if fn_name not in documentationStore: 
+        if fn_name not in documentationStore:
             return
 
         doc_data = documentationStore[fn_name]
@@ -1821,7 +1830,7 @@ class HaxeShowDocumentation( sublime_plugin.TextCommand ):
             documentation_lines = doc_data['doc'].split("\n")
         else :
             documentation_lines = ["","No documentation.",""]
-       
+
         documentation_text += "/**\n";
 
         for line in documentation_lines:
@@ -1829,7 +1838,7 @@ class HaxeShowDocumentation( sublime_plugin.TextCommand ):
             line = line.strip()
 
             # Strip out any leading astericks.
-            if len(line) > 0 and line[0] == "*": 
+            if len(line) > 0 and line[0] == "*":
                 line = line[2:]
 
             documentation_text += line + "\n"
