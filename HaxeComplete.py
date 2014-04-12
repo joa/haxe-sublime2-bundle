@@ -8,7 +8,7 @@ import sublime, sublime_plugin
 import subprocess, time
 import tempfile
 import os, signal
-import io
+from io import open
 #import xml.parsers.expat
 import re
 import codecs
@@ -717,7 +717,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             currentBuild.yaml = build
             buildPath = os.path.dirname( build )
 
-            yaml_data = yaml.load( io.open( build , 'r' ) )
+            yaml_data = yaml.load( open( build , 'r' ) )
 
             currentBuild.main = yaml_data['main']
             currentBuild.args.append( ("-lib","flambe") )
