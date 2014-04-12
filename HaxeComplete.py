@@ -1258,6 +1258,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     settings = view.settings()
                     if settings.has("haxe_library_path") :
                         env["HAXE_LIBRARY_PATH"] = settings.get("haxe_library_path",".")
+                        env["HAXE_STD_PATH"] = settings.get("haxe_library_path",".")
 
                     haxepath = settings.get("haxe_path" , "haxe")
 
@@ -1355,6 +1356,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             env = {}
             if settings.has("haxe_library_path") :
                 env["HAXE_LIBRARY_PATH"] = settings.get("haxe_library_path",".")
+                env["HAXE_STD_PATH"] = settings.get("haxe_library_path",".")
 
             view.window().run_command("haxe_exec", {
                 "cmd": encoded_cmd,
