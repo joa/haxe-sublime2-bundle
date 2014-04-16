@@ -138,9 +138,9 @@ class HaxeLib :
         return comps
 
     @staticmethod
-    def scan() :
+    def scan( view ) :
 
-        settings = sublime.active_window().active_view().settings()
+        settings = view.settings()
         haxelib_path = settings.get("haxelib_path" , "haxelib")
 
         hlout, hlerr = runcmd( [haxelib_path , "config" ] )
@@ -439,42 +439,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
     serverPort = 6000
 
     compilerVersion = 2
+    inited = False
 
     def __init__(self):
-        print("init haxecomplete")
+        #print("init haxecomplete")
         HaxeComplete.inst = self
-
-        HaxeLib.scan()
-
-        settings = sublime.active_window().active_view().settings()
-        haxepath = settings.get("haxe_path","haxe")
-
-        out, err = runcmd( [haxepath, "-main", "Nothing", "-v", "--no-output"] )
-
-        _, versionOut = runcmd([haxepath, "-v"])
-
-        m = classpathLine.match(out)
-        if m is not None :
-            HaxeComplete.stdPaths = set(m.group(1).split(";")) - set([".","./"])
-
-        for p in HaxeComplete.stdPaths :
-            #print("std path : "+p)
-            if len(p) > 1 and os.path.exists(p) and os.path.isdir(p):
-                classes, packs = self.extract_types( p )
-                HaxeComplete.stdClasses.extend( classes )
-                HaxeComplete.stdPackages.extend( packs )
-
-        ver = re.search(haxeVersion , versionOut)
-
-        if ver is not None :
-            self.compilerVersion = float(ver.group(2))
-
-            if self.compilerVersion >= 3 :
-                HaxeBuild.targets.append("swf8")
-            else :
-                HaxeBuild.targets.append("swf9")
-
-            self.serverMode = float(ver.group(2)) * 100 >= 209
 
     def __del__(self) :
         self.stop_server()
@@ -585,6 +554,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         elif view.score_selector(0,'source.hxml,source.erazor,source.nmml') == 0:
             return
 
+        self.init_plugin( view )
         # HaxeProjects.determine_type()
 
         self.extract_build_args( view )
@@ -1247,6 +1217,47 @@ class HaxeComplete( sublime_plugin.EventListener ):
         })
         return ("" , [], "" )
 
+    def init_plugin( self , view ) :
+
+        if self.inited :
+            return
+
+        self.inited = True
+
+        HaxeLib.scan( view )
+
+        settings = view.settings()
+        haxepath = settings.get("haxe_path","haxe")
+
+        out, err = runcmd( [haxepath, "-main", "Nothing", "-v", "--no-output"] )
+
+        _, versionOut = runcmd([haxepath, "-v"])
+
+        m = classpathLine.match(out)
+        if m is not None :
+            HaxeComplete.stdPaths = set(m.group(1).split(";")) - set([".","./"])
+
+        for p in HaxeComplete.stdPaths :
+            #print("std path : "+p)
+            if len(p) > 1 and os.path.exists(p) and os.path.isdir(p):
+                classes, packs = self.extract_types( p )
+                HaxeComplete.stdClasses.extend( classes )
+                HaxeComplete.stdPackages.extend( packs )
+
+        ver = re.search(haxeVersion , versionOut)
+
+        if ver is not None :
+            self.compilerVersion = float(ver.group(2))
+
+            if self.compilerVersion >= 3 :
+                HaxeBuild.targets.append("swf8")
+            else :
+                HaxeBuild.targets.append("swf9")
+
+            self.serverMode = float(ver.group(2)) * 100 >= 209
+
+        self.start_server( view )
+
     def start_server( self , view = None ) :
         #self.stop_server()
         if self.serverMode and self.serverProc is None :
@@ -1296,7 +1307,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def run_haxe( self, view , display = None) :
 
-        self.start_server( view )
+        self.init_plugin( view )
 
         build = self.get_build( view )
         settings = view.settings()
@@ -1982,7 +1993,7 @@ class HaxeExecCommand(ExecCommand):
 class HaxelibExecCommand(ExecCommand):
     def finish(self, *args, **kwargs):
         super(HaxelibExecCommand, self).finish(*args, **kwargs)
-        HaxeLib.scan()
+        HaxeLib.scan( sublime.active_window().active_view() )
 
     def is_visible():
         return false
