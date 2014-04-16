@@ -139,12 +139,16 @@ class HaxeLib :
 
     @staticmethod
     def scan() :
-        hlout, hlerr = runcmd( ["haxelib" , "config" ] )
+
+        settings = sublime.active_window().active_view().settings()
+        haxelib_path = settings.get("haxelib_path" , "haxelib")
+
+        hlout, hlerr = runcmd( [haxelib_path , "config" ] )
         HaxeLib.basePath = hlout.strip()
 
         HaxeLib.available = {}
 
-        hlout, hlerr = runcmd( ["haxelib" , "list" ] )
+        hlout, hlerr = runcmd( [haxelib_path , "list" ] )
 
         for l in hlout.split("\n") :
             found = libLine.match( l )
@@ -154,8 +158,6 @@ class HaxeLib :
 
                 HaxeLib.available[ name ] = lib
 
-
-HaxeLib.scan()
 
 inst = None
 
@@ -302,8 +304,7 @@ class HaxeDisplayCompletion( sublime_plugin.TextCommand ):
     def run( self , edit ) :
         #print("completing")
         view = self.view
-        s = view.settings();
-
+        
         view.run_command( "auto_complete" , {
             "api_completions_only" : True,
             "disable_auto_insert" : True,
@@ -440,12 +441,17 @@ class HaxeComplete( sublime_plugin.EventListener ):
     compilerVersion = 2
 
     def __init__(self):
-        # print("init haxecomplete")
+        print("init haxecomplete")
         HaxeComplete.inst = self
 
-        out, err = runcmd( ["haxe", "-main", "Nothing", "-v", "--no-output"] )
+        HaxeLib.scan()
 
-        _, versionOut = runcmd(["haxe", "-v"])
+        settings = sublime.active_window().active_view().settings()
+        haxepath = settings.get("haxe_path","haxe")
+
+        out, err = runcmd( [haxepath, "-main", "Nothing", "-v", "--no-output"] )
+
+        _, versionOut = runcmd([haxepath, "-v"])
 
         m = classpathLine.match(out)
         if m is not None :
@@ -1208,12 +1214,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def run_nme( self, view, build ) :
 
+        settings = view.settings()
+        haxelib_path = settings.get("haxelib_path" , "haxelib")
+
         if build.openfl :
-            cmd = ["haxelib","run","openfl"]
+            cmd = [haxelib_path,"run","openfl"]
         elif build.lime :
-            cmd = ["haxelib","run","lime"]
+            cmd = [haxelib_path,"run","lime"]
         else :
-            cmd = ["haxelib","run","nme"]
+            cmd = [haxelib_path,"run","nme"]
 
         cmd += [ HaxeBuild.nme_target[2], os.path.basename(build.nmml) ]
         target = HaxeBuild.nme_target[1].split(" ")

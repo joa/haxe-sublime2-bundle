@@ -11,14 +11,19 @@ print("HAXE : haxelib search ")
 
 class HaxelibListLibs( sublime_plugin.WindowCommand ):
     def run(self):
-        out,err = runcmd(["haxelib" , "search"], " \n \n \n");
+
+        settings = self.window.active_view().settings()
+        haxelib_path = settings.get("haxelib_path","haxelib")
+
+        out,err = runcmd([ haxelib_path , "search"], " \n \n \n");
         lines = out.splitlines()
-        
-        #remove the initial prompt
-        lines[0] = lines[0].replace("Search word : ","")
+
+        if len(lines) > 0 :
+            #remove the initial prompt
+            lines[0] = lines[0].replace("Search word : ","")
 
         #sort alphabetically
-        lines = sorted( lines, cmp=lambda x,y: cmp(x.lower(), y.lower()) )
+        lines = sorted( lines , key = str.lower )
 
         #store for later
         self.libs = lines
@@ -52,9 +57,13 @@ class HaxelibListLibs( sublime_plugin.WindowCommand ):
             self.do_action("install",self.selected)
 
     def do_action(self,action,library):
-        out,err = runcmd(["haxelib" , action, self.selected]);
+
+        settings = self.window.active_view().settings()
+        haxelib_path = settings.get("haxelib_path","haxelib")
+
+        out,err = runcmd([ haxelib_path , action, self.selected]);
         lines = out.splitlines()
-        
+
         # the description can be rather long,
         # so we just split it up some
         if action == "install":

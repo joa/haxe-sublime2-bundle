@@ -27,8 +27,11 @@ class HaxelibInstallLib( sublime_plugin.WindowCommand ):
             self.window.run_command("haxelib_list_libs")
 
     def on_input(self, value):
+        settings = self.window.active_view().settings()
+        haxelib_path = settings.get("haxelib_path","haxelib")
+
         if(value != ""):            
-            out,err = runcmd(["haxelib" , "install", value]);
+            out,err = runcmd([haxelib_path , "install", value]);
             outlines = out.splitlines()
             sublime.status_message(str(outlines));
             self.window.show_quick_panel(outlines, None, sublime.MONOSPACE_FONT)

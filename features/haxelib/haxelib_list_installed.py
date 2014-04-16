@@ -12,7 +12,11 @@ class HaxelibListInstalled( sublime_plugin.WindowCommand ):
     def run(self, paths = [] , t = "list"):
         
         self.action = t
-        out,err = runcmd(["haxelib" , "list"]);
+
+        settings = self.window.active_view().settings()
+        haxelib_path = settings.get("haxelib_path","haxelib")
+
+        out,err = runcmd([haxelib_path , "list"]);
 
         libs = out.splitlines()
         
@@ -37,14 +41,22 @@ class HaxelibListInstalled( sublime_plugin.WindowCommand ):
     def do_remove(self,library):
     
         sublime.status_message("Please wait, removing haxelib " + library);
-        out,err = runcmd(["haxelib" , "remove", library]);
+
+        settings = self.window.active_view().settings()
+        haxelib_path = settings.get("haxelib_path","haxelib")
+
+        out,err = runcmd([haxelib_path , "remove", library]);
         sublime.status_message(str(out))
         show_quick_panel(self.window, out.splitlines(), None)
 
     def do_update(self,library):
     
         sublime.status_message("Please wait, updating haxelib " + library);
-        out,err = runcmd(["haxelib" , "update", library]);
+
+        settings = self.window.active_view().settings()
+        haxelib_path = settings.get("haxelib_path","haxelib")
+
+        out,err = runcmd([haxelib_path , "update", library]);
         sublime.status_message(str(out))        
         show_quick_panel(self.window, out.splitlines(), None)
 
