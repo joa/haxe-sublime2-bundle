@@ -8,7 +8,12 @@ import sublime, sublime_plugin
 import subprocess, time
 import tempfile
 import os, signal
-from io import open
+
+try :
+    from io import open
+except ImportError:
+    pass
+
 #import xml.parsers.expat
 import re
 import codecs
