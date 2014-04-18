@@ -1747,8 +1747,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
         inp = (fn,offset,commas,src[0:offset-1])
         if self.currentCompletion["inp"] is None or inp != self.currentCompletion["inp"] :
 
+            byte_offset = len(codecs.encode(src[0:offset], "utf-8"))
             temp = self.save_temp_file( view )
-            ret , haxeComps , status , hints = self.run_haxe( view , { "filename" : fn , "offset" : offset , "commas" : commas , "mode" : None })
+            ret , haxeComps , status , hints = self.run_haxe( view , { "filename" : fn , "offset" : byte_offset , "commas" : commas , "mode" : None })
             self.clear_temp_file( view , temp )
 
             if completeChar not in "(," :
