@@ -1,7 +1,8 @@
 <snippet>
-    <content><![CDATA[class ${1:class_name}$TM_CSLB{
-	function new()$TM_CSLB{
-		
+    <content><![CDATA[class ${1:class_name}
+{
+	public function new(){
+		${0:$TM_SELECTED_TEXT}
 	}
 }]]></content>
     <tabTrigger>class</tabTrigger>

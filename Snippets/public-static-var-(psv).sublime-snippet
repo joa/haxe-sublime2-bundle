@@ -1,0 +1,6 @@
+<snippet>
+    <content><![CDATA[public static var ${1:var_name}${2::${3:Type}};]]></content>
+    <tabTrigger>psv</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Public Static Variable (psv)</description>
+</snippet>

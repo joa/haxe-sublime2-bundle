@@ -1,0 +1,6 @@
+<snippet>
+    <content><![CDATA[private static inline var ${1:CONSTANT_NAME}${2::${3:Type}}${4: = ${5:VALUE}};]]></content>
+    <tabTrigger>prsiv</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Private Static Inline Variable (prsiv)</description>
+</snippet>

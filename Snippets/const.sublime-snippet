@@ -1,6 +1,0 @@
-<snippet>
-    <content><![CDATA[static public inline var ${1:var_name};]]></content>
-    <tabTrigger>const</tabTrigger>
-    <scope>source.haxe.2</scope>
-    <description>Constant (const)</description>
-</snippet>

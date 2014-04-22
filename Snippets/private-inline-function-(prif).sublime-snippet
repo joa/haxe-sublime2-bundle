@@ -1,0 +1,9 @@
+<snippet>
+    <content><![CDATA[private inline function ${1:function_name}(${2:arguments})${3::${4:Void}}
+{
+  ${0:$TM_SELECTED_TEXT}
+}]]></content>
+    <tabTrigger>prif</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Private Inline Function (prif)</description>
+</snippet>
