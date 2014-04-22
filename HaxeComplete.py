@@ -1206,7 +1206,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         return ("" , [], "" )
 
     def run_flambe( self , view , build ):
-        cmd = [ "flambe" ]
+        cmd = [ "flambe.cmd" if os.name == "nt" else "flambe" ]
 
         cmd += HaxeBuild.flambe_target[1].split(" ")
 
