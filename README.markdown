@@ -70,10 +70,11 @@ For manual installation, the folders should be `sublime-text-3` (Linux) or `Subl
 
 ### Settings
 
- - `haxe_path` : Full path to the Haxe compiler, if not already in your PATH ("/usr/bin/haxe" or "C:\Program Files\Haxe\haxe.exe")
- - `haxe_library_path` : Full path to the standard lib, overriding HAXE_LIBRARY_PATH
- - `haxelib_path` : Full path to Haxelib, if not already in your PATH ("/usr/bin/haxelib" or "C:\Program Files\Haxe\haxelib.exe")
- - `haxe_build_server_mode` (`true` by default) : Uses [compilation server](http://haxe.org/manual/completion#compilation-cache-server) for building. The server is always used for completion, and may be restarted if needed through the command palette.
+ - `haxe_path` : Full path to the Haxe compiler, if not already in your `PATH` (ex:"/usr/bin/haxe" or "C:\Program Files\Haxe\haxe.exe")
+ - `haxe_library_path` : Full path to the standard lib, overriding `HAXE_LIBRARY_PATH` and `HAXE_STD_PATH` (ex:"/usr/local/haxe/std")
+ - `haxelib_path` : Full path to Haxelib, if not already in your PATH (ex:"/usr/bin/haxelib" or "C:\Program Files\Haxe\haxelib.exe")
+ - `haxe_build_server_mode` (`true` by default) : Uses [compilation server](http://haxe.org/manual/completion#compilation-cache-server) for building.
+ - `haxe_completion_server_mode` (`true` by default) : Uses [compilation server](http://haxe.org/manual/completion#compilation-cache-server) for autocompletion.
  - `haxe_smart_snippets` (`true` by default) : Inserts smart snippets based on compiler hints after `(` and `,`
 
 ### Targeting NME/openfl

@@ -1256,6 +1256,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             self.serverMode = float(ver.group(2)) * 100 >= 209
 
+        buildServerMode = settings.get('haxe_build_server_mode', True)
+        completionServerMode = settings.get('haxe_completion_server_mode',True)
+
+        self.serverMode = self.serverMode and (buildServerMode or completionServerMode)
+
         self.start_server( view )
 
     def start_server( self , view = None ) :
@@ -1332,9 +1337,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
         cwd = os.path.dirname( build.hxml )
 
         args.extend( build.args )
-        buildServerMode = settings.get('haxe_build_server_mode', True)
 
-        if self.serverMode and (autocomplete or buildServerMode) : #and autocomplete:
+        buildServerMode = settings.get('haxe_build_server_mode', True)
+        completionServerMode = settings.get('haxe_completion_server_mode',True)
+
+        if self.serverMode and ( ( completionServerMode and autocomplete ) or ( buildServerMode and not autocomplete ) ) :
             args.append(("--connect" , str(HaxeComplete.inst.serverPort)))
             args.append(("--cwd" , cwd ))
         #args.append( ("--times" , "-v" ) )
