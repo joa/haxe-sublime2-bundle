@@ -166,7 +166,7 @@ documentationStore = {}
 class HaxeBuild :
 
     #auto = None
-    targets = ["js","cpp","swf","neko","php","java","cs","x"]
+    targets = ["js","cpp","swf","neko","php","java","cs","x","python"]
     nme_targets = [
         ("Flash - test","flash -debug","test"),
         ("Flash - build only","flash -debug","build"),
@@ -757,7 +757,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
                         break
 
-                for flag in [ "resource" , "xml" , "java-lib" ] :
+                for flag in [ "resource" , "xml" , "java-lib" , "net-lib" ] :
                     if l.startswith( "-"+flag ) :
                         spl = l.split(" ")
                         outp = os.path.join( folder , " ".join(spl[1:]) )
