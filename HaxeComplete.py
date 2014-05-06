@@ -304,7 +304,7 @@ class HaxeDisplayCompletion( sublime_plugin.TextCommand ):
     def run( self , edit ) :
         #print("completing")
         view = self.view
-        
+
         view.run_command( "auto_complete" , {
             "api_completions_only" : True,
             "disable_auto_insert" : True,
@@ -1547,18 +1547,22 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 else :
                     status = ""
 
-            self.errors = self.extract_errors( err )
+            self.errors = self.extract_errors( err, cwd )
 
 
         return ( err, comps, status , hints )
 
-    def extract_errors( self , str ):
+    def extract_errors( self , str , cwd ):
         errors = []
 
         for infos in compilerOutput.findall(str) :
             infos = list(infos)
             #print(infos)
             f = infos.pop(0)
+
+            if not os.path.isabs(f):
+                f = os.path.normpath(os.path.join(cwd, f))
+
             l = int( infos.pop(0) )-1
 
             metric = infos.pop(0)
@@ -1888,7 +1892,7 @@ class HaxeExecCommand(ExecCommand):
         super(HaxeExecCommand, self).finish(*args, **kwargs)
         outp = self.output_view.substr(sublime.Region(0, self.output_view.size()))
         hc = HaxeComplete.inst
-        hc.errors = hc.extract_errors( outp )
+        hc.errors = hc.extract_errors( outp, self.output_view.settings().get("result_base_dir") )
         hc.highlight_errors( self.window.active_view() )
 
     def run(self, cmd = [],  shell_cmd = None, file_regex = "", line_regex = "", working_dir = "",
