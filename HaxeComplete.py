@@ -522,6 +522,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 right = e["to"]
 
                 if metric.startswith("character") :
+                    # retrieve character positions from utf-8 bytes offset reported by compiler
+                    line = view.substr(view.line(view.text_point(l, 0))).encode("utf-8")
+                    left = len(line[:left].decode("utf-8"))
+                    right = len(line[:right].decode("utf-8"))
+
                     a = view.text_point(l,left)
                     b = view.text_point(l,right)
                     char_regions.append( sublime.Region(a,b))
