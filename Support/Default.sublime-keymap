@@ -40,6 +40,18 @@
         ]
     },
     {
+        "keys": ["ctrl+]"],
+        "command": "haxe_find_definition",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
         "keys": ["-"],
         "command": "run_macro_file",
         "args":
@@ -64,7 +76,7 @@
                 "operand": "string,comment"
             }
         ]
-    },  
+    },
     {
         "keys": ["("],
         "command": "haxe_hint",
@@ -83,7 +95,7 @@
             },
             { "key": "num_selections", "operator": "equal", "operand": 1 }
         ]
-    },  
+    },
     {
         "keys": [","],
         "command" : "haxe_hint",
