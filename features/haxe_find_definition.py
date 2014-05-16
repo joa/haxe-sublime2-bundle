@@ -1,3 +1,4 @@
+import os.path
 import codecs
 import sublime
 import sublime_plugin
@@ -46,10 +47,20 @@ class HaxeFindDefinition( sublime_plugin.TextCommand ):
         if mode == "lines":
             start = 0
 
+        if os.name == "nt":
+            filename = self.get_windows_path(filename)
+
         # open definition file in the active window and go to given position
         window = sublime.active_window()
         view = window.open_file(filename)
         self.goto_pos(view, line, start)
+
+    def get_windows_path(self, path):
+        dir, file = os.path.split(path)
+        for f in os.listdir(dir):
+            if (f.lower() == file):
+                return os.path.join(dir, f)
+        return path
 
     def goto_pos(self, view, row, off):
         # wait until file is loaded
