@@ -36,11 +36,6 @@ try: # Python 3
     from .HaxeHelper import variables, functions, functionParams, paramDefault
     from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
 
-    # import YAML parser
-    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib3/" )
-    sys.path.append( yaml_path )
-    import yaml
-
 except (ValueError): # Python 2
 
     # Import the features module, including the haxelib and key commands etc
@@ -54,11 +49,6 @@ except (ValueError): # Python 2
     from HaxeHelper import libFlag, skippable, inAnonymous, extractTag
     from HaxeHelper import variables, functions, functionParams, paramDefault
     from HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
-
-    # import YAML parser
-    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib/" )
-    sys.path.append( yaml_path )
-    import yaml
 
 # For running background tasks
 
@@ -701,18 +691,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
             currentBuild.hxml = build
             currentBuild.yaml = build
             buildPath = os.path.dirname( build )
-
-            yaml_data = yaml.load( codecs.open( build , "r+" , "utf-8" , "ignore" ) )
-
-            currentBuild.main = yaml_data['main']
-            currentBuild.args.append( ("-lib","flambe") )
-
-            flambe_lib = HaxeLib.get("flambe")
-            currentBuild.libs.append( flambe_lib )
-
-            srcDir = os.path.join( buildPath , "src" )
-            currentBuild.args.append( ("-cp" , srcDir ) )
-            currentBuild.classpaths.append( srcDir )
 
             self.builds.append( currentBuild )
 
