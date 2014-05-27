@@ -211,7 +211,11 @@ class HaxeBuild :
         ("HTML5 - test", "run html --debug" ),
         ("HTML5 - build only" , "build html --debug"),
         ("Android - test" , "run android --debug"),
-        ("Android - build only" , "build android --debug")
+        ("Android - build only" , "build android --debug"),
+        ("iOS - test" , "run ios --debug"),
+        ("iOS - build only" , "build ios --debug"),
+        ("Firefox App - test" , "run firefox --debug"),
+        ("Firefox App - build only" , "build firefox --debug"),
     ]
     flambe_target = ("Flash - run", "run flash --debug")
 
