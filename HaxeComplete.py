@@ -1360,10 +1360,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             args.append( ("-D", "st_display" ) )
             args.append( ("--display", display["filename"] + "@" + str( display["offset"] ) ) )
-            args.append( ("--no-output",) )
-            args.append( ("-"+build.target , build.output ) )
-            #args.append( ("-cp" , plugin_path ) )
-            #args.append( ("--macro" , "SourceTools.complete()") )
+
+            if build.yaml is not None :
+                # Call out to `flambe haxe-flags` for Flambe completion
+                res, err = runcmd( ["flambe", "haxe-flags"] )
+                if err :
+                    print("Flambe completion error: " + err)
+                else:
+                    args += [(arg,) for arg in res.split("\n")]
+            else:
+                args.append( ("--no-output",) )
+                args.append( ("-"+build.target , build.output ) )
+                #args.append( ("-cp" , plugin_path ) )
+                #args.append( ("--macro" , "SourceTools.complete()") )
 
 
         haxepath = settings.get( 'haxe_path' , 'haxe' )
