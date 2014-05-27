@@ -1215,6 +1215,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         cmd += HaxeBuild.flambe_target[1].split(" ")
 
+        # Use the build server if available
+        buildServerMode = view.settings().get('haxe_build_server_mode', True)
+        if self.serverMode and buildServerMode :
+            cmd += ["--haxe-server", str(HaxeComplete.inst.serverPort)]
+
         view.window().run_command("exec", {
             "cmd": cmd,
             "working_dir": os.path.dirname(build.yaml),
