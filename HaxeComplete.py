@@ -822,7 +822,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 folder = folders[0]
             else:
                 for f in folders:
-                    if f + "/" in fn :
+                    if f + os.sep in fn :
                         folder = f
 
         if folder is not None :
