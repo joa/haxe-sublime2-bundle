@@ -756,7 +756,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 #if l.startswith("--connect") and HaxeComplete.inst.serverMode :
                 #   currentBuild.args.append( ( "--connect" , str(self.serverPort) ))
 
-                for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib", "-dce" , "-js-modern" , "swf-lib" ] :
+                for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib", "dce" , "-js-modern" , "swf-lib" ] :
                     if l.startswith( "-"+flag ) :
                         currentBuild.args.append( tuple(l.split(" ") ) )
 
