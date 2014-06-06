@@ -104,3 +104,5 @@ you may find it useful to [increase its font-size](http://superuser.com/question
 [Haxe workflow with Sublime Text 2, Php & nme examples](http://www.aymericlamboley.fr/blog/haxe-workflow-with-sublime-text-2-php-and-nme-examples/)
 
 [Haxe IDE Choices for Mac OS X](http://sambrick.wordpress.com/2012/03/23/haxe-ide-choices-for-mac/)
+
+[Haxe + lime + openFL](https://medium.com/programming-ideas-tutorial-and-experience/haxe-lime-openfl-ec9c2784aaa8)
