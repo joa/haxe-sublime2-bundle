@@ -40,7 +40,7 @@
         ]
     },
     {
-        "keys": ["ctrl+]"],
+        "keys": ["ctrl+<"],
         "command": "haxe_find_definition",
         "context":
         [
