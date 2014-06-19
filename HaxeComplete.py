@@ -1355,11 +1355,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
             args.append( ("-"+build.target , build.output ) )
             #args.append( ("--times" , "-v" ) )
         else:
+
+            display_arg = display["filename"] + "@" + str( display["offset"] )
             if display["mode"] is not None :
-                args.append( ("-D","display-mode=" + display["mode"] ) )
+                display_arg += "@" + display["mode"]
 
             args.append( ("-D", "st_display" ) )
-            args.append( ("--display", display["filename"] + "@" + str( display["offset"] ) ) )
+            args.append( ("--display", display_arg ) )
             args.append( ("--no-output",) )
             args.append( ("-"+build.target , build.output ) )
             #args.append( ("-cp" , plugin_path ) )
@@ -1421,6 +1423,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         hints = []
         msg = ""
         tree = None
+        pos = None
 
         commas = 0
         if display is not None and display["commas"] is not None :
@@ -1485,6 +1488,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             li = tree.find("list")
             if li is not None :
+
+                pos = li.findtext("pos")
+
                 for i in li.getiterator("i"):
                     name = i.get("n")
                     sig = i.find("t").text
@@ -1554,8 +1560,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             self.errors = self.extract_errors( err, cwd )
 
-
-        return ( err, comps, status , hints )
+        if display is not None and display["mode"] == "position":
+            return pos
+        else:
+            return ( err, comps, status , hints )
 
     def extract_errors( self , str , cwd ):
         errors = []
