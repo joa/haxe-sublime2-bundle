@@ -14,6 +14,7 @@ posRe = re.compile("^(.*):(\\d+):\\ (lines|characters)\\ (\\d+)-(\\d+)$")
 class HaxeFindDefinition( sublime_plugin.TextCommand ):
 
     def run( self , edit ) :
+
         view = self.view
 
         # get word under cursor
@@ -37,6 +38,8 @@ class HaxeFindDefinition( sublime_plugin.TextCommand ):
 
         if pos is None:
             return
+        else :
+            pos = pos.strip()
 
         # parse position
         m = posRe.match(pos)

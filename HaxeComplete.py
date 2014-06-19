@@ -1486,7 +1486,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
             # E.g. we type in self.blarg.herp(), this will get "self.blarg".
             fn_name = self.get_current_fn_name(view, view.sel()[0].end())
 
+            pos = tree.findtext("pos")
             li = tree.find("list")
+
             if li is not None :
 
                 pos = li.findtext("pos")
