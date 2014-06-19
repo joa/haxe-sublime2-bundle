@@ -4,7 +4,7 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2) and [Sublime T
 # Features
 
  - **Syntax highlighting** for Haxe2 and Haxe3 sources and hxml build files
- - **Haxe compiler auto-completion**, code hints, smart snippets and error highlighting / navigation
+ - **Haxe compiler auto-completion**, code hints, smart snippets, error highlighting / navigation and "goto definition" feature
  - **[NME](http://www.nme.io/), [openfl](https://github.com/openfl/openfl) and [Flambe](http://getflambe.com) support** with completion, target selection and compilation
  - **Package and classes discovery/suggestion** including classpath (-cp) and haxelib libraries (-lib)
  - **Multiple build management** and automatic generation of hxml files
@@ -66,6 +66,7 @@ For manual installation, the folders should be `sublime-text-3` (Linux) or `Subl
       - **Ctrl+Shift+I** to create a new interface,
       - **Ctrl+Shift+E** to create a new enum,
       - **Ctrl+Shift+T** to create a new typedef
+ - Press **Ctrl+<** to go to definition (Haxe 3.1.3+ required) 
  - Press **Ctrl+Shift+F1** to show documentation on cursor (when previously autocompleted) 
 
 ### Settings
