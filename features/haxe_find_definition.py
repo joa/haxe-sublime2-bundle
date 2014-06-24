@@ -37,6 +37,8 @@ class HaxeFindDefinition( sublime_plugin.TextCommand ):
         complete.clear_temp_file( view , temp )
 
         if pos is None:
+            status = "Definition of '" + view.substr(sublime.Region(word.a, word.b)) + "' not found."
+            self.view.set_status( "haxe-status", status )
             return
         else :
             pos = pos.strip()
