@@ -866,7 +866,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             self.selectingBuild = True
             sublime.status_message("Please select your build")
-            view.window().show_quick_panel( buildsView , lambda i : self.set_current_build(view, int(i), forcePanel) , sublime.MONOSPACE_FONT )
+            show_quick_panel( view.window() , buildsView , lambda i : self.set_current_build(view, int(i), forcePanel) , sublime.MONOSPACE_FONT )
 
         elif settings.has("haxe-build-id"):
             self.set_current_build( view , int(settings.get("haxe-build-id")), forcePanel )
@@ -899,7 +899,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 for t in HaxeBuild.nme_targets :
                     nme_targets.append( t[0] )
 
-                view.window().show_quick_panel(nme_targets, lambda i : self.select_nme_target(i, view))
+                show_quick_panel( view.window() , nme_targets, lambda i : self.select_nme_target(i, view))
 
             elif self.currentBuild.yaml is not None:
                 sublime.status_message("Please select a Flambe target")
@@ -907,7 +907,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 for t in HaxeBuild.flambe_targets :
                     flambe_targets.append( t[0] )
 
-                view.window().show_quick_panel(flambe_targets, lambda i : self.select_flambe_target(i, view))
+                show_quick_panel( view.window() , flambe_targets, lambda i : self.select_flambe_target(i, view))
 
 
 
