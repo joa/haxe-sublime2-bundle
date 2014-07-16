@@ -4,6 +4,7 @@
 
     { "trigger" : "cp" , "contents" : "cp"},
     { "trigger" : "cpp" , "contents" : "cpp"},
+    { "trigger" : "cs" , "contents" : "cs"},
     { "trigger" : "as3" , "contents" : "as3"},
     { "trigger" : "swf-header" , "contents" : "swf-header"},
     { "trigger" : "swf-version" , "contents" : "swf-version"},
@@ -12,6 +13,7 @@
     { "trigger" : "swf" , "contents" : "swf"},
     { "trigger" : "neko" , "contents" : "neko"},
     { "trigger" : "php" , "contents" : "php"},
+    { "trigger" : "python" , "contents" : "python"},
     { "trigger" : "xml" , "contents" : "xml"},
     { "trigger" : "x" , "contents" : "x"},
     { "trigger" : "main" , "contents" : "main"},
