@@ -1,8 +1,8 @@
 <snippet>
     <content><![CDATA[if (${1:true}){
-      ${0:$TM_SELECTED_TEXT}
+        ${0:$TM_SELECTED_TEXT}
 }else{
-  
+    
 }]]></content>
     <tabTrigger>ife</tabTrigger>
     <scope>source.haxe.2</scope>
