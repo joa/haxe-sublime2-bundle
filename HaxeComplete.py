@@ -379,6 +379,10 @@ class HaxeHint( sublime_plugin.TextCommand ):
                 "characters" : input
             })
 
+        autocomplete = view.settings().get("auto_complete",True)
+        if not autocomplete :
+            return
+
         for r in view.sel() :
             comps, hints = complete.get_haxe_completions( self.view , r.end() )
 
