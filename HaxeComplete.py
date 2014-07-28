@@ -665,6 +665,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     elif (tag == "haxelib"):
                         currentBuild.libs.append( HaxeLib.get( name ) )
                         currentBuild.args.append( ("-lib" , name) )
+                    elif (tag == "haxedef"):
+                        currentBuild.args.append( ("-D", name) )
                     elif (tag == "classpath" or tag == "source"):
                         currentBuild.classpaths.append( os.path.join( buildPath , name ) )
                         currentBuild.args.append( ("-cp" , os.path.join( buildPath , name ) ) )
