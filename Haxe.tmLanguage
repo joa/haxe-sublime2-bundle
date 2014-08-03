@@ -447,7 +447,7 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>(\b(([a-z]+\.)*)([A-Z]\w*|\*))</string>
+          <string>(\b(([a-z][a-zA-Z0-9]*\.)*)([A-Z]\w*|\*))</string>
         </dict>
         <dict>
           <key>name</key>
