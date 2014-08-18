@@ -460,6 +460,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
         hasClasses = False
 
         #print(path)
+        if not os.path.exists( path ) :
+            print('Warning: path %s doesn´t exists.'%path);
+            return classes, packs
 
         for fullpath in glob.glob( os.path.join(path,"*.hx") ) :
             f = os.path.basename(fullpath)
@@ -1379,7 +1382,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
         for a in args :
             cmd.extend( list(a) )
 
-        #print( cmd )
         #
         # TODO: replace runcmd with run_command('exec') when possible (haxelib, maybe build)
         #
@@ -1408,13 +1410,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
         #print(" ".join(cmd))
-        #print(cmd)
         res, err = runcmd( cmd, "" )
 
         if not autocomplete :
             self.panel_output( view , " ".join(cmd) )
 
-        #print( res.encode("utf-8") )
         status = ""
 
         if (not autocomplete) and (build.hxml is None) :
