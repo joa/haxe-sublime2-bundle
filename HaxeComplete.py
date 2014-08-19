@@ -220,7 +220,7 @@ class HaxeBuild :
         self.args = []
         self.main = None
         self.target = "js"
-        self.output = "No output"
+        self.output = None
         self.hxml = None
         self.nmml = None
         self.yaml = None
@@ -239,6 +239,9 @@ class HaxeBuild :
         return self.__dict__ == other.__dict__
 
     def to_string(self) :
+        if self.output is None :
+            return "Invalid build"
+
         out = os.path.basename(self.output)
         if self.openfl :
             return "{out} (openfl / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
@@ -745,6 +748,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
     def read_hxml( self, build ) :
         #print("Reading build " + build );
 
+        builds = []
         buildPath = os.path.dirname(build);
 
         spl = build.split("@")
@@ -753,7 +757,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             build = os.path.join( spl[0] , spl[1] )
 
         if not os.path.exists( build ) :
-            return None
+            return builds
 
         #print( buildPath, build )
         
@@ -762,7 +766,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         currentBuild.cwd = buildPath
 
         #print( currentBuild )
-        
+
         f = codecs.open( build , "r+" , "utf-8" , "ignore" )
 
         while 1:
@@ -770,7 +774,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
             if not l :
                 break;
             if l.startswith("--next") :
-                self.add_build( currentBuild )
+                if len(currentBuild.classpaths) == 0:
+                    currentBuild.classpaths.append( buildPath )
+                    currentBuild.args.append( ("-cp" , buildPath ) )
+
+                if currentBuild.main is not None and currentBuild.output is not None :
+                    builds.append( currentBuild )
+
                 currentBuild = HaxeBuild()
                 currentBuild.hxml = build
                 currentBuild.cwd = buildPath
@@ -835,15 +845,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 currentBuild.classpaths.append( absClasspath )
                 currentBuild.args.append( ("-cp" , absClasspath ) )
 
+        
         if len(currentBuild.classpaths) == 0:
             currentBuild.classpaths.append( buildPath )
             currentBuild.args.append( ("-cp" , buildPath ) )
 
-
-        if currentBuild.main is None:
-            currentBuild.main = '[No Main]'
-
-        return currentBuild
+        if currentBuild.main is not None and currentBuild.output is not None :
+            builds.append( currentBuild )
+            
+        return builds
 
     def add_build( self , build ) :
         if build not in self.builds :
@@ -853,9 +863,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
         hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
 
         for build in hxmls:
-            currentBuild = self.read_hxml( build );
-            if currentBuild is not None :
-                self.add_build( currentBuild )
+            for b in self.read_hxml( build ):
+                self.add_build( b )
 
 
     def find_build_file( self , folder ) :
@@ -888,17 +897,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
         # extract build files from project
         build_files = view.settings().get('haxe_builds') 
         if build_files is not None :
-            for b in build_files :
+            for build in build_files :
                 if( int(sublime.version()) > 3000 ) : 
                     # files are relative to project file name
                     proj = view.window().project_file_name()
                     if( proj is not None ) :
                         proj_path = os.path.dirname( proj )
-                        b = os.path.join( proj_path , b )
+                        build = os.path.join( proj_path , build )
 
-                currentBuild = self.read_hxml( b );
-                if currentBuild is not None :
-                    self.add_build( currentBuild )
+                for b in self.read_hxml( build ) :
+                    self.add_build( b )
 
         else :
 

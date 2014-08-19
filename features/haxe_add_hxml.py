@@ -15,25 +15,35 @@ class HaxeAddHxml( sublime_plugin.WindowCommand ):
         win = self.window
 
         for p in paths :
-            HaxeComplete_inst().read_hxml( p );
-            if( int(sublime.version()) > 3000 ) : 
-                proj = win.project_file_name()
-                if proj is not None :
-                    proj_path = os.path.dirname( proj )
-                    rel_path = os.path.relpath( p , proj_path )
-                else :
-                    rel_path = p
+            if os.path.isfile( p ) :
+                for b in HaxeComplete_inst().read_hxml( p ) :
+                    HaxeComplete_inst().add_build( b )
 
-                data = win.project_data()
-                
-                if 'settings' not in data :
-                    data['settings'] = {}
-                if 'haxe_builds' not in data['settings'] :
-                    data['settings']['haxe_builds'] = []
+                if( int(sublime.version()) > 3000 ) : 
+                    proj = win.project_file_name()
+                    if proj is not None :
+                        proj_path = os.path.dirname( proj )
+                        rel_path = os.path.relpath( p , proj_path )
+                    else :
+                        rel_path = p
 
-                build_files = data['settings']['haxe_builds'];
-                build_files.append( rel_path )
+                    data = win.project_data()
+                    
+                    if 'settings' not in data :
+                        data['settings'] = {}
+                    if 'haxe_builds' not in data['settings'] :
+                        data['settings']['haxe_builds'] = []
 
-                win.set_project_data( data )
+                    build_files = data['settings']['haxe_builds'];
+                    build_files.append( rel_path )
+
+                    win.set_project_data( data )
+
+    def is_enabled( self , paths = [] ) :
+        for p in paths :
+            if os.path.isfile( p ) :
+                return True
+
+        return False
 
                 
