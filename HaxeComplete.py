@@ -865,21 +865,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def extract_build_args( self , view , forcePanel = False ) :
 
-        # extract build files from project
-        build_files = view.settings().get('haxe_builds') 
-        if build_files is not None :
-            for b in build_files :
-                if( int(sublime.version()) > 3000 ) : 
-                    # files are relative to project file name
-                    proj = view.window().project_file_name()
-                    if( proj is not None ) :
-                        proj_path = os.path.dirname( proj )
-                        b = os.path.join( proj_path , b )
-
-                currentBuild = self.read_hxml( b );
-                if currentBuild is not None :
-                    self.add_build( currentBuild )
-
         fn = view.file_name()
         settings = view.settings()
         win = view.window()
@@ -898,27 +883,43 @@ class HaxeComplete( sublime_plugin.EventListener ):
             win_folders = win.folders()
             for f in win_folders:
                 if f + os.sep in fn :
-                    project_folder = folder = f
-                    
+                    project_folder = folder = f  
+        
+        # extract build files from project
+        build_files = view.settings().get('haxe_builds') 
+        if build_files is not None :
+            for b in build_files :
+                if( int(sublime.version()) > 3000 ) : 
+                    # files are relative to project file name
+                    proj = view.window().project_file_name()
+                    if( proj is not None ) :
+                        proj_path = os.path.dirname( proj )
+                        b = os.path.join( proj_path , b )
 
-        crawl_folders = []
+                currentBuild = self.read_hxml( b );
+                if currentBuild is not None :
+                    self.add_build( currentBuild )
 
-        # go up all folders from file to project or root
-        if file_folder is not None :
-            f = file_folder 
-            prev = None
-            while prev != f and ( project_folder is None or project_folder in f ):
-                crawl_folders.append( f )
-                prev = f
-                f = os.path.split( f )[0]
-         
-        # crawl other window folders
-        for f in win_folders :
-            if f not in crawl_folders :
-                crawl_folders.append( f )
+        else :
 
-        for f in crawl_folders :
-            self.find_build_file( f )
+            crawl_folders = []
+
+            # go up all folders from file to project or root
+            if file_folder is not None :
+                f = file_folder 
+                prev = None
+                while prev != f and ( project_folder is None or project_folder in f ):
+                    crawl_folders.append( f )
+                    prev = f
+                    f = os.path.split( f )[0]
+             
+            # crawl other window folders
+            for f in win_folders :
+                if f not in crawl_folders :
+                    crawl_folders.append( f )
+
+            for f in crawl_folders :
+                self.find_build_file( f )
 
         if len(self.builds) == 1:
             if forcePanel :
