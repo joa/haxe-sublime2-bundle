@@ -27,9 +27,9 @@ class HaxeAddHxml( sublime_plugin.WindowCommand ):
 
                     data = win.project_data()
                     
-                    if data['settings'] is None :
+                    if 'settings' not in data :
                         data['settings'] = {}
-                    if data['settings']['haxe_build_files'] is None :
+                    if 'haxe_build_files' not in data['settings'] :
                         data['settings']['haxe_build_files'] = []
 
                     build_files = data['settings']['haxe_build_files'];

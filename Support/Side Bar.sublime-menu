@@ -31,7 +31,7 @@
     ]  
 },{
     "id" : "haxe-add-hxml",
-    "caption" : "Add .hxml build file",
+    "caption" : "Add Haxe build file to project",
     "command" : "haxe_add_hxml",
     "args" : { "paths":[] }
 }
