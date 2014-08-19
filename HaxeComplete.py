@@ -848,7 +848,18 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
     def extract_build_args( self , view , forcePanel = False ) :
 
-        # self.builds = []
+        # extract build files from project
+        build_files = view.settings().get('haxe_build_files') 
+        if build_files is not None :
+            for b in build_files :
+                if( int(sublime.version()) > 3000 ) : 
+                    # files are relative to project file name
+                    proj = view.window().project_file_name()
+                    if( proj is not None ) :
+                        proj_path = os.path.dirname( proj )
+                        b = os.path.join( proj_path , b )
+
+                self.read_hxml(b)
 
         fn = view.file_name()
         settings = view.settings()
