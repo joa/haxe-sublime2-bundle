@@ -15,26 +15,25 @@ class HaxeAddHxml( sublime_plugin.WindowCommand ):
         win = self.window
 
         for p in paths :
-            if os.path.exists( p ) :
-                HaxeComplete_inst().read_hxml( p );
-                if( int(sublime.version()) > 3000 ) : 
-                    proj = win.project_file_name()
-                    if proj is not None :
-                        proj_path = os.path.dirname( proj )
-                        rel_path = os.path.relpath( p , proj_path )
-                    else :
-                        rel_path = p
+            HaxeComplete_inst().read_hxml( p );
+            if( int(sublime.version()) > 3000 ) : 
+                proj = win.project_file_name()
+                if proj is not None :
+                    proj_path = os.path.dirname( proj )
+                    rel_path = os.path.relpath( p , proj_path )
+                else :
+                    rel_path = p
 
-                    data = win.project_data()
-                    
-                    if 'settings' not in data :
-                        data['settings'] = {}
-                    if 'haxe_build_files' not in data['settings'] :
-                        data['settings']['haxe_build_files'] = []
+                data = win.project_data()
+                
+                if 'settings' not in data :
+                    data['settings'] = {}
+                if 'haxe_builds' not in data['settings'] :
+                    data['settings']['haxe_builds'] = []
 
-                    build_files = data['settings']['haxe_build_files'];
-                    build_files.append( rel_path )
+                build_files = data['settings']['haxe_builds'];
+                build_files.append( rel_path )
 
-                    win.set_project_data( data )
+                win.set_project_data( data )
 
                 

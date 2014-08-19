@@ -230,6 +230,7 @@ class HaxeBuild :
         self.packages = None
         self.openfl = False
         self.lime = False
+        self.cwd = None
 
     def __eq__(self,other) :
         return self.__dict__ == other.__dict__
@@ -290,8 +291,12 @@ class HaxeBuild :
 
             #print("extract types :")
             #print(cp)
+            cwd = self.cwd
+            if cwd is None :
+                cwd = os.path.dirname( self.hxml )
+
             for path in cp :
-                c, p = HaxeComplete.inst.extract_types( os.path.join( os.path.dirname( self.hxml ), path ) )
+                c, p = HaxeComplete.inst.extract_types( os.path.join( cwd , path ) )
                 classes.extend( c )
                 packs.extend( p )
 
@@ -738,11 +743,26 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
     def read_hxml( self, build ) :
+        #print("Reading build " + build );
 
-        currentBuild = HaxeBuild()
-        currentBuild.hxml = build
         buildPath = os.path.dirname(build);
 
+        spl = build.split("@")
+        if( len(spl) == 2 ) :
+            buildPath = spl[0]
+            build = os.path.join( spl[0] , spl[1] )
+
+        if not os.path.exists( build ) :
+            return None
+
+        #print( buildPath, build )
+        
+        currentBuild = HaxeBuild()
+        currentBuild.hxml = build
+        currentBuild.cwd = buildPath
+
+        #print( currentBuild )
+        
         f = codecs.open( build , "r+" , "utf-8" , "ignore" )
 
         while 1:
@@ -753,6 +773,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 self.add_build( currentBuild )
                 currentBuild = HaxeBuild()
                 currentBuild.hxml = build
+                currentBuild.cwd = buildPath
 
             l = l.strip()
 
@@ -832,13 +853,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
         hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
 
         for build in hxmls:
-
-            # yeah...
-            if not os.path.exists( build ) :
-                continue
-
             currentBuild = self.read_hxml( build );
-            self.add_build( currentBuild )
+            if currentBuild is not None :
+                self.add_build( currentBuild )
 
 
     def find_build_file( self , folder ) :
@@ -849,7 +866,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
     def extract_build_args( self , view , forcePanel = False ) :
 
         # extract build files from project
-        build_files = view.settings().get('haxe_build_files') 
+        build_files = view.settings().get('haxe_builds') 
         if build_files is not None :
             for b in build_files :
                 if( int(sublime.version()) > 3000 ) : 
@@ -859,7 +876,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
                         proj_path = os.path.dirname( proj )
                         b = os.path.join( proj_path , b )
 
-                self.read_hxml(b)
+                currentBuild = self.read_hxml( b );
+                if currentBuild is not None :
+                    self.add_build( currentBuild )
 
         fn = view.file_name()
         settings = view.settings()
@@ -1409,7 +1428,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         self.errors = []
         args = []
 
-        cwd = os.path.dirname( build.hxml )
+
+        cwd = build.cwd 
+        if cwd is None :
+            cwd = os.path.dirname( build.hxml )
 
         args.extend( build.args )
 
