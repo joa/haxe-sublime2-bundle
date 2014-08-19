@@ -639,6 +639,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         nmmls += glob.glob( os.path.join( folder , "*.lime" ) )
 
         for build in nmmls:
+            # yeah...
+            if not os.path.exists( build ) :
+                continue
+
             currentBuild = HaxeBuild()
             currentBuild.hxml = build
             currentBuild.nmml = build
@@ -702,6 +706,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
         yamls = glob.glob( os.path.join( folder , "flambe.yaml") )
 
         for build in yamls :
+
+            # yeah...
+            if not os.path.exists( build ) :
+                continue
+
             currentBuild = HaxeBuild()
             currentBuild.hxml = build
             currentBuild.yaml = build
@@ -726,12 +735,16 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         for build in hxmls:
 
+            # yeah...
+            if not os.path.exists( build ) :
+                continue
+
             currentBuild = HaxeBuild()
             currentBuild.hxml = build
             buildPath = os.path.dirname(build);
 
-            # print("build file exists")
             f = codecs.open( build , "r+" , "utf-8" , "ignore" )
+
             while 1:
                 l = f.readline()
                 if not l :
@@ -812,6 +825,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
             self.builds.append( currentBuild )
 
 
+    def find_build_file( self , folder ) :
+        self.find_hxml(folder)
+        self.find_nmml(folder)
+        self.find_yaml(folder)
 
     def extract_build_args( self , view , forcePanel = False ) :
 
@@ -821,24 +838,40 @@ class HaxeComplete( sublime_plugin.EventListener ):
         settings = view.settings()
         win = view.window()
         folder = None
+        file_folder = None
+        # folder containing the file, opened in window
+        project_folder = None
+        win_folders = []
+        folders = []
 
         if fn is not None :
-            folder = os.path.dirname(fn)
+            file_folder = os.path.dirname(fn)
 
+        # find window folder containing the file
         if win is not None :
-            folders = win.folders()
-            if len(folders) == 1:
-                folder = folders[0]
-            else:
-                for f in folders:
-                    if f + os.sep in fn :
-                        folder = f
+            win_folders = win.folders()
+            for f in win_folders:
+                if f + os.sep in fn :
+                    project_folder = f
 
-        if folder is not None :
-            # settings.set("haxe-complete-folder", folder)
-            self.find_hxml(folder)
-            self.find_nmml(folder)
-            self.find_yaml(folder)
+        crawl_folders = []
+
+        # go up all folders from file to project or root
+        if file_folder is not None :
+            f = file_folder 
+            prev = None
+            while prev != f and project_folder in f :
+                crawl_folders.append( f )
+                prev = f
+                f = os.path.split( f )[0]
+         
+        # crawl other window folders
+        for f in win_folders :
+            if f not in crawl_folders :
+                crawl_folders.append( f )
+
+        for f in crawl_folders :
+            self.find_build_file( f )
 
         if len(self.builds) == 1:
             if forcePanel :
