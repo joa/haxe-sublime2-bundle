@@ -22,16 +22,19 @@ class HaxeAddHxml( sublime_plugin.WindowCommand ):
                     if proj is not None :
                         proj_path = os.path.dirname( proj )
                         rel_path = os.path.relpath( p , proj_path )
-                        data = win.project_data()
-                        print(data)
-                        if data['settings'] is None :
-                            data['settings'] = {}
-                        if data['settings']['haxe_build_files'] is None :
-                            data['settings']['haxe_build_files'] = []
+                    else :
+                        rel_path = p
 
-                        build_files = data['settings']['haxe_build_files'];
-                        build_files.append( rel_path )
+                    data = win.project_data()
+                    
+                    if data['settings'] is None :
+                        data['settings'] = {}
+                    if data['settings']['haxe_build_files'] is None :
+                        data['settings']['haxe_build_files'] = []
 
-                        win.set_project_data( data )
+                    build_files = data['settings']['haxe_build_files'];
+                    build_files.append( rel_path )
+
+                    win.set_project_data( data )
 
                 
