@@ -245,7 +245,7 @@ class HaxeBuild :
         out = self.main
         if self.output is not None :
             out = os.path.basename(self.output)
-            
+
         if self.openfl :
             return "{out} (openfl / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
         elif self.lime :
@@ -1467,7 +1467,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
             args.append( ("-D", "st_display" ) )
             args.append( ("--display", display_arg ) )
             args.append( ("--no-output",) )
-            args.append( ("-"+build.target , build.output ) )
+            output = build.output
+            if output is None :
+                output = "no-output"
+            args.append( ("-"+build.target , output ) )
             #args.append( ("-cp" , plugin_path ) )
             #args.append( ("--macro" , "SourceTools.complete()") )
 
@@ -1503,7 +1506,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             })
             return ("" , [], "" )
 
-
+        
         #print(" ".join(cmd))
         res, err = runcmd( cmd, "" )
 
