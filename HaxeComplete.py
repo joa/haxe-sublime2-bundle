@@ -239,10 +239,13 @@ class HaxeBuild :
         return self.__dict__ == other.__dict__
 
     def to_string(self) :
-        if self.hxml is not None and self.output is None :
+        if self.hxml is not None and self.output is None and self.yaml is None and self.nmml is None :
             return "Invalid build"
 
-        out = os.path.basename(self.output)
+        out = self.main
+        if self.output is not None :
+            out = os.path.basename(self.output)
+            
         if self.openfl :
             return "{out} (openfl / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
         elif self.lime :
