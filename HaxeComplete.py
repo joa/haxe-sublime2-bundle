@@ -239,7 +239,7 @@ class HaxeBuild :
         return self.__dict__ == other.__dict__
 
     def to_string(self) :
-        if self.output is None :
+        if self.hxml is not None and self.output is None :
             return "Invalid build"
 
         out = os.path.basename(self.output)
@@ -898,9 +898,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
         build_files = view.settings().get('haxe_builds') 
         if build_files is not None :
             for build in build_files :
-                if( int(sublime.version()) > 3000 ) : 
+                if( int(sublime.version()) > 3000 ) and win is not None : 
                     # files are relative to project file name
-                    proj = view.window().project_file_name()
+                    proj = win.project_file_name()
                     if( proj is not None ) :
                         proj_path = os.path.dirname( proj )
                         build = os.path.join( proj_path , build )
