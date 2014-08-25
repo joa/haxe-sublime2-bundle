@@ -18,7 +18,7 @@
   <array>
     <dict>
       <key>match</key>
-      <string>(-cpp?|-js|-as3|-swf-(header|version|lib)|-swf9?|-neko|-python|-php|-cs|-java|-xml|-x|-main|-lib|-D|-resource|-exclude|-v|-debug|-prompt|-cmd|-dce|--flash-strict|--no-traces|--flash-use-stage|--neko-source|--gen-hx-classes|-java-lib|-net-lib|--each|--next|--display|--no-output|--times|--no-inline|--no-opt|--php-front|--php-lib|--php-prefix|--remap|-help|--help|-java|-cs|--dead-code-elimination|--js-modern|--interp|--macro|--dce|--wait|--connect|--cwd|--help-defines)</string>
+      <string>(-cpp?|-js|-as3|-swf-(header|version|lib)|-swf9?|-neko|-python|-php|-cs|-java|-xml|-x|-main|-lib|-D|-resource|-exclude|-v|-debug|-prompt|-cmd|-dce|--flash-strict|--no-traces|--flash-use-stage|--neko-source|--gen-hx-classes|-java-lib|-net-lib|--each|--next|--display|--no-output|--times|--no-inline|--no-opt|--php-front|--php-lib|--php-prefix|--remap|-help|--help|-java|-cs|--dead-code-elimination|--js-modern|--interp|--macro|--dce|--wait|--connect|--cwd|--help-defines|--run)</string>
       <key>name</key>
       <string>keyword.other.hxml</string>
     </dict>

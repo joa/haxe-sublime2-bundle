@@ -255,6 +255,11 @@ class HaxeBuild :
         elif self.yaml is not None:
             return "{out} (Flambe / {target})".format(self=self, out=out, target=HaxeBuild.flambe_target[0]);
         else:
+            if self.target == "-interp" :
+                return "{main} (interp)".format(main=self.main);
+            if self.target == "-run" :
+                return "{main} (run)".format(main=self.main);   
+
             return "{main} ({target}:{out})".format(self=self, out=out, main=self.main, target=self.target);
         #return "{self.main} {self.target}:{out}".format(self=self, out=out);
 
@@ -812,7 +817,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             #if l.startswith("--connect") and HaxeComplete.inst.serverMode :
             #   currentBuild.args.append( ( "--connect" , str(self.serverPort) ))
 
-            for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib", "dce" , "-js-modern" , "swf-lib" ] :
+            for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib", "dce" , "-js-modern" , "swf-lib" ] :
                 if l.startswith( "-"+flag ) :
                     currentBuild.args.append( tuple(l.split(" ") ) )
 
@@ -838,6 +843,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     currentBuild.target = flag
                     currentBuild.output = outp
                     break
+
+            if l.startswith( "--interp" ) :
+                currentBuild.target = "-interp" # we add '-' to the target later on
+                currentBuild.output = ""
+
+            if l.startswith( "--run" ) :
+                spl = l.split(" ")
+                #outp = os.path.join( folder , " ".join(spl[1:]) )
+                outp = " ".join(spl[1:])
+                
+                currentBuild.target = "-run" # we add '-' to the target later on
+                currentBuild.output = outp
+                currentBuild.main = outp
 
             if l.startswith("-cp "):
                 cp = l.split(" ")
