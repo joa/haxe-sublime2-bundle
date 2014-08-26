@@ -877,8 +877,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         return builds
 
     def add_build( self , build ) :
-        if build not in self.builds :
-            self.builds.append( build )
+        if build in self.builds :
+            self.builds.remove( build )
+        
+        self.builds.insert( 0, build )
 
     def find_hxml( self, folder ) :
         hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
@@ -894,6 +896,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
         self.find_yaml(folder)
 
     def extract_build_args( self , view , forcePanel = False ) :
+        #print("extract build args")
+        self.builds = []
 
         fn = view.file_name()
         settings = view.settings()
