@@ -821,7 +821,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 else :
                     sublime.status_message( "Invalid build.hxml : lib not found" )
 
-            for flag in [ "cmd" , "macro" ] :
+            for flag in [ "cmd" , "-macro" ] :
                 spl = l.split(" ")
                 if l.startswith( "-" + flag ) :
                     currentBuild.args.append( ( spl[0] , " ".join(spl[1:]) ) )
