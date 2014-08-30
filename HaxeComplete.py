@@ -238,9 +238,16 @@ class HaxeBuild :
     def __cmp__(self,other) :
         return self.__dict__ == other.__dict__
 
+    def is_valid(self) :
+        if self.hxml is not None and self.target is None and self.yaml is None and self.nmml is None :
+            return False
+        if self.main is None and self.output is None :
+            return False;
+        return True;
+
     def to_string(self) :
-        if self.hxml is not None and self.output is None and self.yaml is None and self.nmml is None :
-            return "Invalid build"
+        if not self.is_valid() :
+            return "Invalid Build"
 
         out = self.main
         if self.output is not None :
@@ -786,7 +793,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     currentBuild.classpaths.append( buildPath )
                     currentBuild.args.append( ("-cp" , buildPath ) )
 
-                if currentBuild.main is not None and currentBuild.output is not None :
+                if currentBuild.is_valid() :
                     builds.append( currentBuild )
 
                 currentBuild = HaxeBuild()
@@ -872,7 +879,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             currentBuild.classpaths.append( buildPath )
             currentBuild.args.append( ("-cp" , buildPath ) )
 
-        if currentBuild.main is not None and currentBuild.output is not None :
+        if currentBuild.is_valid() :
             builds.append( currentBuild )
             
         return builds
@@ -1478,8 +1485,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
             args.append(("--cwd" , cwd ))
         #args.append( ("--times" , "-v" ) )
         if not autocomplete :
-            args.append( ("-main" , build.main ) )
-            args.append( ("-"+build.target , build.output ) )
+            if build.main is not None :
+                args.append( ("-main" , build.main ) )
+            if build.target is not None and build.output is not None :
+                args.append( ("-"+build.target , build.output ) )
             #args.append( ("--times" , "-v" ) )
         else:
 
