@@ -253,6 +253,10 @@ class HaxeBuild :
         if self.output is not None :
             out = os.path.basename(self.output)
 
+        main = self.main
+        if main is None :
+            main = "[no main]"
+
         if self.openfl :
             return "{out} (openfl / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
         elif self.lime :
@@ -263,11 +267,11 @@ class HaxeBuild :
             return "{out} (Flambe / {target})".format(self=self, out=out, target=HaxeBuild.flambe_target[0]);
         else:
             if self.target == "-interp" :
-                return "{main} (interp)".format(main=self.main);
+                return "{main} (interp)".format(main=main);
             if self.target == "-run" :
-                return "{main} (run)".format(main=self.main);   
+                return "{main} (run)".format(main=main);   
 
-            return "{main} ({target}:{out})".format(self=self, out=out, main=self.main, target=self.target);
+            return "{main} ({target}:{out})".format(self=self, out=out, main=main, target=self.target);
         #return "{self.main} {self.target}:{out}".format(self=self, out=out);
 
     def make_hxml( self ) :
