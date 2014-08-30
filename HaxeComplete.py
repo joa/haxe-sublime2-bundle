@@ -810,14 +810,15 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 else :
                     sublime.status_message( "Invalid build.hxml : lib not found" )
 
-            if l.startswith("-cmd") :
+            for flag in [ "cmd" , "macro" ] :
                 spl = l.split(" ")
-                currentBuild.args.append( ( "-cmd" , " ".join(spl[1:]) ) )
+                if l.startswith( "-" + flag ) :
+                    currentBuild.args.append( ( spl[0] , " ".join(spl[1:]) ) )
 
             #if l.startswith("--connect") and HaxeComplete.inst.serverMode :
             #   currentBuild.args.append( ( "--connect" , str(self.serverPort) ))
 
-            for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib", "dce" , "-js-modern" , "swf-lib" ] :
+            for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib", "dce" , "-js-modern" , "swf-lib" ] :
                 if l.startswith( "-"+flag ) :
                     currentBuild.args.append( tuple(l.split(" ") ) )
 
