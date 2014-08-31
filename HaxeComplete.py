@@ -269,7 +269,7 @@ class HaxeBuild :
             if self.target == "-interp" :
                 return "{main} (interp)".format(main=main);
             if self.target == "-run" :
-                return "{main} (run)".format(main=main);   
+                return "{main} (run)".format(main=main);
 
             return "{main} ({target}:{out})".format(self=self, out=out, main=main, target=self.target);
         #return "{self.main} {self.target}:{out}".format(self=self, out=out);
@@ -555,7 +555,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             return
 
         for e in self.errors :
-            if fn.endswith(e["file"]) :
+            if os.path.samefile(e["file"], fn) :
                 metric = e["metric"]
                 l = e["line"]
                 left = e["from"]
@@ -601,7 +601,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         self.init_plugin( view )
         # HaxeProjects.determine_type()
-        
+
         self.extract_build_args( view )
         self.get_build( view )
         self.generate_build( view )
@@ -779,7 +779,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             return builds
 
         #print( buildPath, build )
-        
+
         currentBuild = HaxeBuild()
         currentBuild.hxml = build
         currentBuild.cwd = buildPath
@@ -864,7 +864,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 spl = l.split(" ")
                 #outp = os.path.join( folder , " ".join(spl[1:]) )
                 outp = " ".join(spl[1:])
-                
+
                 currentBuild.target = "-run" # we add '-' to the target later on
                 currentBuild.output = outp
                 currentBuild.main = outp
@@ -878,20 +878,20 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 currentBuild.classpaths.append( absClasspath )
                 currentBuild.args.append( ("-cp" , absClasspath ) )
 
-        
+
         if len(currentBuild.classpaths) == 0:
             currentBuild.classpaths.append( buildPath )
             currentBuild.args.append( ("-cp" , buildPath ) )
 
         if currentBuild.is_valid() :
             builds.append( currentBuild )
-            
+
         return builds
 
     def add_build( self , build ) :
         if build in self.builds :
             self.builds.remove( build )
-        
+
         self.builds.insert( 0, build )
 
     def find_hxml( self, folder ) :
@@ -929,13 +929,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
             win_folders = win.folders()
             for f in win_folders:
                 if f + os.sep in fn :
-                    project_folder = folder = f  
-        
+                    project_folder = folder = f
+
         # extract build files from project
-        build_files = view.settings().get('haxe_builds') 
+        build_files = view.settings().get('haxe_builds')
         if build_files is not None :
             for build in build_files :
-                if( int(sublime.version()) > 3000 ) and win is not None : 
+                if( int(sublime.version()) > 3000 ) and win is not None :
                     # files are relative to project file name
                     proj = win.project_file_name()
                     if( proj is not None ) :
@@ -951,13 +951,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             # go up all folders from file to project or root
             if file_folder is not None :
-                f = file_folder 
+                f = file_folder
                 prev = None
                 while prev != f and ( project_folder is None or project_folder in f ):
                     crawl_folders.append( f )
                     prev = f
                     f = os.path.split( f )[0]
-             
+
             # crawl other window folders
             for f in win_folders :
                 if f not in crawl_folders :
@@ -1475,7 +1475,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         args = []
 
 
-        cwd = build.cwd 
+        cwd = build.cwd
         if cwd is None :
             cwd = os.path.dirname( build.hxml )
 
@@ -1542,7 +1542,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             })
             return ("" , [], "" )
 
-        
+
         #print(" ".join(cmd))
         res, err = runcmd( cmd, "" )
 
@@ -1716,7 +1716,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
             f = infos.pop(0)
 
             if not os.path.isabs(f):
-                f = os.path.normpath(os.path.join(cwd, f))
+                f = os.path.join(cwd, f)
+            f = os.path.normpath(f)
 
             l = int( infos.pop(0) )-1
 
@@ -1731,7 +1732,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             m = infos.pop(0)
 
-            if metric.startswith("line") :
+            if metric == "lines" :
                 left -= 1
 
             errors.append({
