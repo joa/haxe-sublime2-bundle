@@ -40,8 +40,7 @@ isType = re.compile("^[A-Z][a-zA-Z0-9_]*$")
 comments = re.compile("(//[^\n\r]*?[\n\r]|/\*(.*?)\*/)", re.MULTILINE | re.DOTALL )
 
 haxeVersion = re.compile("(Haxe|haXe) Compiler ([0-9]\.[0-9])",re.M)
-#haxeFileRegex = "^([^:]*):([0-9]+): characters? ([0-9]+)-?[0-9]* :(.*)$"
-haxeFileRegex = "^([^:\n\r]*\.hx):([0-9]+):.*$"
+haxeFileRegex = "^(.+):(\\d+): (?:lines \\d+-\\d+|character(?:s \\d+-| )(\\d+)) : (.*)$"
 controlStruct = re.compile( "\s*(if|switch|for|while)\s*\($" );
 
 
