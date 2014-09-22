@@ -1,0 +1,7 @@
+[  
+{  
+    "id": "haxe-goto-definition",  
+    "caption" : "Goto definition (Haxe)",
+    "command" : "haxe_find_definition"
+}
+]  

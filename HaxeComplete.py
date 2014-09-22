@@ -214,7 +214,7 @@ class HaxeBuild :
         self.args = []
         self.main = None
         self.target = "js"
-        self.output = "No output"
+        self.output = None
         self.hxml = None
         self.nmml = None
         self.yaml = None
@@ -224,9 +224,33 @@ class HaxeBuild :
         self.packages = None
         self.openfl = False
         self.lime = False
+        self.cwd = None
+
+    def __eq__(self,other) :
+        return self.__dict__ == other.__dict__
+
+    def __cmp__(self,other) :
+        return self.__dict__ == other.__dict__
+
+    def is_valid(self) :
+        if self.hxml is not None and self.target is None and self.yaml is None and self.nmml is None :
+            return False
+        if self.main is None and self.output is None :
+            return False;
+        return True;
 
     def to_string(self) :
-        out = os.path.basename(self.output)
+        if not self.is_valid() :
+            return "Invalid Build"
+
+        out = self.main
+        if self.output is not None :
+            out = os.path.basename(self.output)
+
+        main = self.main
+        if main is None :
+            main = "[no main]"
+
         if self.openfl :
             return "{out} (openfl / {target})".format(self=self, out=out, target=HaxeBuild.nme_target[0]);
         elif self.lime :
@@ -236,7 +260,12 @@ class HaxeBuild :
         elif self.yaml is not None:
             return "{out} (Flambe / {target})".format(self=self, out=out, target=HaxeBuild.flambe_target[0]);
         else:
-            return "{main} ({target}:{out})".format(self=self, out=out, main=self.main, target=self.target);
+            if self.target == "-interp" :
+                return "{main} (interp)".format(main=main);
+            if self.target == "-run" :
+                return "{main} (run)".format(main=main);
+
+            return "{main} ({target}:{out})".format(self=self, out=out, main=main, target=self.target);
         #return "{self.main} {self.target}:{out}".format(self=self, out=out);
 
     def make_hxml( self ) :
@@ -278,8 +307,12 @@ class HaxeBuild :
 
             #print("extract types :")
             #print(cp)
+            cwd = self.cwd
+            if cwd is None :
+                cwd = os.path.dirname( self.hxml )
+
             for path in cp :
-                c, p = HaxeComplete.inst.extract_types( os.path.join( os.path.dirname( self.hxml ), path ) )
+                c, p = HaxeComplete.inst.extract_types( os.path.join( cwd , path ) )
                 classes.extend( c )
                 packs.extend( p )
 
@@ -373,6 +406,10 @@ class HaxeHint( sublime_plugin.TextCommand ):
                 "characters" : input
             })
 
+        autocomplete = view.settings().get("auto_complete",True)
+        if not autocomplete :
+            return
+
         for r in view.sel() :
             comps, hints = complete.get_haxe_completions( self.view , r.end() )
 
@@ -450,6 +487,9 @@ class HaxeComplete( sublime_plugin.EventListener ):
         hasClasses = False
 
         #print(path)
+        if not os.path.exists( path ) :
+            print('Warning: path %s doesn´t exists.'%path);
+            return classes, packs
 
         for fullpath in glob.glob( os.path.join(path,"*.hx") ) :
             f = os.path.basename(fullpath)
@@ -509,7 +549,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             return
 
         for e in self.errors :
-            if fn.endswith(e["file"]) :
+            if os.path.samefile(e["file"], fn) :
                 metric = e["metric"]
                 l = e["line"]
                 left = e["from"]
@@ -626,6 +666,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         nmmls += glob.glob( os.path.join( folder , "*.lime" ) )
 
         for build in nmmls:
+            # yeah...
+            if not os.path.exists( build ) :
+                continue
+
             currentBuild = HaxeBuild()
             currentBuild.hxml = build
             currentBuild.nmml = build
@@ -655,6 +699,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     elif (tag == "haxelib"):
                         currentBuild.libs.append( HaxeLib.get( name ) )
                         currentBuild.args.append( ("-lib" , name) )
+                    elif (tag == "haxedef"):
+                        currentBuild.args.append( ("-D", name) )
                     elif (tag == "classpath" or tag == "source"):
                         currentBuild.classpaths.append( os.path.join( buildPath , name ) )
                         currentBuild.args.append( ("-cp" , os.path.join( buildPath , name ) ) )
@@ -681,137 +727,226 @@ class HaxeComplete( sublime_plugin.EventListener ):
             currentBuild.output = outp
 
             if currentBuild.main is not None :
-                self.builds.append( currentBuild )
+                self.add_build( currentBuild )
 
     def find_yaml( self, folder ) :
         yamls = glob.glob( os.path.join( folder , "flambe.yaml") )
 
         for build in yamls :
+
+            # yeah...
+            if not os.path.exists( build ) :
+                continue
+
             currentBuild = HaxeBuild()
             currentBuild.hxml = build
             currentBuild.yaml = build
             buildPath = os.path.dirname( build )
 
-            self.builds.append( currentBuild )
+            self.add_build( currentBuild )
+
+
+    def read_hxml( self, build ) :
+        #print("Reading build " + build );
+
+        builds = []
+        buildPath = os.path.dirname(build);
+
+        spl = build.split("@")
+        if( len(spl) == 2 ) :
+            buildPath = spl[0]
+            build = os.path.join( spl[0] , spl[1] )
+
+        if not os.path.exists( build ) :
+            return builds
+
+        #print( buildPath, build )
+
+        currentBuild = HaxeBuild()
+        currentBuild.hxml = build
+        currentBuild.cwd = buildPath
+
+        #print( currentBuild )
+
+        f = codecs.open( build , "r+" , "utf-8" , "ignore" )
+
+        while 1:
+            l = f.readline()
+            if not l :
+                break;
+            if l.startswith("--next") :
+                if len(currentBuild.classpaths) == 0:
+                    currentBuild.classpaths.append( buildPath )
+                    currentBuild.args.append( ("-cp" , buildPath ) )
+
+                if currentBuild.is_valid() :
+                    builds.append( currentBuild )
+
+                currentBuild = HaxeBuild()
+                currentBuild.hxml = build
+                currentBuild.cwd = buildPath
+
+            l = l.strip()
+
+            if l.startswith("-main") :
+                spl = l.split(" ")
+                if len( spl ) == 2 :
+                    currentBuild.main = spl[1]
+                else :
+                    sublime.status_message( "Invalid build.hxml : no Main class" )
+
+            if l.startswith("-lib") :
+                spl = l.split(" ")
+                if len( spl ) == 2 :
+                    lib = HaxeLib.get( spl[1] )
+                    currentBuild.libs.append( lib )
+                else :
+                    sublime.status_message( "Invalid build.hxml : lib not found" )
+
+            for flag in [ "cmd" , "-macro" ] :
+                spl = l.split(" ")
+                if l.startswith( "-" + flag ) :
+                    currentBuild.args.append( ( spl[0] , " ".join(spl[1:]) ) )
+
+            #if l.startswith("--connect") and HaxeComplete.inst.serverMode :
+            #   currentBuild.args.append( ( "--connect" , str(self.serverPort) ))
+
+            for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib", "dce" , "-js-modern" , "swf-lib" ] :
+                if l.startswith( "-"+flag ) :
+                    currentBuild.args.append( tuple(l.split(" ") ) )
+
+                    break
+
+            for flag in [ "resource" , "xml" , "java-lib" , "net-lib" ] :
+                if l.startswith( "-"+flag ) :
+                    spl = l.split(" ")
+                    outp = os.path.join( buildPath , " ".join(spl[1:]) )
+                    currentBuild.args.append( ("-"+flag, outp) )
+
+                    break
+
+            #print(HaxeBuild.targets)
+            for flag in HaxeBuild.targets :
+                if l.startswith( "-" + flag + " " ) :
+
+                    spl = l.split(" ")
+                    #outp = os.path.join( folder , " ".join(spl[1:]) )
+                    outp = " ".join(spl[1:])
+                    #currentBuild.args.append( ("-"+flag, outp) )
+
+                    currentBuild.target = flag
+                    currentBuild.output = outp
+                    break
+
+            if l.startswith( "--interp" ) :
+                currentBuild.target = "-interp" # we add '-' to the target later on
+                currentBuild.output = ""
+
+            if l.startswith( "--run" ) :
+                spl = l.split(" ")
+                #outp = os.path.join( folder , " ".join(spl[1:]) )
+                outp = " ".join(spl[1:])
+
+                currentBuild.target = "-run" # we add '-' to the target later on
+                currentBuild.output = outp
+                currentBuild.main = outp
+
+            if l.startswith("-cp "):
+                cp = l.split(" ")
+                #view.set_status( "haxe-status" , "Building..." )
+                cp.pop(0)
+                classpath = " ".join( cp )
+                absClasspath = classpath#os.path.join( buildPath , classpath )
+                currentBuild.classpaths.append( absClasspath )
+                currentBuild.args.append( ("-cp" , absClasspath ) )
+
+
+        if len(currentBuild.classpaths) == 0:
+            currentBuild.classpaths.append( buildPath )
+            currentBuild.args.append( ("-cp" , buildPath ) )
+
+        if currentBuild.is_valid() :
+            builds.append( currentBuild )
+
+        return builds
+
+    def add_build( self , build ) :
+        if build in self.builds :
+            self.builds.remove( build )
+
+        self.builds.insert( 0, build )
 
     def find_hxml( self, folder ) :
         hxmls = glob.glob( os.path.join( folder , "*.hxml" ) )
 
         for build in hxmls:
-
-            currentBuild = HaxeBuild()
-            currentBuild.hxml = build
-            buildPath = os.path.dirname(build);
-
-            # print("build file exists")
-            f = codecs.open( build , "r+" , "utf-8" , "ignore" )
-            while 1:
-                l = f.readline()
-                if not l :
-                    break;
-                if l.startswith("--next") :
-                    self.builds.append( currentBuild )
-                    currentBuild = HaxeBuild()
-                    currentBuild.hxml = build
-
-                l = l.strip()
-
-                if l.startswith("-main") :
-                    spl = l.split(" ")
-                    if len( spl ) == 2 :
-                        currentBuild.main = spl[1]
-                    else :
-                        sublime.status_message( "Invalid build.hxml : no Main class" )
-
-                if l.startswith("-lib") :
-                    spl = l.split(" ")
-                    if len( spl ) == 2 :
-                        lib = HaxeLib.get( spl[1] )
-                        currentBuild.libs.append( lib )
-                    else :
-                        sublime.status_message( "Invalid build.hxml : lib not found" )
-
-                if l.startswith("-cmd") :
-                    spl = l.split(" ")
-                    currentBuild.args.append( ( "-cmd" , " ".join(spl[1:]) ) )
-
-                #if l.startswith("--connect") and HaxeComplete.inst.serverMode :
-                #   currentBuild.args.append( ( "--connect" , str(self.serverPort) ))
-
-                for flag in [ "lib" , "D" , "swf-version" , "swf-header", "debug" , "-no-traces" , "-flash-use-stage" , "-gen-hx-classes" , "-remap" , "-no-inline" , "-no-opt" , "-php-prefix" , "-js-namespace" , "-interp" , "-macro" , "-dead-code-elimination" , "-remap" , "-php-front" , "-php-lib", "-dce" , "-js-modern" , "swf-lib" ] :
-                    if l.startswith( "-"+flag ) :
-                        currentBuild.args.append( tuple(l.split(" ") ) )
-
-                        break
-
-                for flag in [ "resource" , "xml" , "java-lib" , "net-lib" ] :
-                    if l.startswith( "-"+flag ) :
-                        spl = l.split(" ")
-                        outp = os.path.join( folder , " ".join(spl[1:]) )
-                        currentBuild.args.append( ("-"+flag, outp) )
-
-                        break
-
-                #print(HaxeBuild.targets)
-                for flag in HaxeBuild.targets :
-                    if l.startswith( "-" + flag + " " ) :
-
-                        spl = l.split(" ")
-                        #outp = os.path.join( folder , " ".join(spl[1:]) )
-                        outp = " ".join(spl[1:])
-                        #currentBuild.args.append( ("-"+flag, outp) )
-
-                        currentBuild.target = flag
-                        currentBuild.output = outp
-                        break
-
-                if l.startswith("-cp "):
-                    cp = l.split(" ")
-                    #view.set_status( "haxe-status" , "Building..." )
-                    cp.pop(0)
-                    classpath = " ".join( cp )
-                    absClasspath = classpath#os.path.join( buildPath , classpath )
-                    currentBuild.classpaths.append( absClasspath )
-                    currentBuild.args.append( ("-cp" , absClasspath ) )
-
-            if len(currentBuild.classpaths) == 0:
-                currentBuild.classpaths.append( buildPath )
-                currentBuild.args.append( ("-cp" , buildPath ) )
+            for b in self.read_hxml( build ):
+                self.add_build( b )
 
 
-            if currentBuild.main is None:
-                currentBuild.main = '[No Main]'
-
-            self.builds.append( currentBuild )
-
-
+    def find_build_file( self , folder ) :
+        self.find_hxml(folder)
+        self.find_nmml(folder)
+        self.find_yaml(folder)
 
     def extract_build_args( self , view , forcePanel = False ) :
-
+        #print("extract build args")
         self.builds = []
 
         fn = view.file_name()
         settings = view.settings()
         win = view.window()
         folder = None
+        file_folder = None
+        # folder containing the file, opened in window
+        project_folder = None
+        win_folders = []
+        folders = []
 
         if fn is not None :
-            folder = os.path.dirname(fn)
+            file_folder = folder = os.path.dirname(fn)
 
+        # find window folder containing the file
         if win is not None :
-            folders = win.folders()
-            if len(folders) == 1:
-                folder = folders[0]
-            else:
-                for f in folders:
-                    if f + "/" in fn :
-                        folder = f
+            win_folders = win.folders()
+            for f in win_folders:
+                if f + os.sep in fn :
+                    project_folder = folder = f
 
-        if folder is not None :
-            # settings.set("haxe-complete-folder", folder)
-            self.find_hxml(folder)
-            self.find_nmml(folder)
-            self.find_yaml(folder)
+        # extract build files from project
+        build_files = view.settings().get('haxe_builds')
+        if build_files is not None :
+            for build in build_files :
+                if( int(sublime.version()) > 3000 ) and win is not None :
+                    # files are relative to project file name
+                    proj = win.project_file_name()
+                    if( proj is not None ) :
+                        proj_path = os.path.dirname( proj )
+                        build = os.path.join( proj_path , build )
+
+                for b in self.read_hxml( build ) :
+                    self.add_build( b )
+
+        else :
+
+            crawl_folders = []
+
+            # go up all folders from file to project or root
+            if file_folder is not None :
+                f = file_folder
+                prev = None
+                while prev != f and ( project_folder is None or project_folder in f ):
+                    crawl_folders.append( f )
+                    prev = f
+                    f = os.path.split( f )[0]
+
+            # crawl other window folders
+            for f in win_folders :
+                if f not in crawl_folders :
+                    crawl_folders.append( f )
+
+            for f in crawl_folders :
+                self.find_build_file( f )
 
         if len(self.builds) == 1:
             if forcePanel :
@@ -848,7 +983,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             self.selectingBuild = True
             sublime.status_message("Please select your build")
-            view.window().show_quick_panel( buildsView , lambda i : self.set_current_build(view, int(i), forcePanel) , sublime.MONOSPACE_FONT )
+            show_quick_panel( view.window() , buildsView , lambda i : self.set_current_build(view, int(i), forcePanel) , sublime.MONOSPACE_FONT )
 
         elif settings.has("haxe-build-id"):
             self.set_current_build( view , int(settings.get("haxe-build-id")), forcePanel )
@@ -881,7 +1016,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 for t in HaxeBuild.nme_targets :
                     nme_targets.append( t[0] )
 
-                view.window().show_quick_panel(nme_targets, lambda i : self.select_nme_target(i, view))
+                show_quick_panel( view.window() , nme_targets, lambda i : self.select_nme_target(i, view))
 
             elif self.currentBuild.yaml is not None:
                 sublime.status_message("Please select a Flambe target")
@@ -889,7 +1024,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
                 for t in HaxeBuild.flambe_targets :
                     flambe_targets.append( t[0] )
 
-                view.window().show_quick_panel(flambe_targets, lambda i : self.select_flambe_target(i, view))
+                show_quick_panel( view.window() , flambe_targets, lambda i : self.select_flambe_target(i, view))
 
 
 
@@ -1326,7 +1461,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
         self.errors = []
         args = []
 
-        cwd = os.path.dirname( build.hxml )
+
+        cwd = build.cwd
+        if cwd is None :
+            cwd = os.path.dirname( build.hxml )
 
         args.extend( build.args )
 
@@ -1338,15 +1476,19 @@ class HaxeComplete( sublime_plugin.EventListener ):
             args.append(("--cwd" , cwd ))
         #args.append( ("--times" , "-v" ) )
         if not autocomplete :
-            args.append( ("-main" , build.main ) )
-            args.append( ("-"+build.target , build.output ) )
+            if build.main is not None :
+                args.append( ("-main" , build.main ) )
+            if build.target is not None and build.output is not None :
+                args.append( ("-"+build.target , build.output ) )
             #args.append( ("--times" , "-v" ) )
         else:
+
+            display_arg = display["filename"] + "@" + str( display["offset"] )
             if display["mode"] is not None :
-                args.append( ("-D","display-mode=" + display["mode"] ) )
+                display_arg += "@" + display["mode"]
 
             args.append( ("-D", "st_display" ) )
-            args.append( ("--display", display["filename"] + "@" + str( display["offset"] ) ) )
+            args.append( ("--display", display_arg ) )
 
             if build.yaml is not None :
                 # Call out to `flambe haxe-flags` for Flambe completion
@@ -1357,7 +1499,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
                     args += [(arg,) for arg in res.split("\n")]
             else:
                 args.append( ("--no-output",) )
-                args.append( ("-"+build.target , build.output ) )
+                output = build.output
+                if output is None :
+                    output = "no-output"
+                args.append( ("-"+build.target , output ) )
                 #args.append( ("-cp" , plugin_path ) )
                 #args.append( ("--macro" , "SourceTools.complete()") )
 
@@ -1367,7 +1512,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
         for a in args :
             cmd.extend( list(a) )
 
-        #print( cmd )
         #
         # TODO: replace runcmd with run_command('exec') when possible (haxelib, maybe build)
         #
@@ -1396,13 +1540,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
 
         #print(" ".join(cmd))
-        #print(cmd)
         res, err = runcmd( cmd, "" )
 
         if not autocomplete :
             self.panel_output( view , " ".join(cmd) )
 
-        #print( res.encode("utf-8") )
         status = ""
 
         if (not autocomplete) and (build.hxml is None) :
@@ -1417,6 +1559,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         hints = []
         msg = ""
         tree = None
+        pos = None
 
         commas = 0
         if display is not None and display["commas"] is not None :
@@ -1479,8 +1622,13 @@ class HaxeComplete( sublime_plugin.EventListener ):
             # E.g. we type in self.blarg.herp(), this will get "self.blarg".
             fn_name = self.get_current_fn_name(view, view.sel()[0].end())
 
+            pos = tree.findtext("pos")
             li = tree.find("list")
+
             if li is not None :
+
+                pos = li.findtext("pos")
+
                 for i in li.getiterator("i"):
                     name = i.get("n")
                     sig = i.find("t").text
@@ -1550,8 +1698,10 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             self.errors = self.extract_errors( err, cwd )
 
-
-        return ( err, comps, status , hints )
+        if display is not None and display["mode"] == "position":
+            return pos
+        else:
+            return ( err, comps, status , hints )
 
     def extract_errors( self , str , cwd ):
         errors = []
@@ -1562,7 +1712,8 @@ class HaxeComplete( sublime_plugin.EventListener ):
             f = infos.pop(0)
 
             if not os.path.isabs(f):
-                f = os.path.normpath(os.path.join(cwd, f))
+                f = os.path.join(cwd, f)
+            f = os.path.normpath(f)
 
             l = int( infos.pop(0) )-1
 
@@ -1577,7 +1728,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             m = infos.pop(0)
 
-            if metric.startswith("line") :
+            if metric == "lines" :
                 left -= 1
 
             errors.append({
@@ -1807,7 +1958,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
         return f
 
 
-class HaxeShowDocumentation( sublime_plugin.TextCommand ):
+class HaxeShowDocumentation( sublime_plugin.TextCommand ) :
     def run( self , edit ) :
 
         view = self.view
@@ -1885,7 +2036,6 @@ class HaxeShowDocumentation( sublime_plugin.TextCommand ):
         doc_view.settings().set('word_wrap', True)
         doc_view.insert(edit, doc_view.size(), documentation_text + "\n")
         window.run_command("show_panel", {"panel": "output.haxe-doc"})
-
 
 
 class HaxeExecCommand(ExecCommand):
@@ -2000,8 +2150,6 @@ class HaxeExecCommand(ExecCommand):
 
     def on_finished(self, proc):
         sublime.set_timeout(functools.partial(self.finish, proc), 1)
-
-
 
 class HaxelibExecCommand(ExecCommand):
     def finish(self, *args, **kwargs):

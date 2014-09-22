@@ -12,7 +12,7 @@ import re
 
 
 
-def HaxeComplete_inst():    
+def HaxeComplete_inst():
     from .HaxeComplete import HaxeComplete
     return HaxeComplete.inst
 
@@ -21,7 +21,7 @@ wordChars = re.compile("[a-z0-9._]", re.I)
 importLine = re.compile("^([ \t]*)import\s+([a-z0-9._]+);", re.I | re.M)
 packageLine = re.compile("package\s*([a-z0-9.]*);", re.I)
 
-compilerOutput = re.compile("^([^:]+):([0-9]+): (characters?|lines?) ([0-9]+)-?([0-9]+)? : (.*)", re.M)
+compilerOutput = re.compile("^(.+):(\\d+): (lines|characters?) (\\d+)(?:-(\\d+))? : (.*)$", re.M)
 compactFunc = re.compile("\(.*\)")
 compactProp = re.compile(":.*\.([a-z_0-9]+)", re.I)
 libLine = re.compile("([^:]*):[^\[]*\[(dev\:)?(.*)\]")
@@ -40,8 +40,7 @@ isType = re.compile("^[A-Z][a-zA-Z0-9_]*$")
 comments = re.compile("(//[^\n\r]*?[\n\r]|/\*(.*?)\*/)", re.MULTILINE | re.DOTALL )
 
 haxeVersion = re.compile("(Haxe|haXe) Compiler ([0-9]\.[0-9])",re.M)
-#haxeFileRegex = "^([^:]*):([0-9]+): characters? ([0-9]+)-?[0-9]* :(.*)$"
-haxeFileRegex = "^([^:\n\r]*\.hx):([0-9]+):.*$"
+haxeFileRegex = "^(.+):(\\d+): (?:lines \\d+-\\d+|character(?:s \\d+-| )(\\d+)) : (.*)$"
 controlStruct = re.compile( "\s*(if|switch|for|while)\s*\($" );
 
 
@@ -51,11 +50,11 @@ try:
   STARTUP_INFO.wShowWindow = subprocess.SW_HIDE
 except (AttributeError):
     STARTUP_INFO = None
-    
+
 try :
     stexec = __import__("exec")
     ExecCommand = stexec.ExecCommand
-    AsyncProcess = stexec.AsyncProcess 
+    AsyncProcess = stexec.AsyncProcess
 except ImportError as e :
     import Default
     stexec = getattr( Default , "exec" )
@@ -84,11 +83,11 @@ def show_quick_panel(_window, options, done, flags=0, sel_index=0):
     sublime.set_timeout(lambda: _window.show_quick_panel(options, done, flags, sel_index), 10)
 
 
- 
+
 class runcmd_async(object):
     """
     Enables to run subprocess commands in a different thread with TIMEOUT option.
- 
+
     Based on jcollado's solution:
     http://stackoverflow.com/questions/1191374/subprocess-with-timeout/4825933#4825933
     """
@@ -96,12 +95,12 @@ class runcmd_async(object):
     process = None
     status = None
     output, error = '', ''
- 
+
     def __init__(self, command):
         if isinstance(command, str):
             command = shlex.split(command)
         self.command = command
- 
+
     def run(self, timeout=None, **kwargs):
         """ Run a command then return: (status, output, error). """
         def target(**kwargs):

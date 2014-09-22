@@ -4,7 +4,7 @@ An Haxe Bundle for [Sublime Text 2](http://www.sublimetext.com/2) and [Sublime T
 # Features
 
  - **Syntax highlighting** for Haxe2 and Haxe3 sources and hxml build files
- - **Haxe compiler auto-completion**, code hints, smart snippets and error highlighting / navigation
+ - **Haxe compiler auto-completion**, code hints, smart snippets, error highlighting / navigation and "goto definition" feature
  - **[NME](http://www.nme.io/), [openfl](https://github.com/openfl/openfl) and [Flambe](http://getflambe.com) support** with completion, target selection and compilation
  - **Package and classes discovery/suggestion** including classpath (-cp) and haxelib libraries (-lib)
  - **Multiple build management** and automatic generation of hxml files
@@ -66,6 +66,7 @@ For manual installation, the folders should be `sublime-text-3` (Linux) or `Subl
       - **Ctrl+Shift+I** to create a new interface,
       - **Ctrl+Shift+E** to create a new enum,
       - **Ctrl+Shift+T** to create a new typedef
+ - Press **Ctrl+<** to go to definition (Haxe 3.1.3+ required) 
  - Press **Ctrl+Shift+F1** to show documentation on cursor (when previously autocompleted) 
 
 ### Settings
@@ -76,6 +77,7 @@ For manual installation, the folders should be `sublime-text-3` (Linux) or `Subl
  - `haxe_build_server_mode` (`true` by default) : Uses [compilation server](http://haxe.org/manual/completion#compilation-cache-server) for building.
  - `haxe_completion_server_mode` (`true` by default) : Uses [compilation server](http://haxe.org/manual/completion#compilation-cache-server) for autocompletion.
  - `haxe_smart_snippets` (`true` by default) : Inserts smart snippets based on compiler hints after `(` and `,`
+ - `haxe_builds` : Adds `hxml` files to your project, and disable `hxml` file scan (see above).
 
 ### Targeting NME/openfl
 
@@ -85,6 +87,28 @@ To target [openfl](https://github.com/openfl/openfl), use `.xml` instead, like `
 
  - press **Ctrl+Shift+B** to select a NME target
  - press **Ctrl+Enter** to build and run (regular Sublime Text build system won't work)
+
+
+### Build selection / discovery
+
+The bundle should find your `hxml` file automatically, to provide autocompletion and build functionnality. It will search for `hxml` files as follows :
+
+ - If you opened only a file, it will scan from the file path up to your filesystem root.
+
+ - If you opened folders, it will scan from the file path you opened up to the folder you opened that contains it. It will also scan the root of other opened folders.
+
+In addition to that, you can manually add `hxml` files to your project by either right-clicking them and 'Add Haxe build file to project', or adding them manually to your `haxe_builds` project setting.
+
+In ST3, if you use projects, the paths will persist across sessions.
+
+When this feature is used, the bundle will only use the `hxml` files you provided, and no longer scan for other `hxml` files.
+
+The `haxe_builds` setting is an array of either simple `hxml` paths (eg:`"build/html5.hxml"`), or of the form of 'current/working/dir@build/path.hxml'.
+
+For example, if you add `"my_project/haxe_sources@build/test.hxml"`, the bundle will run `haxe build/test.hxml` from `my_project/haxe_sources`.
+
+(Please notice that only ST3 allows paths to be relative to project-file path)
+
 
 ### Troubleshooting
 
@@ -104,3 +128,5 @@ you may find it useful to [increase its font-size](http://superuser.com/question
 [Haxe workflow with Sublime Text 2, Php & nme examples](http://www.aymericlamboley.fr/blog/haxe-workflow-with-sublime-text-2-php-and-nme-examples/)
 
 [Haxe IDE Choices for Mac OS X](http://sambrick.wordpress.com/2012/03/23/haxe-ide-choices-for-mac/)
+
+[Haxe + lime + openFL](https://medium.com/programming-ideas-tutorial-and-experience/haxe-lime-openfl-ec9c2784aaa8)

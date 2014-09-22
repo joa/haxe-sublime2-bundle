@@ -1,7 +1,7 @@
 <snippet>
     <content><![CDATA[public function ${1:function_name}(${2:arguments})${3::${4:Void}}
 {
-  ${0:$TM_SELECTED_TEXT}
+    ${0:$TM_SELECTED_TEXT}
 }]]></content>
     <tabTrigger>pf</tabTrigger>
     <scope>source.haxe.2</scope>
