@@ -36,11 +36,6 @@ try: # Python 3
     from .HaxeHelper import variables, functions, functionParams, paramDefault
     from .HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
 
-    # import YAML parser
-    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib3/" )
-    sys.path.append( yaml_path )
-    import yaml
-
 except (ValueError): # Python 2
 
     # Import the features module, including the haxelib and key commands etc
@@ -54,11 +49,6 @@ except (ValueError): # Python 2
     from HaxeHelper import libFlag, skippable, inAnonymous, extractTag
     from HaxeHelper import variables, functions, functionParams, paramDefault
     from HaxeHelper import isType, comments, haxeVersion, haxeFileRegex, controlStruct
-
-    # import YAML parser
-    yaml_path = os.path.join( plugin_path , "PyYAML-3.10/lib/" )
-    sys.path.append( yaml_path )
-    import yaml
 
 # For running background tasks
 
@@ -211,7 +201,11 @@ class HaxeBuild :
         ("HTML5 - test", "run html --debug" ),
         ("HTML5 - build only" , "build html --debug"),
         ("Android - test" , "run android --debug"),
-        ("Android - build only" , "build android --debug")
+        ("Android - build only" , "build android --debug"),
+        ("iOS - test" , "run ios --debug"),
+        ("iOS - build only" , "build ios --debug"),
+        ("Firefox App - test" , "run firefox --debug"),
+        ("Firefox App - build only" , "build firefox --debug"),
     ]
     flambe_target = ("Flash - run", "run flash --debug")
 
@@ -748,18 +742,6 @@ class HaxeComplete( sublime_plugin.EventListener ):
             currentBuild.hxml = build
             currentBuild.yaml = build
             buildPath = os.path.dirname( build )
-
-            yaml_data = yaml.load( codecs.open( build , "r+" , "utf-8" , "ignore" ) )
-
-            currentBuild.main = yaml_data['main']
-            currentBuild.args.append( ("-lib","flambe") )
-
-            flambe_lib = HaxeLib.get("flambe")
-            currentBuild.libs.append( flambe_lib )
-
-            srcDir = os.path.join( buildPath , "src" )
-            currentBuild.args.append( ("-cp" , srcDir ) )
-            currentBuild.classpaths.append( srcDir )
 
             self.add_build( currentBuild )
 
@@ -1350,6 +1332,11 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         cmd += HaxeBuild.flambe_target[1].split(" ")
 
+        # Use the build server if available
+        buildServerMode = view.settings().get('haxe_build_server_mode', True)
+        if self.serverMode and buildServerMode :
+            cmd += ["--haxe-server", str(HaxeComplete.inst.serverPort)]
+
         view.window().run_command("exec", {
             "cmd": cmd,
             "working_dir": os.path.dirname(build.yaml),
@@ -1502,13 +1489,22 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             args.append( ("-D", "st_display" ) )
             args.append( ("--display", display_arg ) )
-            args.append( ("--no-output",) )
-            output = build.output
-            if output is None :
-                output = "no-output"
-            args.append( ("-"+build.target , output ) )
-            #args.append( ("-cp" , plugin_path ) )
-            #args.append( ("--macro" , "SourceTools.complete()") )
+
+            if build.yaml is not None :
+                # Call out to `flambe haxe-flags` for Flambe completion
+                res, err = runcmd( ["flambe", "haxe-flags"] )
+                if err :
+                    print("Flambe completion error: " + err)
+                else:
+                    args += [(arg,) for arg in res.split("\n")]
+            else:
+                args.append( ("--no-output",) )
+                output = build.output
+                if output is None :
+                    output = "no-output"
+                args.append( ("-"+build.target , output ) )
+                #args.append( ("-cp" , plugin_path ) )
+                #args.append( ("--macro" , "SourceTools.complete()") )
 
 
         haxepath = settings.get( 'haxe_path' , 'haxe' )
