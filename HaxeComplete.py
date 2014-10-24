@@ -741,7 +741,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
             currentBuild = HaxeBuild()
             currentBuild.hxml = build
             currentBuild.yaml = build
-            buildPath = os.path.dirname( build )
+            currentBuild.cwd = os.path.dirname( build )
 
             self.add_build( currentBuild )
 
@@ -1339,7 +1339,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
         view.window().run_command("exec", {
             "cmd": cmd,
-            "working_dir": os.path.dirname(build.yaml),
+            "working_dir": build.cwd,
             "file_regex": haxeFileRegex #"^([^:]*):([0-9]+): characters [0-9]+-([0-9]+) :.*$"
         })
         return ("" , [], "" )
@@ -1492,7 +1492,7 @@ class HaxeComplete( sublime_plugin.EventListener ):
 
             if build.yaml is not None :
                 # Call out to `flambe haxe-flags` for Flambe completion
-                res, err = runcmd( ["flambe", "haxe-flags"] )
+                res, err = runcmd( ["flambe","--config" , build.yaml, "haxe-flags"] )
                 if err :
                     print("Flambe completion error: " + err)
                 else:
