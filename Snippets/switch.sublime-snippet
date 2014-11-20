@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[switch (${1:$TM_SELECTED_TEXT}) {
+	case:
+}]]></content>
+    <tabTrigger>switch</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>switch</description>
+</snippet>

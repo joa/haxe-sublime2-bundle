@@ -5,6 +5,8 @@
   <key>fileTypes</key>
   <array>
     <string>hx</string>
+    <string>hxsl</string>
+    <string>hscript</string>
   </array>
   <key>foldingStartMarker</key>
   <string>(\{\s*(//.*)?$|^\s*// \{\{\{|#if)</string>
@@ -13,12 +15,16 @@
   <key>keyEquivalent</key>
   <string>^~H</string>
   <key>name</key>
-  <string>HaXe2</string>
+  <string>Haxe</string>
   <key>patterns</key>
   <array>
     <dict>
       <key>include</key>
       <string>#comments</string>
+    </dict>
+    <dict>
+      <key>include</key>
+      <string>#regex</string>
     </dict>
     <dict>
       <key>include</key>
@@ -47,10 +53,6 @@
     <dict>
       <key>include</key>
       <string>#keywords</string>
-    </dict>
-    <dict>
-      <key>include</key>
-      <string>#regex</string>
     </dict>
     <dict>
       <key>include</key>
@@ -84,7 +86,7 @@
           </dict>
           <key>match</key>
           <string>(?x)
-                                (\b(class|enum|interface)|\b(implements|extends))
+                                (\b(class|enum|interface|abstract)|\b(implements|extends))
                                 \s+(([a-z]+.)*[A-Z]\w*)</string>
         </dict>
       </array>
@@ -107,10 +109,10 @@
           <key>name</key>
           <string>comment.block.empty.haxe.2</string>
         </dict>
-        <dict>
+        <!--<dict>
           <key>include</key>
           <string>text.html.javadoc</string>
-        </dict>
+        </dict>-->
         <dict>
           <key>include</key>
           <string>#comments-inline</string>
@@ -193,7 +195,7 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>\b(new)\s+(([a-z]+\.)*[A-Z][\w\.\&lt;\&gt;]*)</string>
+          <string>\b(new)\s+(([a-z]+\.)*[A-Z]\w+(&lt;[\w\.,\s&lt;&gt;]+&gt;)?)</string>
         </dict>
       </array>
     </dict>
@@ -249,7 +251,7 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>\b(function)\s+([_A-Za-z]\w*)[&lt;\w&gt;,]*\s*\(</string>
+          <string>\b(function)\s+([_A-Za-z]\w+)\s*</string>
         </dict>
       </array>
     </dict>
@@ -345,11 +347,11 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>(#if\s+([\!\w]+|(\([^\)]*\))))</string>
+          <string>(#(if|elseif)\s+([\!\w-]+|(\([^\)]*\)))\s*)</string>
         </dict>
         <dict>
           <key>match</key>
-          <string>(#end|#else|#elseif)\b</string>
+          <string>(#\w+\s*)</string>
           <key>name</key>
           <string>keyword.control.directive.conditional.haxe.2</string>
         </dict>
@@ -391,9 +393,67 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>\b(Array|ArrayAccess|Bool|Class|Date|DateTools|Dynamic|EReg|Enum|Float|Hash|Int|IntHash|IntIter|Iterable|Iterator|Lambda|List|Math|Null|Reflect|Std|String|StringBuf|StringTools|Type|UInt|ValueType|Void|Xml|XmlType|TBool|TInt|TFloat|TFunction|TObject|TEnum|TClass|TNull|TUnknown)\b</string>
+          <string>\b_\b</string>
+          <key>name</key>
+          <string>support.variable.magic.haxe.2</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>\b(Array|ArrayAccess|Bool|Class|Date|DateTools|Dynamic|EReg|Enum|Float|Hash|Int|IntHash|IntIter|Iterable|Iterator|Lambda|List|Math|Null|Reflect|Std|String|StringBuf|StringTools|Type|UInt|ValueType|Void|Xml|XmlType|TBool|TInt|TFloat|TFunction|TObject|TEnum|TClass|TNull|TUnknown|Float2|Float3|Float4|Matrix|M44|M33|M43|M34|Texture|CubeTexture|Color|Map)\b</string>
           <key>name</key>
           <string>support.class.haxe</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>(\$)([iea])\(</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>support.reification.haxe.2</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>support.reification.haxe.2</string>
+            </dict>
+          </dict>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>((\$)([a-zA-Z.]*))</string>
+          <key>captures</key>
+          <dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>support.reification.haxe.2</string>
+            </dict>
+          </dict>
+        </dict>
+        <dict>
+          <key>captures</key>
+          <dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>entity.name.type.package.haxe.2</string>
+            </dict>
+            <key>4</key>
+            <dict>
+              <key>name</key>
+              <string>entity.name.type.class.haxe.2</string>
+            </dict>
+          </dict>
+          <key>match</key>
+          <string>(\b(([a-z][a-zA-Z0-9]*\.)*)([A-Z]\w*|\*))</string>
+        </dict>
+        <dict>
+          <key>name</key>
+          <string>keyword.other.haxe.2</string>
+          <key>match</key>
+          <string>\b(function)\b</string>
         </dict>
         <dict>
           <key>include</key>
@@ -406,10 +466,10 @@
       <key>patterns</key>
       <array>
         <dict>
-          <key>captures</key>
-          <dict/>
+          <key>name</key>
+          <string>string.regexp.haxe.2</string>
           <key>match</key>
-          <string>~/([^/]+)/</string>
+          <string>~/((?:\\/|[^/])+)/</string>
         </dict>
       </array>
     </dict>
@@ -419,15 +479,62 @@
       <array>
         <dict>
           <key>match</key>
-          <string>\b(public|private|static|dynamic|inline|extern|typedef|override)\b</string>
+          <string>((@:)(require|final|hack|native|coreApi|fakeEnum|macro|build|keep|keepSub|overload|extern|optional|feature|noCompletion|noUsing|allow|access|generic|publicFields|expose|defineFeature|runtime|initPackage|bind|bitmap|file|font|sound|ns|protected|getter|setter|meta|debug|noDebug|headerCode|headerClassCode|cppFileCode|functionCode|functionTailCode|buildXml|cppNamespaceCode|headerNamespaceCode|noStack|depend|include|internal|volatile|transient|functionBody|classContents|remove)\b)</string>
+          <key>captures</key>
+          <dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>storage.modifier.macro.haxe.2</string>
+            </dict>
+            <key>3</key>
+            <dict>
+              <key>name</key>
+              <string>storage.modifier.macro.haxe.2</string>
+            </dict>
+          </dict>
+
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>((@:?)([a-zA-Z_]*))</string>
+          <key>captures</key>
+          <dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>support.macro.haxe.2</string>
+            </dict>
+            <key>3</key>
+            <dict>
+              <key>name</key>
+              <string>support.macro.haxe.2</string>
+            </dict>
+          </dict>
+
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>\b(public|private|static|dynamic|inline|macro|extern|typedef|override)\b</string>
           <key>name</key>
           <string>storage.modifier.haxe.2</string>
         </dict>
         <dict>
           <key>match</key>
-          <string>\bpackage\b</string>
-          <key>name</key>
-          <string>storage.type.package.haxe.2</string>
+          <string>\b(package)(\s+[a-z\._]*);</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>storage.type.package.haxe.2</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>entity.name.type.package.haxe.2</string>
+            </dict>
+          </dict>
         </dict>
         <dict>
           <key>match</key>
@@ -505,6 +612,61 @@
               <key>name</key>
               <string>constant.character.escape.haxe.2</string>
             </dict>
+            <dict>
+              <key>match</key>
+              <string>\$\$</string>
+              <key>name</key>
+              <string>constant.character.escape.haxe.2</string>
+            </dict>
+            <dict>
+              <key>captures</key>
+              <dict>
+                <key>1</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+                <key>3</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+                <key>4</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+              </dict>
+              <key>comment</key>
+              <string>String interpolation : "${test.ole}"</string>
+              <key>match</key>
+              <string>(\$)(\{)([^}]*)(\})</string>
+            </dict>
+            <dict>
+              <key>captures</key>
+              <dict>
+                <key>1</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                  <key>name</key>
+                  <string>variable.other.haxe.2</string>
+                </dict>
+              </dict>
+              <key>comment</key>
+              <string>String interpolation : "$test"</string>
+              <key>match</key>
+              <string>(\$)([\w]*)</string>
+            </dict>
+
           </array>
         </dict>
       </array>

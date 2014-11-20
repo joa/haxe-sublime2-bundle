@@ -1,0 +1,46 @@
+{
+    "scope": "source.hxml",
+  "completions" : [
+
+    { "trigger" : "cp" , "contents" : "cp"},
+    { "trigger" : "cpp" , "contents" : "cpp"},
+    { "trigger" : "cs" , "contents" : "cs"},
+    { "trigger" : "as3" , "contents" : "as3"},
+    { "trigger" : "swf-header" , "contents" : "swf-header"},
+    { "trigger" : "swf-version" , "contents" : "swf-version"},
+    { "trigger" : "swf-lib" , "contents" : "swf-lib"},
+    { "trigger" : "swf9" , "contents" : "swf9"},
+    { "trigger" : "swf" , "contents" : "swf"},
+    { "trigger" : "neko" , "contents" : "neko"},
+    { "trigger" : "php" , "contents" : "php"},
+    { "trigger" : "python" , "contents" : "python"},
+    { "trigger" : "xml" , "contents" : "xml"},
+    { "trigger" : "x" , "contents" : "x"},
+    { "trigger" : "main" , "contents" : "main"},
+    { "trigger" : "lib" , "contents" : "lib"},
+    { "trigger" : "D" , "contents" : "D"},
+    { "trigger" : "resource" , "contents" : "resource"},
+    { "trigger" : "exclude" , "contents" : "exclude"},
+    { "trigger" : "v" , "contents" : "v"},
+    { "trigger" : "debug" , "contents" : "debug"},
+    { "trigger" : "prompt" , "contents" : "prompt"},
+    { "trigger" : "cmd" , "contents" : "cmd"},
+    { "trigger" : "flash-strict" , "contents" : "-flash-strict"},
+    { "trigger" : "no-traces" , "contents" : "-no-traces"},
+    { "trigger" : "flash-use-stage" , "contents" : "-flash-use-stage"},    
+    { "trigger" : "neko-source" , "contents" : "-neko-source"}, 
+    { "trigger" : "gen-hx-classes" , "contents" : "-gen-hx-classes"},    
+    { "trigger" : "next" , "contents" : "-next"},
+    { "trigger" : "display" , "contents" : "-display"},
+    { "trigger" : "no-output" , "contents" : "-no-output"},
+    { "trigger" : "times" , "contents" : "-times"},
+    { "trigger" : "no-inline" , "contents" : "-no-inline"},
+    { "trigger" : "no-opt" , "contents" : "-no-opt"},
+    { "trigger" : "php-front" , "contents" : "-php-front"},
+    { "trigger" : "remap" , "contents" : "-remap"},
+    { "trigger" : "help" , "contents" : "-help"} 
+
+  ]
+
+
+}

@@ -1,0 +1,9 @@
+{
+	"auto_complete_selectors": "source - string - comment - keyword.control.directive.conditional.haxe.2",
+	"auto_complete_triggers": [ {"selector": "source.haxe.2", "characters": "."} ],
+	"haxe_build_server_mode" : true,
+	"haxe_smart_snippets" : true
+	
+	// ,"haxe_path" : "/usr/bin/haxe"
+	// ,"haxe_library_path" : "/usr/local/haxe/std:."
+}

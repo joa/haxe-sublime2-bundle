@@ -1,0 +1,12 @@
+<snippet>
+    <content><![CDATA[public var ${1:var_name}(get_${1:var_name}, set_${1:var_name}):${2:var_type};
+private var _${1:var_name}:${2:var_type};
+
+function get_${1:var_name}():${2:var_type} { return _${1:var_name}; }
+function set_${1:var_name}(value:${2:var_type}):${2:var_type}$TM_CSLB{
+	return _${1:var_name} = value;
+}]]></content>
+    <tabTrigger>prop</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Property with getter/setter (prop)</description>
+</snippet>

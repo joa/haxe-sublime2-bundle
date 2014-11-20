@@ -1,0 +1,6 @@
+<snippet>
+    <content><![CDATA[function($1) {${0:$TM_SELECTED_TEXT}};]]></content>
+    <tabTrigger>f</tabTrigger>
+    <scope>source.haxe.2</scope>
+    <description>Anonymous Function (f)</description>
+</snippet>

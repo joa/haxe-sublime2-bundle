@@ -20,7 +20,7 @@
       <key>comment</key>
       <string>Variable setting</string>
     </dict>
-    <dict>
+    <!--<dict>
       <key>include</key>
       <string>#variable_setting</string>
     </dict>
@@ -35,7 +35,7 @@
     <dict>
       <key>include</key>
       <string>#general</string>
-    </dict>
+    </dict>-->
     <dict>
       <key>comment</key>
       <string>Yes, we need the rules at root level available for nesting.</string>
@@ -143,10 +143,10 @@
           <key>include</key>
           <string>#general</string>
         </dict>
-        <dict>
+        <!--<dict>
           <key>include</key>
           <string>#mixin_attributes</string>
-        </dict>
+        </dict>-->
       </array>
     </dict>
     <key>constant_hex</key>
@@ -375,14 +375,14 @@
           <key>include</key>
           <string>#general</string>
         </dict>
-        <dict>
+        <!--<dict>
           <key>include</key>
           <string>#extend</string>
         </dict>
         <dict>
           <key>include</key>
           <string>#include</string>
-        </dict>
+        </dict>-->
         <dict>
           <key>include</key>
           <string>#selectors</string>
@@ -400,10 +400,10 @@
               <key>include</key>
               <string>#property_names</string>
             </dict>
-            <dict>
+           <!-- <dict>
               <key>include</key>
               <string>#include</string>
-            </dict>
+            </dict>-->
           </array>
         </dict>
         <dict>

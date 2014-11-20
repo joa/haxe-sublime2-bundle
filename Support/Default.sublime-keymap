@@ -1,0 +1,145 @@
+[
+    {
+        "keys": ["ctrl+shift+b"],
+        "command": "haxe_select_build",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2,source.hxml,source.nmml,source.erazor"
+            }
+        ]
+    },
+    {
+        "keys": ["ctrl+enter"],
+        "command": "run_macro_file",
+        "args":
+        {
+            "file": "Packages/Haxe/Macros/SaveAllAndBuild.sublime-macro"
+        },
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2,source.hxml,source.nmml,source.erazor"
+            }
+        ]
+    },
+    {
+        "keys": ["ctrl+i"],
+        "command": "haxe_generate_import",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
+        "keys": ["ctrl+<"],
+        "command": "haxe_find_definition",
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            }
+        ]
+    },
+    {
+        "keys": ["-"],
+        "command": "run_macro_file",
+        "args":
+        {
+            "file": "Packages/Haxe/Macros/input/Hyphen.sublime-macro"
+        },
+        "context":
+        [
+            {
+                "key": "auto_complete_visible",
+                "operator": "equal",
+                "operand": false
+            },
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.hxml"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string,comment"
+            }
+        ]
+    },
+    {
+        "keys": ["("],
+        "command": "haxe_hint",
+        "args" : { "input" : "(" },
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string,comment,keyword.control.directive.conditional.haxe.2"
+            },
+            { "key": "num_selections", "operator": "equal", "operand": 1 }
+        ]
+    },
+    {
+        "keys": [","],
+        "command" : "haxe_hint",
+        "args" : {
+            "input" : ","
+        },
+        "context":
+        [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "source.haxe.2"
+            },
+            {
+                "key": "selector",
+                "operator": "not_equal",
+                "operand": "string,comment,keyword.control.directive.conditional.haxe.2"
+            },
+            { "key": "num_selections", "operator": "equal", "operand": 1 }
+        ]
+    },
+    {
+        "keys": ["ctrl+shift+h","ctrl+shift+c"],
+        "command": "haxe_create_type",
+        "args" : {"t" : "class"}
+    },
+    {
+        "keys": ["ctrl+shift+h","ctrl+shift+i"],
+        "command": "haxe_create_type",
+        "args" : {"t" : "interface"}
+    },
+    {
+        "keys": ["ctrl+shift+h","ctrl+shift+t"],
+        "command": "haxe_create_type",
+        "args" : {"t" : "typedef"}
+    },
+    {
+        "keys": ["ctrl+shift+h","ctrl+shift+e"],
+        "command": "haxe_create_type",
+        "args" : {"t" : "enum"}
+    },
+    {
+        "keys": ["ctrl+shift+f1"],
+        "command" : "haxe_show_documentation",
+        "args" : {}
+    }
+]

@@ -1,0 +1,6 @@
+{
+	"cmd": ["haxe" , "build.hxml"],
+	"file_regex": "^(.+):(\\d+): (?:lines \\d+-\\d+|character(?:s \\d+-| )(\\d+)) : (.*)$",
+	"working_dir": "${project_path:${folder:${file_path}}}",
+	"selector": "source.haxe.2,source.hxml"
+}

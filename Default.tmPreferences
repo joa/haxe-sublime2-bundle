@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>name</key>
+    <string>Globals</string>
+    <key>scope</key>
+    <string>source.haxe.2</string>
+    <key>settings</key>
+    <dict>
+        <key>shellVariables</key>
+        <array>
+            <dict>
+                <key>name</key>
+                <string>TM_CSLB</string>
+                <key>value</key>
+                <string><![CDATA[
+]]></string>
+                <!-- <string></string> -->
+            </dict>
+        </array>
+    </dict>
+    <key>uuid</key>
+    <string>0ef292cd-943a-4fb0-b43d-65959c5e6b06</string>
+</dict>
+</plist>
